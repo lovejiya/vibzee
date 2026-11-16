@@ -63,6 +63,9 @@ def build_menu(candidates, context, location_details, photo_ratio, location, rec
         f'{r.get("metaphor")}({r.get("domain")},{r.get("layout")})' for r in recent[-10:]
     ) if recent else "None"
 
+    quote_native = [c for c in pool if c.quote_native]
+    supplementary = [c for c in pool if not c.quote_native]
+
     menu = f"""CONTEXT:
   Quote: "{candidates.quote}"
   Emotion: {context.emotion.get('primary')}
@@ -74,11 +77,22 @@ def build_menu(candidates, context, location_details, photo_ratio, location, rec
   Photo ratio: {photo_ratio}
   Location: {location['name']}
   Recent (avoid): {recent_avoid}
-
-=== METAPHOR CANDIDATES ===
-Pick 1-2. Each has pre-written text — use ONLY these words.
 """
-    for c in pool:
+    if quote_native:
+        menu += "\n=== QUOTE-NATIVE VISUALS ===\n"
+        menu += "These come from the quote's own words. They are the PRIMARY subject.\n"
+        for c in quote_native:
+            menu += f'\n[{c.id}] "{c.name}" [{c.domain}]\n'
+            menu += f'  Subject text: "{c.subject_text}"\n'
+            menu += f'  Scene text: "{c.scene_text}"\n'
+            menu += f'  Visual phrases: {c.visual_phrases}\n'
+
+    menu += "\n=== SUPPLEMENTARY CANDIDATES ===\n"
+    if quote_native:
+        menu += "These add atmosphere. Do NOT use as main subject if quote-native visuals exist.\n"
+    else:
+        menu += "Pick 1-2. Each has pre-written text — use ONLY these words.\n"
+    for c in supplementary:
         menu += f"""
 [{c.id}] "{c.name}" [{c.domain}]
   Groundable: {c.groundable} | Cultural: {c.cultural} | Chains: {c.chain_sources}
@@ -206,10 +220,13 @@ def verify_word_count(prompt: MasterPrompt, max_words=195) -> MasterPrompt:
 
 
 def fallback(candidates, context, location_details, photo_ratio) -> MasterPrompt:
-    """Rule-based fallback when Gemini is down. First viable candidate, no scoring."""
+    """Rule-based fallback when Gemini is down. Prefer quote-native candidates."""
     candidate = next(
-        (c for c in candidates.pool if c.domain == "PHOTOREALISTIC" and (c.groundable or c.cultural)),
-        candidates.pool[0] if candidates.pool else None,
+        (c for c in candidates.pool if c.quote_native),
+        next(
+            (c for c in candidates.pool if c.domain == "PHOTOREALISTIC" and (c.groundable or c.cultural)),
+            candidates.pool[0] if candidates.pool else None,
+        ),
     )
 
     details = random.sample(location_details, min(3, len(location_details))) if location_details else []

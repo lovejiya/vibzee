@@ -110,9 +110,17 @@ def enrich_context(quote, location, date, time_of_day) -> Context:
     en_keywords = translate_hi_to_en(quote_analysis.key_terms)
     emotion = detect_emotion(quote_analysis, en_keywords=en_keywords)
 
+    visual_imagery = extract_visual_imagery(quote_analysis, en_keywords)
+    quote_festival = detect_quote_festival(quote, quote_analysis.tokens)
+    if quote_festival:
+        festival = quote_festival
+
     return Context(
         weather=weather, festival=festival, quote_analysis=quote_analysis,
         emotion=emotion, en_keywords=en_keywords, time=time_of_day, quote=quote,
+        visual_imagery=visual_imagery,
+        visual_richness_score=len(visual_imagery),
+        quote_festival=quote_festival,
     )
 
 
@@ -189,6 +197,69 @@ def get_festival(date) -> str | None:
 def is_hindi_text(text: str) -> bool:
     """Check if the text contains Devanagari script characters (U+0900 to U+097F)."""
     return bool(re.search(r"[\u0900-\u097f]", text))
+
+
+def detect_quote_festival(quote_text, tokens) -> str | None:
+    """Scan quote for festival names using aliases from panchang JSON."""
+    global _PANCHANG_DATA
+    if _PANCHANG_DATA is None:
+        try:
+            _PANCHANG_DATA = json.loads(PANCHANG_PATH.read_text(encoding="utf-8"))
+        except Exception:
+            _PANCHANG_DATA = {}
+    aliases = _PANCHANG_DATA.get("_festival_aliases", {})
+    text_lower = quote_text.lower()
+    for alias, canonical in aliases.items():
+        if alias in quote_text or alias in text_lower:
+            return canonical
+    return None
+
+
+_KNOWN_VISUAL = {
+    "rangoli", "diya", "diwali", "holi", "lamp", "candle", "flame", "color",
+    "festival", "garland", "incense", "mandala", "kolam", "mehendi", "bindi",
+    "firework", "lantern", "wreath", "petal", "offering",
+}
+
+
+def extract_visual_imagery(quote_analysis, en_keywords) -> list[dict]:
+    """Extract the quote's own concrete visual words."""
+    visuals = []
+    seen = set()
+    key_terms = quote_analysis.key_terms
+    for i, hindi_w in enumerate(key_terms):
+        en_w = en_keywords[i] if i < len(en_keywords) else hindi_w
+        if en_w == hindi_w:
+            en_w = FALLBACK_LEXICON.get(hindi_w, hindi_w)
+        en_lower = en_w.lower()
+        if en_lower in seen or en_lower in ENGLISH_STOPWORDS or en_lower == hindi_w:
+            continue
+        if is_visual_word(en_lower) or en_lower in _KNOWN_VISUAL:
+            visuals.append({"hindi": hindi_w, "english": en_lower})
+            seen.add(en_lower)
+    return visuals
+
+
+def build_quote_native_candidates(visual_imagery, weather, time_of_day) -> list[PreparedCandidate]:
+    """Create first-class candidates from the quote's own visual words."""
+    candidates = []
+    weather_ctx = f"{weather.get('condition', '')}, {weather.get('temp', '')}C"
+    for v in visual_imagery:
+        candidates.append(PreparedCandidate(
+            id=f"quote_native_{v['english']}",
+            name=v["english"],
+            domain="PHOTOREALISTIC",
+            entity_type="quote_visual",
+            groundable=False,
+            cultural=False,
+            chain_sources=["quote_native"],
+            subject_text=v["english"],
+            scene_text=f"{v['english']} in {time_of_day} light",
+            weather_context=weather_ctx,
+            visual_phrases=[v["english"]],
+            quote_native=True,
+        ))
+    return candidates
 
 
 def analyze_quote(quote_text) -> QuoteAnalysis:
@@ -321,14 +392,16 @@ def run_knowledge_chain(context, location) -> CandidatePool:
         context.en_keywords + word_info.get("synonyms", []) + word_info.get("related", [])
     ))
 
-    # Chain 2: Wikidata symbolic discovery
-    wikidata_results = chain_2_wikidata(en_keywords, location)
-
-    # Chain 3: Wikipedia visual enrichment
-    wiki_results = chain_3_wikipedia(wikidata_results)
-
-    # Chain 4: DBpedia thematic expansion
-    dbpedia_results = chain_4_dbpedia(wiki_results.get("categories", []))
+    # Gate chains 2-4 based on quote's visual richness.
+    richness = context.visual_richness_score
+    if richness >= 3:
+        wikidata_results = {"symbols": [], "location_features": [], "mythology": [], "fiction": []}
+        wiki_results = {"entities": {}, "categories": []}
+        dbpedia_results = []
+    else:
+        wikidata_results = chain_2_wikidata(en_keywords, location)
+        wiki_results = chain_3_wikipedia(wikidata_results)
+        dbpedia_results = chain_4_dbpedia(wiki_results.get("categories", []))
 
     # Chain 5: Fictional/anime discovery
     fiction_results = chain_5_fictional(context.emotion)
@@ -366,6 +439,13 @@ def run_knowledge_chain(context, location) -> CandidatePool:
                             quote_terms=context.en_keywords)
         for c in raw_candidates
     ]
+
+    # Prepend quote-native candidates so they appear first in Gemini's menu.
+    quote_candidates = build_quote_native_candidates(
+        context.visual_imagery, context.weather, context.time)
+    if richness in (1, 2):
+        prepared = prepared[:3]
+    prepared = quote_candidates + prepared
 
     # Always guarantee at least one candidate (edge case 1: no nouns / all APIs down).
     # Route through Chain 6 cultural metaphors matched by emotion, not hardcoded location.

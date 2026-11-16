@@ -6,3 +6,4 @@ data/cache/
 logs/*.log
 .vercel/
 data/recent_runs.json
+.vercel

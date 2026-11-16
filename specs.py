@@ -64,6 +64,9 @@ class Context(BaseModel):
     en_keywords: list[str] = []         # translated English keywords
     time: str                           # "dawn", "morning", etc.
     quote: str = ""                     # original quote text
+    visual_imagery: list = []           # quote's own concrete visual words
+    visual_richness_score: int = 0      # count of visual words in quote
+    quote_festival: Optional[str] = None  # festival detected from quote text
 
 
 class PreparedCandidate(BaseModel):
@@ -79,6 +82,7 @@ class PreparedCandidate(BaseModel):
     weather_context: str = ""           # "mist, 18C"
     visual_phrases: list[str] = []      # raw phrases from Wikipedia
     verb_type: str = "unknown"          # "physical"/"mental"/"stative"/"unknown"
+    quote_native: bool = False          # True if from quote's own visual words
 
 
 class CandidatePool(BaseModel):
@@ -366,6 +370,13 @@ FALLBACK_LEXICON = {
     "सादगी": "simplicity", "दौलत": "wealth", "दुनिया": "world",
     "चाँद": "moon", "अँधेरा": "darkness", "पहचान": "identity",
     "बदलाव": "change", "शुरुआत": "beginning",
+    "रंग": "color", "रंगोली": "rangoli", "द्वार": "doorway", "घर": "home",
+    "मुस्कान": "smile", "अरमान": "aspiration", "त्योहार": "festival",
+    "दीपावली": "diwali", "दीया": "diya", "दीये": "diya", "दीप": "lamp",
+    "चिराग": "lamp", "लौ": "flame", "ज्योति": "flame", "प्रकाश": "light",
+    "तारा": "star", "सितारा": "star", "बगीचा": "garden", "झील": "lake",
+    "समुद्र": "ocean", "पहाड़": "mountain", "पत्ता": "leaf", "पंखुड़ी": "petal",
+    "किनारा": "shore", "सड़क": "road", "रास्ता": "path", "द्वार": "doorway",
 }
 
 
@@ -502,17 +513,22 @@ FACE & FIGURE RULE:
 - Exception: only if the prompt explicitly requests a named character 
   (mythological or anime-style) may a face be rendered, and even then 
   in the domain's stylized manner — never photorealistic.
-PRIORITY RULE:
-- The QUOTE'S meaning and emotion are the PRIMARY driver of all selections.
-  Festival context is SECONDARY — use it only when it naturally aligns with
-  the quote's core message. NEVER force a festival-driven metaphor or domain
-  onto a quote about a different topic (e.g. do not pick a river/mythological
-  scene for a friendship quote just because a river festival is active).
+QUOTE-FIRST RULE:
+- If QUOTE-NATIVE VISUALS exist in the menu, they MUST form the scene's
+  primary subject. Supplementary candidates may only add atmosphere/texture.
+- The quote's own visual words (rangoli, diya, flower, river, etc.) define
+  the image. External metaphors are supporting decoration only.
+- Festival from context is background decoration, not the main subject,
+  UNLESS the quote itself mentions that festival.
+- NEVER force a festival-driven or external metaphor onto a quote that
+  already has its own visual imagery.
 SELECTION GUIDELINES:
-- METAPHOR: Choose the candidate that best captures the quote's core message.
-  VARY your visual subjects — do NOT default only to diya lamps or riverbanks if other elements
-  (such as ancient banyan trees, quiet courtyards, rain ripples, open balconies, forest clearings,
-  blooming flora, morning mist, tea cups, or mountain horizons) fit the spirit of the quote.
+- METAPHOR: If QUOTE-NATIVE VISUALS are listed, you MUST select at least one
+  of them — they are the quote's own imagery and take priority. Supplementary
+  candidates can be added for atmosphere only.
+  If no quote-native visuals exist, choose the candidate that best captures
+  the quote's core message. VARY your subjects — avoid defaulting to diya
+  lamps or riverbanks when other elements fit better.
   Avoid metaphors and domains listed in "Recent (avoid)".
 - DOMAIN: Match the quote's emotion and theme authentically:
   * Determined/Heroic → ANIME
@@ -529,11 +545,9 @@ PHOTO PLACEHOLDER RULES:
 - The reserved photo area must be placed in a visually CALM zone — 
   flat sky, soft mist, plain wall, open water, or gradient background.
 - NEVER place the reserved photo area over or touching any architectural 
-  element, structure top, spire, dome, tree canopy, or object silhouette.
+  element, devotional, spiritual, god related things, structure top, spire, dome, tree canopy, or object silhouette.
   It must float entirely within an unobstructed, featureless background region.
-- Size the placeholder proportional to the quote text block:
-  * If the text layout is VERTICAL (portrait), the placeholder width ≈ quote text width.
-  * If the textlayout is HORIZONTAL (landscape), the placeholder height ≈ quote text height.
+- Size the placeholder must be 2.5 inch square. 
   Treat both elements as a matched pair in visual weight.
 - The photo placeholder should always be beside the quote text, not above or below it and must create a balanced composition with the text with something like a rectangle as an over all but this shouldn't be written in the prompt just the scene should be described in a way that naturally leaves space for it.
 - APPROACH: Match the scene's natural atmosphere to the best empty-space strategy.
