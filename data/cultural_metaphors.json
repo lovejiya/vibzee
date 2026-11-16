@@ -1,0 +1,2451 @@
+{
+  "hope": [
+    {
+      "visual": "earthen diya lamp with flickering flame",
+      "context": "light in darkness"
+    },
+    {
+      "visual": "first light at dawn over river",
+      "context": "new beginning"
+    },
+    {
+      "visual": "golden sunrise breaking through morning mist",
+      "context": "new day new possibilities"
+    },
+    {
+      "visual": "tender green shoot pushing through cracked stone paving",
+      "context": "unbreakable resilience"
+    },
+    {
+      "visual": "child releasing paper lantern into dusky violet sky",
+      "context": "sending wishes upward"
+    },
+    {
+      "visual": "robin perched on bare winter branch with first cherry blossom bud",
+      "context": "sign that warmth is coming"
+    }
+  ],
+  "peace": [
+    {
+      "visual": "still water reflecting sky like mirror",
+      "context": "inner calm"
+    },
+    {
+      "visual": "single white lotus on calm water",
+      "context": "purity amidst chaos"
+    },
+    {
+      "visual": "mist settling over quiet valley at dawn",
+      "context": "tranquil stillness"
+    },
+    {
+      "visual": "golden aarti lamp reflecting on calm water",
+      "context": "sacred evening river ritual"
+    },
+    {
+      "visual": "shaded courtyard with cool stone floor and soft shadows",
+      "context": "oasis of quiet contemplation"
+    },
+    {
+      "visual": "japanese zen garden with raked sand circles around moss-covered stones",
+      "context": "cultivated serenity"
+    }
+  ],
+  "pause": [
+    {
+      "visual": "warm cup of tea steaming beside an open rain-washed balcony",
+      "context": "gentle pause from a bustling world"
+    },
+    {
+      "visual": "hammock swaying gently between two mango trees in afternoon shade",
+      "context": "unhurried stillness and taking a breath"
+    },
+    {
+      "visual": "old pocket watch resting open on weathered wooden desk beside books",
+      "context": "suspending the rush of time"
+    },
+    {
+      "visual": "lone wooden bench overlooking calm valley at sunset",
+      "context": "space to sit and reflect"
+    },
+    {
+      "visual": "person sitting cross-legged on rooftop at golden hour with city skyline behind",
+      "context": "choosing stillness amid urban rush"
+    }
+  ],
+  "rest": [
+    {
+      "visual": "sleeping cat curled in a warm patch of sunlight on old wooden floor",
+      "context": "effortless surrender to rest"
+    },
+    {
+      "visual": "closed lotus blossom floating under twilight sky",
+      "context": "natural replenishment at day's end"
+    },
+    {
+      "visual": "unlit brass lantern hanging quietly on veranda as night falls",
+      "context": "quiet conclusion after full day"
+    },
+    {
+      "visual": "soft blanket draped over empty reading chair beside dying fireplace embers",
+      "context": "permission to stop and be still"
+    }
+  ],
+  "strength": [
+    {
+      "visual": "ancient banyan tree with massive roots",
+      "context": "deep foundation"
+    },
+    {
+      "visual": "temple standing through centuries",
+      "context": "endurance"
+    },
+    {
+      "visual": "rock face unyielding against crashing mountain torrent",
+      "context": "unshakable inner fort"
+    },
+    {
+      "visual": "iron anvil reflecting forge glow in village workshop",
+      "context": "resilience under pressure"
+    },
+    {
+      "visual": "lighthouse standing firm on rocky cliff in stormy sea spray",
+      "context": "guiding others while enduring waves"
+    }
+  ],
+  "faith": [
+    {
+      "visual": "aarti flame reflected in river water",
+      "context": "devotion"
+    },
+    {
+      "visual": "prayer beads beside folded hands",
+      "context": "spiritual practice"
+    },
+    {
+      "visual": "temple bells and incense smoke in golden light",
+      "context": "divine blessing"
+    },
+    {
+      "visual": "carved sandstone sanctuary illuminated by single butter lamp",
+      "context": "sanctuary of quiet belief"
+    }
+  ],
+  "progress": [
+    {
+      "visual": "stone steps ascending upward along river",
+      "context": "pilgrimage"
+    },
+    {
+      "visual": "river flowing steadily forward",
+      "context": "constant motion"
+    },
+    {
+      "visual": "path winding through pine forest toward sunlit mountain pass",
+      "context": "gradual continuous ascent"
+    },
+    {
+      "visual": "potter's wheel spinning with wet clay taking graceful shape",
+      "context": "patient transformation and craft"
+    },
+    {
+      "visual": "stack of hand-written journal pages growing beside morning coffee",
+      "context": "daily effort building something real"
+    }
+  ],
+  "journey": [
+    {
+      "visual": "lone wooden boat drifting on wide river toward horizon",
+      "context": "life's steady passage"
+    },
+    {
+      "visual": "footsteps imprinted on wet sand disappearing along shoreline",
+      "context": "leaving a quiet mark on the world"
+    },
+    {
+      "visual": "lantern-lit stone alleyway winding through ancient town at dusk",
+      "context": "embracing the path ahead"
+    },
+    {
+      "visual": "worn leather hiking boots resting on mountain trail marker stone",
+      "context": "distance already covered"
+    }
+  ],
+  "rain": [
+    {
+      "visual": "monsoon raindrops falling on green leaves",
+      "context": "nourishment and renewal"
+    },
+    {
+      "visual": "rain ripples spreading on still pond",
+      "context": "gentle comfort"
+    },
+    {
+      "visual": "clay tiled rooftop dripping with fresh rain water into earthen jar",
+      "context": "gratitude for nature's shower"
+    },
+    {
+      "visual": "two people sharing one umbrella on rain-soaked cobblestone street",
+      "context": "closeness born from shared shelter"
+    }
+  ],
+  "lotus": [
+    {
+      "visual": "pink lotus blooming in muddy pond",
+      "context": "beauty despite adversity"
+    },
+    {
+      "visual": "lotus petals opening to morning sun",
+      "context": "resilience and grace"
+    },
+    {
+      "visual": "unblemished water droplet resting on broad lotus leaf",
+      "context": "detached purity in worldly waters"
+    }
+  ],
+  "flower": [
+    {
+      "visual": "field of marigolds in warm sunlight",
+      "context": "spreading joy"
+    },
+    {
+      "visual": "jasmine flowers releasing fragrance at dusk",
+      "context": "quiet beauty"
+    },
+    {
+      "visual": "single red hibiscus flower offered on ancient stone step",
+      "context": "sacred humility and devotion"
+    },
+    {
+      "visual": "wildflowers growing through crack in abandoned railway platform",
+      "context": "beauty reclaiming forgotten places"
+    }
+  ],
+  "moon": [
+    {
+      "visual": "full moon reflected in calm river water",
+      "context": "light in darkness"
+    },
+    {
+      "visual": "crescent moon over silhouetted trees",
+      "context": "quiet identity"
+    },
+    {
+      "visual": "silver moonlight washing over old temple courtyard",
+      "context": "cool solace after burning heat"
+    }
+  ],
+  "river": [
+    {
+      "visual": "sacred river flowing between ancient banks",
+      "context": "continuity of life"
+    },
+    {
+      "visual": "river merging into vast ocean at horizon",
+      "context": "love and unity"
+    },
+    {
+      "visual": "pebbles smoothed by centuries of flowing mountain river",
+      "context": "gentle endurance overcoming sharpness"
+    }
+  ],
+  "simplicity": [
+    {
+      "visual": "single clay pot beside a window with soft light",
+      "context": "contentment in little"
+    },
+    {
+      "visual": "bare feet on cool earth under neem tree",
+      "context": "grounded living"
+    },
+    {
+      "visual": "woven cotton mat on clean cow-dung plaster floor with sunlight",
+      "context": "rustic peace and purity"
+    },
+    {
+      "visual": "single wildflower in small glass jar on wooden kitchen windowsill",
+      "context": "elegance in the unadorned"
+    }
+  ],
+  "change": [
+    {
+      "visual": "seed sprouting through cracked earth",
+      "context": "transformation"
+    },
+    {
+      "visual": "butterfly emerging from cocoon on branch",
+      "context": "new beginning from within"
+    },
+    {
+      "visual": "autumn leaf drifting from branch onto flowing brook",
+      "context": "graceful surrender to life's seasons"
+    },
+    {
+      "visual": "old door with peeling paint opening to reveal sunlit meadow beyond",
+      "context": "what lies on the other side of letting go"
+    }
+  ],
+  "time": [
+    {
+      "visual": "hourglass with fine golden sand slipping grain by grain",
+      "context": "precious fleeting moments"
+    },
+    {
+      "visual": "ancient stone sundial casting long afternoon shadow on lawn",
+      "context": "unhurried cosmic rhythm"
+    },
+    {
+      "visual": "ripples in water carrying fallen blossoms downstream",
+      "context": "ephemeral beauty of passing time"
+    },
+    {
+      "visual": "stack of faded photographs spilling from old wooden box",
+      "context": "layers of lived life"
+    }
+  ],
+  "world": [
+    {
+      "visual": "bustling evening bazaar with warm lanterns and spices seen from peaceful high terrace",
+      "context": "observing the busy world from inner sanctuary"
+    },
+    {
+      "visual": "vast panoramic mountain range bathed in golden sunrise above morning clouds",
+      "context": "the grandeur and vastness of creation"
+    }
+  ],
+  "wisdom": [
+    {
+      "visual": "ancient palm-leaf manuscript illuminated by soft oil lamp on wooden desk",
+      "context": "timeless knowledge handed down across generations"
+    },
+    {
+      "visual": "elderly artisan's weathered hands carefully carving intricate teak wood",
+      "context": "mastery built on lifetime of patience"
+    },
+    {
+      "visual": "old tree with initials carved decades ago surrounded by grown bark",
+      "context": "lessons that deepen with age"
+    }
+  ],
+  "solitude": [
+    {
+      "visual": "lone tree standing tall on misty grassy ridge at sunrise",
+      "context": "peaceful self-reliance"
+    },
+    {
+      "visual": "single candle flickering quietly inside empty stone meditation alcove",
+      "context": "inner clarity away from noise"
+    },
+    {
+      "visual": "person reading book alone in quiet corner of rain-streaked cafe window",
+      "context": "chosen aloneness as nourishment"
+    }
+  ],
+  "courage": [
+    {
+      "visual": "eagle soaring high above stormy mountain peaks into clear sunlit sky",
+      "context": "rising above fear"
+    },
+    {
+      "visual": "tiny oil wick burning steadfastly against cool gust of autumn wind",
+      "context": "bravery that doesn't roar"
+    },
+    {
+      "visual": "small boat pushing out from shore into wide open sea at dawn",
+      "context": "daring to begin despite uncertainty"
+    }
+  ],
+  "patience": [
+    {
+      "visual": "ancient banyan seed resting quietly in earth waiting for monsoon",
+      "context": "trusting the season of growth"
+    },
+    {
+      "visual": "drop of morning water slowly forming at tip of green bamboo leaf",
+      "context": "delicate perfection takes time"
+    },
+    {
+      "visual": "fisherman sitting still on wooden pier at golden hour with calm lake",
+      "context": "trust in what will come"
+    }
+  ],
+  "gratitude": [
+    {
+      "visual": "folded palms holding fresh marigold flowers in morning prayer",
+      "context": "thankfulness for the day's gifts"
+    },
+    {
+      "visual": "clay bowl filled with fresh river water offered to visiting birds on veranda",
+      "context": "sharing blessings with all life"
+    },
+    {
+      "visual": "family dinner table lit by warm overhead lamp with simple home-cooked food",
+      "context": "recognizing richness in daily ritual"
+    }
+  ],
+  "freedom": [
+    {
+      "visual": "open window with white linen curtains billowing in fresh spring breeze",
+      "context": "unbound lightness of heart"
+    },
+    {
+      "visual": "white crane stretching wide wings before taking flight across clear blue sky",
+      "context": "liberation from earthly weight"
+    },
+    {
+      "visual": "person with arms outstretched standing on cliff edge overlooking vast green valley",
+      "context": "unbounded possibility"
+    }
+  ],
+  "smile": [
+    {
+      "visual": "sunflower turning toward the sun",
+      "context": "radiating warmth"
+    },
+    {
+      "visual": "child's hands releasing flower petals into wind",
+      "context": "carefree joy"
+    }
+  ],
+  "joy": [
+    {
+      "visual": "colorful rangoli pattern on courtyard floor",
+      "context": "celebration"
+    },
+    {
+      "visual": "kites soaring against bright blue sky",
+      "context": "freedom and delight"
+    },
+    {
+      "visual": "golden confetti drifting through warm afternoon sunlight at outdoor celebration",
+      "context": "uncontainable exuberance"
+    }
+  ],
+  "love": [
+    {
+      "visual": "two hands lighting a diya together",
+      "context": "shared devotion"
+    },
+    {
+      "visual": "intertwined vines climbing an old stone wall",
+      "context": "enduring bond"
+    },
+    {
+      "visual": "pair of old wooden rocking chairs side by side on quiet porch at sunset",
+      "context": "love that ages gracefully"
+    },
+    {
+      "visual": "hand-knit scarf draped over two shoulders in snowfall",
+      "context": "warmth offered without asking"
+    }
+  ],
+  "calm": [
+    {
+      "visual": "morning fog hovering over glassy lake",
+      "context": "deep stillness"
+    },
+    {
+      "visual": "single lamp glowing in dim room at dawn",
+      "context": "quiet presence"
+    },
+    {
+      "visual": "smooth river stones stacked in balanced tower beside trickling stream",
+      "context": "equilibrium found through patience"
+    }
+  ],
+  "blessing": [
+    {
+      "visual": "golden light streaming through temple archway",
+      "context": "divine grace"
+    },
+    {
+      "visual": "open hands catching morning sunlight",
+      "context": "receiving grace"
+    }
+  ],
+  "beauty": [
+    {
+      "visual": "dewdrops glistening on spider web at dawn",
+      "context": "noticing the small"
+    },
+    {
+      "visual": "peacock displaying feathers in forest clearing",
+      "context": "nature's artistry"
+    },
+    {
+      "visual": "shaft of golden light illuminating dust motes in old library",
+      "context": "magic hiding in plain sight"
+    }
+  ],
+  "darkness": [
+    {
+      "visual": "single flame cutting through deep darkness",
+      "context": "resilience"
+    },
+    {
+      "visual": "stars appearing one by one in twilight sky",
+      "context": "light emerging"
+    },
+    {
+      "visual": "moonlit path through dense forest leading toward distant clearing",
+      "context": "finding way through the unknown"
+    }
+  ],
+  "morning": [
+    {
+      "visual": "birds taking flight from tree at sunrise",
+      "context": "fresh start"
+    },
+    {
+      "visual": "dew-covered grass sparkling in first light",
+      "context": "renewal"
+    },
+    {
+      "visual": "steam rising from fresh coffee cup on balcony railing as city wakes below",
+      "context": "quiet ownership of a new day"
+    }
+  ],
+  "water": [
+    {
+      "visual": "waterfall cascading into mossy pool",
+      "context": "flowing energy"
+    },
+    {
+      "visual": "cupped hands holding clear water",
+      "context": "purity and life"
+    }
+  ],
+
+  "self_worth": [
+    {
+      "visual": "uncut diamond resting on dark velvet cloth catching single beam of light",
+      "context": "inherent value needing no polishing"
+    },
+    {
+      "visual": "ancient tree standing alone on hilltop refusing to bend in strong wind",
+      "context": "dignity that doesn't shrink"
+    },
+    {
+      "visual": "handmade pottery bowl with visible mend lines filled with golden light",
+      "context": "beauty in being imperfectly whole"
+    },
+    {
+      "visual": "crown of wildflowers resting on mossy stone in forest clearing",
+      "context": "royalty that needs no throne"
+    }
+  ],
+  "self_compassion": [
+    {
+      "visual": "gentle hands wrapping soft bandage around own wrist in warm lamplight",
+      "context": "tending to your own wounds first"
+    },
+    {
+      "visual": "person holding warm mug close to chest while wrapped in soft shawl by window",
+      "context": "giving yourself the comfort you give others"
+    },
+    {
+      "visual": "rain falling softly on parched garden soil that slowly drinks it in",
+      "context": "allowing yourself to receive care"
+    },
+    {
+      "visual": "hand placing a single flower on own doorstep at dawn",
+      "context": "treating yourself as someone worth visiting"
+    }
+  ],
+  "growth": [
+    {
+      "visual": "bamboo forest stretching skyward with light filtering through tall green stalks",
+      "context": "rapid rise after years of rooting"
+    },
+    {
+      "visual": "vine climbing old brick wall reaching toward sunlit rooftop",
+      "context": "persistent upward reach"
+    },
+    {
+      "visual": "caterpillar on leaf edge with butterfly shadow cast beside it",
+      "context": "becoming what you were always meant to be"
+    },
+    {
+      "visual": "sapling growing tall beside the stump of its parent tree",
+      "context": "outgrowing your origins"
+    },
+    {
+      "visual": "pencil with long trail of shavings beside freshly sharpened point",
+      "context": "refinement through what is removed"
+    }
+  ],
+  "authenticity": [
+    {
+      "visual": "wildflower growing vivid and untamed among rows of trimmed garden hedges",
+      "context": "beauty in refusing to conform"
+    },
+    {
+      "visual": "handwritten letter on rough paper beside stack of printed cards",
+      "context": "the real over the polished"
+    },
+    {
+      "visual": "unglazed clay pot with visible fingerprints beside mass-produced porcelain",
+      "context": "the mark of the maker"
+    },
+    {
+      "visual": "person removing theatrical mask to reveal calm face bathed in stage light",
+      "context": "dropping the performance"
+    }
+  ],
+  "belonging": [
+    {
+      "visual": "warm lit windows of a cottage seen from a snowy path at twilight",
+      "context": "the pull of where you are wanted"
+    },
+    {
+      "visual": "bird settling into nest high in old oak as evening light turns amber",
+      "context": "finding your place after long flight"
+    },
+    {
+      "visual": "puzzle piece fitting perfectly into its space completing a sunlit landscape image",
+      "context": "clicking into where you were always meant to be"
+    },
+    {
+      "visual": "circle of mismatched chairs around a bonfire on beach at dusk",
+      "context": "home is people not places"
+    }
+  ],
+  "connection": [
+    {
+      "visual": "two trees whose roots have grown intertwined beneath the surface",
+      "context": "bonds deeper than what is visible"
+    },
+    {
+      "visual": "string of paper lanterns linking two distant balconies across narrow alley",
+      "context": "light bridging the gap between souls"
+    },
+    {
+      "visual": "two cups of tea steaming side by side on shared wooden table",
+      "context": "presence needing no performance"
+    },
+    {
+      "visual": "bridge of stepping stones across gentle stream connecting two gardens",
+      "context": "effort to meet each other halfway"
+    }
+  ],
+  "friendship": [
+    {
+      "visual": "two old bicycles leaning against each other outside sunlit cafe",
+      "context": "companionship in the ordinary"
+    },
+    {
+      "visual": "shared umbrella between two figures walking down autumn leaf-covered lane",
+      "context": "shelter in each other"
+    },
+    {
+      "visual": "two kites tangled together soaring higher than either flew alone",
+      "context": "lifted by proximity"
+    },
+    {
+      "visual": "worn garden bench with two different book impressions left on its seat",
+      "context": "comfortable silence between close souls"
+    }
+  ],
+  "boundaries": [
+    {
+      "visual": "beautiful wrought-iron garden gate with blooming roses growing on it",
+      "context": "protection that is still inviting"
+    },
+    {
+      "visual": "stone wall with small window framing a peaceful view of hills beyond",
+      "context": "choosing what to let in"
+    },
+    {
+      "visual": "lantern with glass enclosure protecting flame from gusty night wind",
+      "context": "guarding your light without dimming it"
+    },
+    {
+      "visual": "drawbridge raised over castle moat with calm gardens inside walls",
+      "context": "peace that requires conscious gatekeeping"
+    }
+  ],
+  "understanding": [
+    {
+      "visual": "two hands holding one cracked bowl together in soft afternoon light",
+      "context": "tenderness toward what is broken"
+    },
+    {
+      "visual": "old tree with hollow trunk sheltering small animals inside during storm",
+      "context": "making space for another's pain"
+    },
+    {
+      "visual": "warm lamplight falling equally on two facing chairs with a shared book between them",
+      "context": "meeting on common ground"
+    }
+  ],
+  "kindness": [
+    {
+      "visual": "stranger's hand offering warm bread to another across a doorway",
+      "context": "generosity needing no reason"
+    },
+    {
+      "visual": "child placing a blanket over sleeping parent on the couch",
+      "context": "small acts carrying enormous weight"
+    },
+    {
+      "visual": "someone leaving coins on a wishing well edge for the next person",
+      "context": "grace that asks for nothing back"
+    },
+    {
+      "visual": "handwritten note tucked inside lunchbox beside packed meal",
+      "context": "love expressed in tiny gestures"
+    }
+  ],
+  "new_beginnings": [
+    {
+      "visual": "blank notebook open to first page with fresh pen resting beside it",
+      "context": "the thrill of an unwritten chapter"
+    },
+    {
+      "visual": "empty room with moving boxes and sunlight pouring through bare windows",
+      "context": "starting fresh with nothing but possibility"
+    },
+    {
+      "visual": "freshly plowed field with first rows of seeds under wide open sky",
+      "context": "beginning that trusts the harvest will come"
+    },
+    {
+      "visual": "key turning in lock of door opening onto sun-drenched new apartment",
+      "context": "crossing the threshold into what's next"
+    },
+    {
+      "visual": "first footprint on pristine snow-covered path through birch forest",
+      "context": "the courage to go first into the unknown"
+    }
+  ],
+  "nostalgia": [
+    {
+      "visual": "faded handwritten recipe card propped against old spice jars in kitchen",
+      "context": "love preserved in familiar rituals"
+    },
+    {
+      "visual": "empty childhood swing swaying gently in afternoon breeze",
+      "context": "the echo of laughter that was"
+    },
+    {
+      "visual": "sun-bleached photograph pinned to corkboard beside dried pressed flower",
+      "context": "holding onto what time has softened"
+    },
+    {
+      "visual": "old gramophone playing in corner of dust-moted room with lace curtains",
+      "context": "melodies that carry you backward"
+    },
+    {
+      "visual": "grandmother's reading glasses resting on open book beside window with rain",
+      "context": "presence still felt in objects left behind"
+    }
+  ],
+  "present_moment": [
+    {
+      "visual": "bare feet standing on warm sand with incoming wave about to touch toes",
+      "context": "fully arriving in the now"
+    },
+    {
+      "visual": "hands cupping a warm bowl of soup at a kitchen counter with morning light",
+      "context": "the richness of right here"
+    },
+    {
+      "visual": "person lying in tall grass staring up at slowly moving clouds",
+      "context": "letting the moment be enough"
+    },
+    {
+      "visual": "hourglass turned on its side with sand perfectly still",
+      "context": "time paused when you stop counting it"
+    }
+  ],
+  "ordinary": [
+    {
+      "visual": "steam rising from freshly ironed cotton shirt on hanger in soft bedroom light",
+      "context": "quiet dignity of daily routine"
+    },
+    {
+      "visual": "kitchen window with herbs growing in small pots while morning light streams in",
+      "context": "the sacred hidden in the everyday"
+    },
+    {
+      "visual": "worn wooden spoon resting across well-used cooking pot",
+      "context": "love measured in meals served"
+    },
+    {
+      "visual": "pair of house slippers aligned by the door in evening lamplight",
+      "context": "the ritual of coming home"
+    },
+    {
+      "visual": "laundry drying on clothesline in warm afternoon breeze with blue sky",
+      "context": "beauty in the unremarkable"
+    }
+  ],
+  "memories": [
+    {
+      "visual": "jar of collected seashells on windowsill catching afternoon light",
+      "context": "treasures gathered from lived experience"
+    },
+    {
+      "visual": "old stone wall covered in layers of faded concert posters and rain marks",
+      "context": "layers of moments stacked on each other"
+    },
+    {
+      "visual": "string of fairy lights wound around branches of backyard tree from past celebration",
+      "context": "traces of joy that linger"
+    },
+    {
+      "visual": "dog-eared pages of a much-read paperback novel left open on park bench",
+      "context": "stories that become part of you"
+    }
+  ],
+  "letting_go": [
+    {
+      "visual": "hand releasing dandelion seeds into gentle evening wind",
+      "context": "trusting what you release to find its place"
+    },
+    {
+      "visual": "autumn tree shedding golden leaves into swirling breeze without resistance",
+      "context": "grace in not holding on"
+    },
+    {
+      "visual": "untied boat drifting slowly from dock into open sunlit water",
+      "context": "allowing departure without grief"
+    },
+    {
+      "visual": "balloon floating upward from open palm into vast blue sky",
+      "context": "lightness that comes from unclenching"
+    },
+    {
+      "visual": "incense stick reaching its end with last curl of smoke dissolving into air",
+      "context": "completing without clinging"
+    }
+  ],
+  "trust": [
+    {
+      "visual": "blindfolded person stepping off stone ledge into hands reaching up below",
+      "context": "faith in what you cannot see"
+    },
+    {
+      "visual": "seed buried deep in dark soil with roots just beginning to push down",
+      "context": "believing in what has not yet appeared"
+    },
+    {
+      "visual": "bridge of rope and wood swaying over misty gorge with path continuing beyond",
+      "context": "crossing despite the trembling"
+    },
+    {
+      "visual": "compass needle pointing steady north on a foggy mountain trail",
+      "context": "trusting direction when you cannot see the destination"
+    }
+  ],
+  "healing": [
+    {
+      "visual": "cracked ceramic bowl mended with gold lacquer in kintsugi style",
+      "context": "becoming more beautiful for having been broken"
+    },
+    {
+      "visual": "fresh green moss growing over old scar in bark of wounded tree",
+      "context": "nature slowly reclaiming what was hurt"
+    },
+    {
+      "visual": "bandaged seedling supported by small wooden stake growing toward light",
+      "context": "recovery needs both support and time"
+    },
+    {
+      "visual": "warm sunlight reaching the floor of a room after curtains are finally opened",
+      "context": "letting light back in after a long dark"
+    }
+  ],
+  "resilience": [
+    {
+      "visual": "bent but unbroken reed swaying in strong river current",
+      "context": "flexibility as survival"
+    },
+    {
+      "visual": "wildflowers blooming on volcanic rock field where nothing should grow",
+      "context": "life persisting against all odds"
+    },
+    {
+      "visual": "old stone bridge still standing firm over raging seasonal flood waters",
+      "context": "built to weather every storm"
+    },
+    {
+      "visual": "crumpled paper unfolded to reveal writing still perfectly legible",
+      "context": "what matters survives the damage"
+    }
+  ],
+  "mindfulness": [
+    {
+      "visual": "single drop of water creating perfect concentric ripples on still pond surface",
+      "context": "focused attention spreading outward"
+    },
+    {
+      "visual": "hands carefully arranging flowers one stem at a time in shallow bowl",
+      "context": "devotion to what is directly in front of you"
+    },
+    {
+      "visual": "person walking barefoot on forest path with eyes closed and palms open",
+      "context": "feeling the world instead of rushing through it"
+    },
+    {
+      "visual": "steaming teacup held in both hands with eyes lowered in quiet focus",
+      "context": "ceremony in the simple act"
+    }
+  ],
+  "home": [
+    {
+      "visual": "warm kitchen with bread cooling on counter and evening light through window",
+      "context": "the place that feeds your soul"
+    },
+    {
+      "visual": "porch light left on glowing amber against dark blue evening",
+      "context": "someone waiting for your return"
+    },
+    {
+      "visual": "well-worn welcome mat beside potted plant at apartment door",
+      "context": "small declarations of sanctuary"
+    },
+    {
+      "visual": "quilt made from old family clothes draped over chair in cozy room",
+      "context": "home stitched from pieces of love"
+    }
+  ],
+  "comfort": [
+    {
+      "visual": "thick woolen socks beside crackling fireplace on stone hearth",
+      "context": "warmth that wraps around you"
+    },
+    {
+      "visual": "warm rain falling on upturned face with eyes closed and gentle smile",
+      "context": "letting go into what holds you"
+    },
+    {
+      "visual": "dog resting its head on person's lap while they read in armchair",
+      "context": "wordless companionship"
+    },
+    {
+      "visual": "bowl of steaming soup placed in front of someone on a cold evening",
+      "context": "care expressed through nourishment"
+    }
+  ],
+  "warmth": [
+    {
+      "visual": "hands wrapped around clay mug beside glowing campfire embers",
+      "context": "simple closeness to warmth"
+    },
+    {
+      "visual": "golden afternoon sun warming old brick wall with cat sleeping against it",
+      "context": "basking in effortless glow"
+    },
+    {
+      "visual": "grandmother draping shawl around grandchild's shoulders on cool evening",
+      "context": "love passed from one generation to the next"
+    },
+    {
+      "visual": "candles lit on every step of stone stairway creating path of warm light",
+      "context": "collective small lights creating a warm glow"
+    }
+  ],
+  "vulnerability": [
+    {
+      "visual": "bird with wet feathers sitting still on branch after storm waiting for sun",
+      "context": "being exposed and still choosing to stay"
+    },
+    {
+      "visual": "seedling with first tender leaf fully open to sky without shelter",
+      "context": "courage to be soft"
+    },
+    {
+      "visual": "open palm holding single fragile butterfly without closing fingers",
+      "context": "trust that does not grasp"
+    },
+    {
+      "visual": "turtle slowly emerging from shell on sun-warmed rock",
+      "context": "the bravery of showing your soft parts"
+    }
+  ],
+  "longing": [
+    {
+      "visual": "empty chair at sunset-lit dinner table set for two",
+      "context": "ache of an unfilled space"
+    },
+    {
+      "visual": "hand pressed against rain-streaked train window watching platform recede",
+      "context": "leaving what you wish you could keep"
+    },
+    {
+      "visual": "lighthouse beam sweeping across dark sea searching for distant ships",
+      "context": "reaching for what hasn't arrived"
+    },
+    {
+      "visual": "half-finished letter left open on desk beside dried ink pen",
+      "context": "words that never quite reached the other person"
+    }
+  ],
+  "forgiveness": [
+    {
+      "visual": "two rivers merging into one after flowing separately through valley",
+      "context": "coming together after time apart"
+    },
+    {
+      "visual": "morning frost melting off thorny rose bush as sun rises",
+      "context": "warmth dissolving what was sharp and cold"
+    },
+    {
+      "visual": "old lock rusted open falling away from garden gate",
+      "context": "what was once sealed releasing on its own"
+    },
+    {
+      "visual": "hand smoothing creased paper flat on table under warm light",
+      "context": "undoing damage with gentle persistence"
+    }
+  ],
+  "acceptance": [
+    {
+      "visual": "river flowing around immovable boulder without struggle or spray",
+      "context": "finding the way around what will not move"
+    },
+    {
+      "visual": "old cottage settling deeper into hillside it was built on over centuries",
+      "context": "becoming one with your circumstances"
+    },
+    {
+      "visual": "open hands resting palms-up on knees in morning meditation light",
+      "context": "receiving whatever comes without resistance"
+    },
+    {
+      "visual": "fallen tree slowly becoming part of forest floor with moss and new plants",
+      "context": "transforming loss into foundation"
+    }
+  ],
+  "imperfection": [
+    {
+      "visual": "hand-thrown pottery with slight wobble catching light beautifully on shelf",
+      "context": "charm in what machines cannot replicate"
+    },
+    {
+      "visual": "cracked mosaic tile floor still forming gorgeous pattern when seen from above",
+      "context": "broken pieces making a complete picture"
+    },
+    {
+      "visual": "crooked tree growing at angle from cliffside with magnificent canopy",
+      "context": "thriving in your own unusual way"
+    },
+    {
+      "visual": "child's crayon drawing pinned proudly on refrigerator door",
+      "context": "worth measured by heart not precision"
+    }
+  ],
+  "purpose": [
+    {
+      "visual": "compass lying on unfolded hand-drawn map beside packed leather satchel",
+      "context": "knowing your direction before the journey starts"
+    },
+    {
+      "visual": "single lantern lighting the way on a dark mountain trail",
+      "context": "inner calling guiding through uncertainty"
+    },
+    {
+      "visual": "river carving its own canyon through solid rock over millennia",
+      "context": "persistent direction shaping everything around it"
+    },
+    {
+      "visual": "archer's arrow drawn back on taut bow pointed at distant target in golden light",
+      "context": "focused intention before release"
+    }
+  ],
+  "determination": [
+    {
+      "visual": "mountain climber's hands gripping rock ledge with summit visible above",
+      "context": "the grip that refuses to slip"
+    },
+    {
+      "visual": "small ant carrying leaf many times its size across wide stone path",
+      "context": "effort unbothered by scale"
+    },
+    {
+      "visual": "candle flame leaning but not extinguishing in steady draft",
+      "context": "persistence that doesn't demand stillness"
+    },
+    {
+      "visual": "roots of young tree lifting concrete sidewalk slab as it grows",
+      "context": "quiet force that moves obstacles over time"
+    }
+  ],
+  "sacrifice": [
+    {
+      "visual": "mother bird plucking her own feathers to line the nest for her young",
+      "context": "giving from yourself so others are warm"
+    },
+    {
+      "visual": "old candle melted nearly to its base still casting bright warm light",
+      "context": "diminishing yourself to illuminate the room"
+    },
+    {
+      "visual": "farmer's calloused hands placing last seed in ground as sun sets on long day",
+      "context": "spending today for a harvest you may not eat"
+    }
+  ],
+  "legacy": [
+    {
+      "visual": "ancient tree with children's treehouse built in its branches beside carved initials",
+      "context": "what you build becomes others' shelter"
+    },
+    {
+      "visual": "grandfather's hand guiding child's hand planting sapling in garden soil",
+      "context": "planting for someone else's shade"
+    },
+    {
+      "visual": "worn stone steps hollowed by centuries of pilgrims' feet",
+      "context": "the path shaped by everyone who walked before"
+    },
+    {
+      "visual": "old well still providing clear water to new village houses built around it",
+      "context": "what was dug with care serves for generations"
+    }
+  ],
+  "seasons": [
+    {
+      "visual": "single tree shown in four quadrants of spring bloom summer green autumn gold winter bare",
+      "context": "every phase serves its purpose"
+    },
+    {
+      "visual": "winter branch with first spring bud appearing at its tip",
+      "context": "what seems dead is only resting"
+    },
+    {
+      "visual": "harvest basket overflowing beside bare field ready for winter rest",
+      "context": "abundance followed by necessary emptying"
+    },
+    {
+      "visual": "cherry blossoms falling like snow onto still pond in brief perfect storm",
+      "context": "the beauty that exists only because it passes"
+    }
+  ],
+  "storm": [
+    {
+      "visual": "rainbow arching over landscape still wet from recent thunderstorm",
+      "context": "beauty that only follows difficulty"
+    },
+    {
+      "visual": "old oak tree with lightning scar still growing green and full",
+      "context": "carrying the mark but continuing to live"
+    },
+    {
+      "visual": "calm sea after storm with debris washed clean on empty beach at sunrise",
+      "context": "what remains when turmoil passes"
+    },
+    {
+      "visual": "birds emerging from shelter to sing on branches still dripping with rain",
+      "context": "the song that comes after survival"
+    }
+  ],
+  "mountain": [
+    {
+      "visual": "distant snow-capped peak visible through break in clouds from green valley floor",
+      "context": "the goal seen clearly from far away"
+    },
+    {
+      "visual": "winding switchback trail ascending steep slope with rest stops along the way",
+      "context": "progress doesn't always look like a straight line"
+    },
+    {
+      "visual": "person standing at summit with clouds below and golden light all around",
+      "context": "perspective earned through climb"
+    },
+    {
+      "visual": "mountain stream beginning as tiny trickle from melting snow at high altitude",
+      "context": "great things beginning as small flows"
+    }
+  ],
+  "ocean": [
+    {
+      "visual": "vast turquoise ocean stretching to horizon under wide open sky",
+      "context": "limitless depth and possibility"
+    },
+    {
+      "visual": "waves crashing on rocks then pulling back only to return again",
+      "context": "persistence without exhaustion"
+    },
+    {
+      "visual": "tide pool teeming with small colorful life in hollow of rock",
+      "context": "entire worlds in small contained spaces"
+    },
+    {
+      "visual": "deep blue water seen from below with shafts of sunlight penetrating the surface",
+      "context": "light reaching even into the depths"
+    }
+  ],
+  "garden": [
+    {
+      "visual": "overgrown cottage garden bursting with flowers of every color in morning dew",
+      "context": "beauty that refuses to be tidy"
+    },
+    {
+      "visual": "gardener's weathered hands pressing soil around freshly transplanted seedling",
+      "context": "tending what you hope will grow"
+    },
+    {
+      "visual": "neglected garden with one persistent rose bush blooming through weeds",
+      "context": "beauty that persists without attention"
+    },
+    {
+      "visual": "raised garden bed with neat rows of vegetables and handwritten plant markers",
+      "context": "patience and care yielding nourishment"
+    }
+  ],
+  "forest": [
+    {
+      "visual": "sunlight filtering through dense canopy creating dappled gold on forest floor",
+      "context": "light finding its way through complexity"
+    },
+    {
+      "visual": "moss-covered trees in ancient forest with soft mist between them",
+      "context": "wisdom that accumulates in stillness"
+    },
+    {
+      "visual": "narrow path disappearing into misty woodland with ferns on either side",
+      "context": "the invitation to explore the unknown"
+    },
+    {
+      "visual": "fallen log serving as bridge over stream in deep woodland",
+      "context": "obstacles becoming pathways"
+    }
+  ],
+  "desert": [
+    {
+      "visual": "single green oasis visible across golden sand dunes under clear sky",
+      "context": "sustenance found in barren stretches"
+    },
+    {
+      "visual": "desert flower blooming vivid pink after rare rainfall on cracked earth",
+      "context": "life exploding when conditions finally come"
+    },
+    {
+      "visual": "caravan silhouette crossing vast dune under star-filled night sky",
+      "context": "continuing through emptiness guided by stars"
+    },
+    {
+      "visual": "wind-sculpted sandstone arch framing clear blue sky in canyon",
+      "context": "erosion creating architecture"
+    }
+  ],
+  "snow": [
+    {
+      "visual": "fresh untouched snowfall covering all imperfections of landscape at dawn",
+      "context": "starting clean over everything that was"
+    },
+    {
+      "visual": "warm orange light from cabin window casting glow on surrounding snowdrift",
+      "context": "warmth defying the cold"
+    },
+    {
+      "visual": "bare tree branches perfectly outlined in fresh white snow against grey sky",
+      "context": "structure revealed when everything else is stripped"
+    },
+    {
+      "visual": "snowmelt feeding tiny stream that will become a river in spring",
+      "context": "even endings feed beginnings"
+    }
+  ],
+  "fire": [
+    {
+      "visual": "campfire flames dancing in ring of stones under starry sky",
+      "context": "warmth created by gathering together"
+    },
+    {
+      "visual": "blacksmith pulling glowing orange metal from forge with tongs",
+      "context": "heat that transforms raw material into something useful"
+    },
+    {
+      "visual": "single match struck in pitch darkness illuminating everything nearby",
+      "context": "one brave act changing the whole scene"
+    },
+    {
+      "visual": "ember glowing red among grey ashes of yesterday's fire",
+      "context": "what seems finished still holds warmth"
+    }
+  ],
+  "sky": [
+    {
+      "visual": "vast open sky with single bird soaring freely through scattered clouds",
+      "context": "no ceiling on what you can become"
+    },
+    {
+      "visual": "dramatic sunset painting clouds in orange gold and violet over calm sea",
+      "context": "the show that requires no audience"
+    },
+    {
+      "visual": "star-filled night sky reflected in perfectly still mountain lake",
+      "context": "infinity above and below"
+    },
+    {
+      "visual": "hot air balloon rising gently into clear morning sky above patchwork fields",
+      "context": "perspective gained through rising above"
+    }
+  ],
+  "earth": [
+    {
+      "visual": "barefoot footprints in rich dark garden soil",
+      "context": "grounding in what is real"
+    },
+    {
+      "visual": "hands scooping rich loamy earth with tiny root systems visible",
+      "context": "the unseen network that sustains everything above"
+    },
+    {
+      "visual": "ancient cliff face showing layers of geological time in colored strata",
+      "context": "depth built by ages of accumulation"
+    }
+  ],
+  "wind": [
+    {
+      "visual": "tall grass field rippling in waves under steady warm wind",
+      "context": "yielding gracefully to invisible forces"
+    },
+    {
+      "visual": "wind chimes catching breeze on quiet veranda making music from movement",
+      "context": "turning disturbance into melody"
+    },
+    {
+      "visual": "dry autumn leaves spiraling upward in joyful whirlwind on empty street",
+      "context": "what is released can dance"
+    },
+    {
+      "visual": "prayer flags fluttering on mountain pass carrying wishes into the distance",
+      "context": "sending intentions where your body cannot go"
+    }
+  ],
+  "harvest": [
+    {
+      "visual": "golden wheat field ready for cutting under deep blue late-summer sky",
+      "context": "the reward that patience grew"
+    },
+    {
+      "visual": "wooden table laden with fresh vegetables and fruits from garden",
+      "context": "abundance earned through tending"
+    },
+    {
+      "visual": "apple tree bending under weight of ripe red fruit in orchard",
+      "context": "success so full it humbles"
+    }
+  ],
+  "horizon": [
+    {
+      "visual": "endless road disappearing into glowing horizon line at golden hour",
+      "context": "what lies ahead is always lit"
+    },
+    {
+      "visual": "person standing at cliff edge looking out at where sea meets sky",
+      "context": "the boundary where the known meets the infinite"
+    },
+    {
+      "visual": "railway tracks converging toward vanishing point in warm hazy distance",
+      "context": "everything comes together eventually"
+    }
+  ],
+  "bridge": [
+    {
+      "visual": "old stone arch bridge over peaceful stream connecting two flowering meadows",
+      "context": "what was built to bring separate worlds together"
+    },
+    {
+      "visual": "rope bridge swaying gently between two misty cliffs with valley far below",
+      "context": "crossing requires trusting what holds you"
+    },
+    {
+      "visual": "stepping stones placed across garden stream with moss growing on each one",
+      "context": "small steady steps between one place and the next"
+    }
+  ],
+  "door": [
+    {
+      "visual": "weathered blue wooden door slightly ajar with warm golden light spilling out",
+      "context": "invitation to what awaits inside"
+    },
+    {
+      "visual": "archway of climbing roses framing entrance to hidden garden beyond",
+      "context": "beauty as threshold to more beauty"
+    },
+    {
+      "visual": "row of colorful doors on narrow cobblestone street each one unique",
+      "context": "many possibilities standing side by side"
+    }
+  ],
+  "mirror": [
+    {
+      "visual": "still forest pool reflecting trees so perfectly the image is indistinguishable from real",
+      "context": "seeing yourself clearly in stillness"
+    },
+    {
+      "visual": "antique hand mirror on vanity table catching morning light",
+      "context": "the courage to look honestly at yourself"
+    },
+    {
+      "visual": "rain puddle on cobblestone reflecting ornate building above upside down",
+      "context": "perspective that reveals what standing misses"
+    }
+  ],
+  "thread": [
+    {
+      "visual": "golden thread being pulled through fabric on embroidery hoop by steady hand",
+      "context": "each stitch connecting to the larger pattern"
+    },
+    {
+      "visual": "spider web strung between branches glistening with morning dew",
+      "context": "invisible connections holding everything together"
+    },
+    {
+      "visual": "ball of yarn unraveling down stone steps leading to warmly lit room below",
+      "context": "following the thread to where love is"
+    }
+  ],
+  "seed": [
+    {
+      "visual": "single seed resting in center of open palm under open sky",
+      "context": "everything begins smaller than you expect"
+    },
+    {
+      "visual": "seed packet torn open with seeds scattered on rich dark potting soil",
+      "context": "the deliberate act of beginning"
+    },
+    {
+      "visual": "dandelion seed floating on breeze above meadow in golden hour light",
+      "context": "potential carried by forces beyond your control"
+    }
+  ],
+  "nest": [
+    {
+      "visual": "bird's nest woven from twigs and soft fibers cradling pale blue eggs",
+      "context": "protection built piece by piece for what matters most"
+    },
+    {
+      "visual": "empty nest on branch with feathers still lining it after fledglings have flown",
+      "context": "the space love leaves behind"
+    },
+    {
+      "visual": "child building blanket fort in living room with pillows and fairy lights inside",
+      "context": "creating safety from whatever is at hand"
+    }
+  ],
+  "compass": [
+    {
+      "visual": "brass compass resting on weathered map spread across wooden ship's table",
+      "context": "knowing your direction when landmarks fail"
+    },
+    {
+      "visual": "north star shining steadily above silhouetted pine tree line",
+      "context": "the fixed point that guides through changing skies"
+    },
+    {
+      "visual": "footpath diverging in autumn woods with sunlight on one of the forks",
+      "context": "the moment of choosing which way"
+    }
+  ],
+  "anchor": [
+    {
+      "visual": "heavy iron anchor resting in sand beside calm harbor at low tide",
+      "context": "what keeps you steady when tides shift"
+    },
+    {
+      "visual": "deep-rooted mangrove tree holding firm at water's edge against incoming tide",
+      "context": "grounded in shifting circumstances"
+    },
+    {
+      "visual": "old stone hearth at center of family room with generations of soot marks",
+      "context": "the unchanging center everything orbits around"
+    }
+  ],
+  "candle": [
+    {
+      "visual": "row of candles in clay holders lighting up dark temple corridor",
+      "context": "each small light making the darkness smaller"
+    },
+    {
+      "visual": "single candle casting long warm shadow in otherwise dark room",
+      "context": "one presence filling the whole space"
+    },
+    {
+      "visual": "hand cupping candle flame to protect it while walking through windy passage",
+      "context": "guarding something delicate through rough stretches"
+    }
+  ],
+  "path": [
+    {
+      "visual": "winding cobblestone path through lavender field toward stone cottage",
+      "context": "the journey is fragrant if you walk with attention"
+    },
+    {
+      "visual": "deer trail barely visible through tall meadow grass leading into treeline",
+      "context": "paths made by those who went without a map"
+    },
+    {
+      "visual": "stepping stones across shallow stream each one placed just within stride",
+      "context": "you only need to see the next step"
+    }
+  ],
+  "celebration": [
+    {
+      "visual": "string of colored paper lanterns glowing above outdoor evening gathering",
+      "context": "turning ordinary spaces into festive ones"
+    },
+    {
+      "visual": "hands clapping flour-dusted while making festive bread in warm kitchen",
+      "context": "joy in the making itself"
+    },
+    {
+      "visual": "sparklers held by multiple hands drawing light circles in dark evening",
+      "context": "shared exuberance lighting up the night"
+    }
+  ],
+  "music": [
+    {
+      "visual": "old wooden piano keys worn smooth by decades of playing in quiet room",
+      "context": "instrument shaped by the songs it has carried"
+    },
+    {
+      "visual": "street musician playing violin on cobblestone corner as petals drift by",
+      "context": "beauty offered freely to anyone passing"
+    },
+    {
+      "visual": "wind carrying sound of distant temple bells across misty green valley",
+      "context": "harmony reaching farther than you know"
+    }
+  ],
+  "dance": [
+    {
+      "visual": "silhouette of dancer mid-spin with flowing fabric in golden backlight",
+      "context": "expression that needs no explanation"
+    },
+    {
+      "visual": "autumn leaves swirling in synchronized spiral updraft",
+      "context": "natural rhythm that moves without instruction"
+    },
+    {
+      "visual": "fireflies tracing light patterns over dark meadow at twilight",
+      "context": "joy that creates its own choreography"
+    }
+  ],
+  "silence": [
+    {
+      "visual": "snow-covered forest where every sound is absorbed into white stillness",
+      "context": "the loudest peace"
+    },
+    {
+      "visual": "empty meditation hall with single cushion and shaft of morning light",
+      "context": "space cleared for listening inward"
+    },
+    {
+      "visual": "library reading room with dust motes floating in slanted afternoon light",
+      "context": "productive quiet where thought can settle"
+    }
+  ],
+  "breath": [
+    {
+      "visual": "visible exhale in cold morning air turning to mist before dissolving",
+      "context": "proof of life in the invisible"
+    },
+    {
+      "visual": "wind filling white sailcloth propelling small boat across calm blue water",
+      "context": "what is unseen powering forward motion"
+    },
+    {
+      "visual": "chest of sleeping infant rising and falling in soft crib light",
+      "context": "the simplest rhythm sustaining everything"
+    }
+  ],
+  "shadow": [
+    {
+      "visual": "long evening shadow of single figure stretching across golden field",
+      "context": "you are larger than you appear to yourself"
+    },
+    {
+      "visual": "shadow puppets cast on wall by hands in candlelight",
+      "context": "creating meaning from what is dark"
+    },
+    {
+      "visual": "tree shade falling cool and protective over stone bench on hot day",
+      "context": "darkness that protects rather than threatens"
+    }
+  ],
+  "light": [
+    {
+      "visual": "shaft of light breaking through gap in heavy clouds onto green landscape",
+      "context": "illumination finding its way through barriers"
+    },
+    {
+      "visual": "child holding jar of caught fireflies glowing in dark garden",
+      "context": "gathering light wherever you can find it"
+    },
+    {
+      "visual": "sunlight passing through stained glass casting colored patterns on stone floor",
+      "context": "beauty created by what light passes through"
+    },
+    {
+      "visual": "chain of people passing lit candles from one to another in dark crowd",
+      "context": "light multiplied by sharing without losing"
+    }
+  ],
+  "dawn": [
+    {
+      "visual": "first rays of sun touching snow-capped mountain peak while valley sleeps in shadow",
+      "context": "the highest parts of you catch light first"
+    },
+    {
+      "visual": "rooster silhouetted on fence post against pale pink and orange pre-dawn sky",
+      "context": "announcing what others haven't yet seen"
+    },
+    {
+      "visual": "fisherman pushing boat into calm water as sky shifts from grey to gold",
+      "context": "beginning work before the world awakes"
+    }
+  ],
+  "dusk": [
+    {
+      "visual": "purple and amber sky reflected in windows of quiet town as lights come on",
+      "context": "the gentle handoff between effort and rest"
+    },
+    {
+      "visual": "last bird returning to tree as sky turns indigo and first star appears",
+      "context": "everything finding its way home"
+    },
+    {
+      "visual": "fisherman folding nets on shore as sun drops below calm water",
+      "context": "completion without fanfare"
+    }
+  ],
+  "rainbow": [
+    {
+      "visual": "full rainbow arching over green valley with last raindrops still falling",
+      "context": "beauty requiring both rain and sun"
+    },
+    {
+      "visual": "prism on windowsill splitting white sunlight into spectrum across white wall",
+      "context": "what seems plain contains multitudes"
+    },
+    {
+      "visual": "oil puddle on street creating iridescent rainbow swirl after rain",
+      "context": "unexpected beauty in overlooked places"
+    }
+  ],
+  "star": [
+    {
+      "visual": "single bright star visible in deep blue twilight before any others",
+      "context": "the first to show up"
+    },
+    {
+      "visual": "milky way stretching across desert sky above sleeping traveler",
+      "context": "vastness watching over smallness"
+    },
+    {
+      "visual": "child pointing at shooting star from father's shoulders in dark field",
+      "context": "wonder shared across generations"
+    }
+  ],
+  "sunset": [
+    {
+      "visual": "sun sinking into ocean painting water in molten gold and deep orange",
+      "context": "endings that set the world on fire"
+    },
+    {
+      "visual": "silhouette of couple on bench watching sunset over quiet lake",
+      "context": "sharing the beauty of an ending"
+    },
+    {
+      "visual": "last warm light painting old stone building facade in honey gold",
+      "context": "the most beautiful light comes right before dark"
+    }
+  ],
+  "balance": [
+    {
+      "visual": "perfectly balanced stone cairn on rocky beach with waves behind",
+      "context": "stability found through careful placement"
+    },
+    {
+      "visual": "traditional brass weighing scale with both sides level in market light",
+      "context": "giving and taking in equal measure"
+    },
+    {
+      "visual": "tightrope walker silhouetted against sunset sky with pole held steady",
+      "context": "grace requiring constant micro-adjustments"
+    },
+    {
+      "visual": "yin-yang pattern formed by black and white koi circling in clear pond",
+      "context": "opposites holding each other in motion"
+    }
+  ],
+  "abundance": [
+    {
+      "visual": "overflowing fruit basket on rustic table dappled with orchard sunlight",
+      "context": "more than enough to share"
+    },
+    {
+      "visual": "wildflower meadow stretching as far as the eye can see in every color",
+      "context": "nature holding nothing back"
+    },
+    {
+      "visual": "bookshelf bowing under weight of beloved well-read books in cozy nook",
+      "context": "richness measured in what feeds your mind"
+    }
+  ],
+  "community": [
+    {
+      "visual": "many hands joining to form circle around freshly planted community garden",
+      "context": "growing something no one could grow alone"
+    },
+    {
+      "visual": "row of different colored front doors on shared village street",
+      "context": "unity that does not require sameness"
+    },
+    {
+      "visual": "potluck dishes crowding a long outdoor table under string lights",
+      "context": "each person bringing what they have"
+    },
+    {
+      "visual": "stone well at center of village square with paths radiating outward to homes",
+      "context": "shared source sustaining all directions"
+    }
+  ],
+  "childhood": [
+    {
+      "visual": "small rubber boots standing in puddle reflecting blue sky above",
+      "context": "the world at ankle height is full of wonder"
+    },
+    {
+      "visual": "chalk drawings fading on sidewalk beside abandoned skipping rope",
+      "context": "joy that doesn't need permanence"
+    },
+    {
+      "visual": "treehouse with rope ladder and hand-painted sign in backyard oak",
+      "context": "first kingdoms built from imagination"
+    },
+    {
+      "visual": "jar of crayons spilled across sunlit floor beside half-finished drawing",
+      "context": "creating without caring about the result"
+    }
+  ],
+  "aging": [
+    {
+      "visual": "ancient olive tree with gnarled trunk still bearing abundant green fruit",
+      "context": "productivity deepening with age"
+    },
+    {
+      "visual": "weathered wooden dock extending into calm lake reflecting autumn mountains",
+      "context": "well-worn structures still holding weight"
+    },
+    {
+      "visual": "silver-haired hands threading needle with practiced ease in window light",
+      "context": "skill that only years can grant"
+    },
+    {
+      "visual": "old stone wall with each layer telling a different geological story",
+      "context": "depth visible only through accumulation"
+    }
+  ],
+  "laughter": [
+    {
+      "visual": "group of friends around evening bonfire with sparks rising like miniature stars",
+      "context": "warmth generated by togetherness"
+    },
+    {
+      "visual": "children spinning under garden sprinkler in golden summer afternoon light",
+      "context": "uninhibited delight"
+    },
+    {
+      "visual": "colorful paper pinwheels spinning wildly in seaside breeze",
+      "context": "movement powered by play"
+    }
+  ],
+  "tears": [
+    {
+      "visual": "rain streaking down windowpane with warm room blurred behind it",
+      "context": "the view through grief"
+    },
+    {
+      "visual": "morning dew collecting in hollow of cupped leaf before spilling over",
+      "context": "what accumulates must eventually fall"
+    },
+    {
+      "visual": "cloud breaking open over parched farmland with crops reaching upward",
+      "context": "release that nourishes what waited below"
+    }
+  ],
+  "embrace": [
+    {
+      "visual": "two trees growing so close their canopies have merged into one shelter",
+      "context": "closeness that creates shared protection"
+    },
+    {
+      "visual": "ivy completely enveloping old stone wall in living green embrace",
+      "context": "holding on gently but completely"
+    },
+    {
+      "visual": "warm scarf wrapped around cold hands holding hot cup on winter morning",
+      "context": "layers of care surrounding you"
+    }
+  ],
+  "waiting": [
+    {
+      "visual": "empty platform bench with single suitcase as train tracks stretch into distance",
+      "context": "the space between here and what comes next"
+    },
+    {
+      "visual": "kettle on stove with first wisps of steam before the whistle",
+      "context": "the quiet buildup before things happen"
+    },
+    {
+      "visual": "cocoon hanging from branch in late winter with spring buds forming nearby",
+      "context": "transformation happening in stillness"
+    },
+    {
+      "visual": "dock at empty lake at dawn with fishing rod already cast into still water",
+      "context": "readiness without anxiety"
+    }
+  ],
+  "wandering": [
+    {
+      "visual": "person walking alone down sunlit country road lined with wildflowers and no signs",
+      "context": "the freedom of having no fixed destination"
+    },
+    {
+      "visual": "paper boat drifting downstream through forest stream with dappled light",
+      "context": "going where the current carries you"
+    },
+    {
+      "visual": "backpack resting against mile marker on empty scenic highway at sunset",
+      "context": "pausing to take in what you didn't plan to find"
+    }
+  ],
+  "rootedness": [
+    {
+      "visual": "massive exposed root system of ancient tree gripping riverbank soil",
+      "context": "strength that begins underground"
+    },
+    {
+      "visual": "bonsai tree with thick trunk and carefully shaped branches in ceramic pot",
+      "context": "depth independent of size"
+    },
+    {
+      "visual": "family recipe book open on kitchen counter stained with years of use",
+      "context": "traditions that ground you through repetition"
+    }
+  ],
+  "awakening": [
+    {
+      "visual": "first crack of egg from inside as chick begins to emerge",
+      "context": "breaking through what once protected you"
+    },
+    {
+      "visual": "person opening shutters to flood of morning light in white room",
+      "context": "choosing to let clarity in"
+    },
+    {
+      "visual": "frozen lake with first crack appearing in ice as spring sun warms it",
+      "context": "thawing what has been held rigid"
+    },
+    {
+      "visual": "eyes opening wide with morning light reflected in them",
+      "context": "seeing as if for the first time"
+    }
+  ],
+  "release": [
+    {
+      "visual": "birds bursting from open cage door into wide open sky",
+      "context": "freedom found when the door is finally opened"
+    },
+    {
+      "visual": "tight fist slowly opening to flat palm under pouring rain",
+      "context": "unclenching what you held too hard"
+    },
+    {
+      "visual": "river breaking through dam of autumn leaves into clear downstream pool",
+      "context": "flow resuming after obstruction is cleared"
+    }
+  ],
+  "renewal": [
+    {
+      "visual": "rain washing city streets clean at dawn with fresh reflections everywhere",
+      "context": "the world made new by what washes over it"
+    },
+    {
+      "visual": "fresh coat of whitewash on old mud wall with blue sky behind",
+      "context": "restoration that honors the original"
+    },
+    {
+      "visual": "spring meadow exploding green where winter field was brown and bare",
+      "context": "dormancy was not death"
+    },
+    {
+      "visual": "snake's shed skin beside the rock where it basked renewed and larger",
+      "context": "leaving behind what no longer fits"
+    }
+  ],
+  "spontaneity": [
+    {
+      "visual": "shoes kicked off beside unforeseen path leading to hidden waterfall",
+      "context": "the best discoveries come unplanned"
+    },
+    {
+      "visual": "picnic blanket spread impulsively under blooming cherry tree with no basket in sight yet",
+      "context": "deciding to celebrate right now"
+    },
+    {
+      "visual": "paper airplane launched from high balcony catching wind and soaring farther than expected",
+      "context": "unplanned moments that take flight"
+    }
+  ],
+  "fullness": [
+    {
+      "visual": "ripe pomegranate split open revealing hundreds of jewel-like ruby seeds",
+      "context": "richness hidden beneath simple exterior"
+    },
+    {
+      "visual": "harvest moon enormous and golden hanging low over quiet countryside",
+      "context": "life at its most complete"
+    },
+    {
+      "visual": "overflowing birdbath with sparrows splashing in late afternoon garden",
+      "context": "enough to share and still overflow"
+    }
+  ],
+  "disconnect": [
+    {
+      "visual": "phone left face-down on table beside open window with mountain view",
+      "context": "choosing the real over the feed"
+    },
+    {
+      "visual": "person walking into forest leaving all belongings at the trailhead",
+      "context": "shedding what weighs you down"
+    },
+    {
+      "visual": "closed laptop on desk with sunset light warming the room around it",
+      "context": "the screen that isn't competing with the sky"
+    },
+    {
+      "visual": "unread notification badges on dark phone screen beside blooming window garden",
+      "context": "what you choose not to check"
+    }
+  ],
+  "comparison": [
+    {
+      "visual": "unique misshapen seashell beside row of perfect identical shells on sand",
+      "context": "standing out is not a flaw"
+    },
+    {
+      "visual": "wildflower growing freely beside manicured topiary in same garden",
+      "context": "two forms of beauty existing without competition"
+    },
+    {
+      "visual": "different sized candle flames all casting equal warmth in dark room",
+      "context": "value that isn't measured by size"
+    }
+  ],
+  "overwhelm": [
+    {
+      "visual": "single small boat on very wide turbulent sea under heavy grey sky",
+      "context": "feeling small against what surrounds you"
+    },
+    {
+      "visual": "stack of papers and books threatening to topple on cluttered desk by dim lamp",
+      "context": "the weight of accumulated demand"
+    },
+    {
+      "visual": "tangled ball of yarn with one free end leading out toward clear table space",
+      "context": "finding the single thread to pull"
+    }
+  ],
+  "clarity": [
+    {
+      "visual": "eyeglasses placed on open book bringing blurred text into sharp focus",
+      "context": "seeing clearly what was always there"
+    },
+    {
+      "visual": "mountain lake so clear you see every stone on the bottom",
+      "context": "transparency that comes from stillness"
+    },
+    {
+      "visual": "fog lifting from valley revealing landscape that was hidden all along",
+      "context": "confusion was temporary not permanent"
+    }
+  ],
+  "identity": [
+    {
+      "visual": "single red door in long row of white doors on cobblestone street",
+      "context": "the part of you that refuses to blend"
+    },
+    {
+      "visual": "tree rings visible in cross-section showing years of drought and abundance",
+      "context": "who you are is written in your history"
+    },
+    {
+      "visual": "handmade ceramic mug unlike any other on shelf of factory cups",
+      "context": "shaped by hands not molds"
+    }
+  ],
+  "persistence": [
+    {
+      "visual": "water drops slowly wearing groove in solid rock beside temple steps",
+      "context": "softness defeating hardness through time"
+    },
+    {
+      "visual": "ivy reaching higher on stone wall each season leaving marks of past growth",
+      "context": "advance that does not advertise itself"
+    },
+    {
+      "visual": "turtle steady on sandy path with finish line visible ahead in warm light",
+      "context": "arriving not first but certain"
+    }
+  ],
+  "perspective": [
+    {
+      "visual": "city skyline seen from distant hilltop looking small and quiet at sunset",
+      "context": "distance making the loud seem manageable"
+    },
+    {
+      "visual": "reflection of mountain in lake appearing upside down but equally beautiful",
+      "context": "the same truth looks different from every angle"
+    },
+    {
+      "visual": "child looking up at towering sunflower from ground level in garden",
+      "context": "how something appears depends on where you stand"
+    }
+  ],
+  "transition": [
+    {
+      "visual": "caterpillar halfway across bridge made of single leaf between two branches",
+      "context": "the in-between before the becoming"
+    },
+    {
+      "visual": "sky at exact moment between sunset and blue hour with both colors visible",
+      "context": "the beauty exclusive to the threshold"
+    },
+    {
+      "visual": "half-packed suitcase open on bed in room with bare walls and morning light",
+      "context": "the pause between leaving and arriving"
+    }
+  ],
+  "potential": [
+    {
+      "visual": "acorn resting in child's palm with massive oak canopy visible above",
+      "context": "what you hold is already the whole future"
+    },
+    {
+      "visual": "blank canvas on easel facing open window with inspiring landscape beyond",
+      "context": "possibility waiting for first stroke"
+    },
+    {
+      "visual": "uncarved block of marble in sculptor's studio with light catching one face",
+      "context": "every form already exists inside the raw material"
+    }
+  ],
+  "struggle": [
+    {
+      "visual": "salmon leaping upstream against powerful waterfall current",
+      "context": "fighting toward where you need to be"
+    },
+    {
+      "visual": "moth circling closer and closer to lamp on warm summer night",
+      "context": "drawn irresistibly toward what matters"
+    },
+    {
+      "visual": "hands kneading tough bread dough on flour-dusted kitchen counter",
+      "context": "effort that transforms the raw into the nourishing"
+    }
+  ],
+  "surprise": [
+    {
+      "visual": "door opening onto unexpected rooftop garden hidden above busy street",
+      "context": "wonder waiting in places you didn't think to look"
+    },
+    {
+      "visual": "butterfly landing on outstretched hand of person sitting still in meadow",
+      "context": "beauty that arrives when you stop chasing"
+    },
+    {
+      "visual": "double rainbow appearing in clearing sky above ordinary suburban street",
+      "context": "the spectacular visiting the mundane"
+    }
+  ],
+  "loss": [
+    {
+      "visual": "single leaf falling in slow spiral from otherwise full autumn tree",
+      "context": "the first sign that something is changing"
+    },
+    {
+      "visual": "empty birdcage with door open beside window overlooking open sky",
+      "context": "the space where something precious used to be"
+    },
+    {
+      "visual": "tide washing away sandcastle leaving only smooth wet sand at sunset",
+      "context": "what was built beautifully returning to the elements"
+    }
+  ],
+  "generosity": [
+    {
+      "visual": "fruit tree with branches hanging over neighbor's fence sharing harvest",
+      "context": "abundance that naturally crosses boundaries"
+    },
+    {
+      "visual": "someone placing their own coat over sleeping stranger on park bench",
+      "context": "warmth given at your own expense"
+    },
+    {
+      "visual": "well with no lock and ladle hanging for anyone who passes",
+      "context": "resources offered without condition"
+    }
+  ],
+  "focus": [
+    {
+      "visual": "magnifying glass concentrating sunlight into bright point on leaf",
+      "context": "scattered energy gathered into power"
+    },
+    {
+      "visual": "archer's eye aligned with arrow and distant target in still forest clearing",
+      "context": "the world narrowing to what matters most"
+    },
+    {
+      "visual": "single lit desk lamp illuminating open notebook while room fades to shadow",
+      "context": "choosing where to direct your light"
+    }
+  ],
+  "infinity": [
+    {
+      "visual": "two mirrors facing each other creating endless corridor of reflections",
+      "context": "depth without visible end"
+    },
+    {
+      "visual": "ocean meeting sky at indistinguishable horizon on perfectly clear day",
+      "context": "the point where boundaries dissolve"
+    },
+    {
+      "visual": "spiral staircase viewed from below curving upward into light without visible top",
+      "context": "the journey that keeps revealing more"
+    }
+  ],
+  "simplicity_modern": [
+    {
+      "visual": "single white coffee cup on clean marble counter beside open window",
+      "context": "luxury in having less"
+    },
+    {
+      "visual": "one perfect avocado toast on handmade plate with linen napkin",
+      "context": "elevation of the everyday"
+    },
+    {
+      "visual": "minimalist room with one plant and one book and streaming natural light",
+      "context": "space as a form of abundance"
+    }
+  ],
+  "hustle": [
+    {
+      "visual": "workshop bench with sawdust and half-finished project under bright task lamp at night",
+      "context": "building while others sleep"
+    },
+    {
+      "visual": "multiple clocks on wall each showing different time zone in modern workspace",
+      "context": "the world that never fully stops"
+    },
+    {
+      "visual": "coffee cup leaving overlapping ring stains on desk calendar page",
+      "context": "relentless days bleeding into each other"
+    }
+  ],
+  "burnout": [
+    {
+      "visual": "candle burned down to bare wick with pool of melted wax around it",
+      "context": "what happens when you give all your light"
+    },
+    {
+      "visual": "dry cracked riverbed under harsh midday sun with green banks visible in distance",
+      "context": "running dry while life continues on the shores"
+    },
+    {
+      "visual": "wilted plant on office desk beside unanswered stack of papers and cold coffee",
+      "context": "neglecting what keeps you alive"
+    }
+  ],
+  "digital_life": [
+    {
+      "visual": "glowing phone screen reflected in dark window against city lights at night",
+      "context": "the world in your hand competing with the one outside"
+    },
+    {
+      "visual": "charging cable plugged into phone beside unplugged acoustic guitar on bed",
+      "context": "feeding the device while starving the soul"
+    },
+    {
+      "visual": "dozens of app notification badges glowing on phone screen beside sleeping infant",
+      "context": "the noise that doesn't know when to be quiet"
+    }
+  ],
+  "ambition": [
+    {
+      "visual": "falcon perched on high ledge scanning vast landscape below at dawn",
+      "context": "vision that sees from above before diving in"
+    },
+    {
+      "visual": "seedling pressing through concrete sidewalk crack toward open air",
+      "context": "drive that finds a way through any surface"
+    },
+    {
+      "visual": "ladder leaning against high wall with sky visible just above the top",
+      "context": "the climb toward what is barely out of reach"
+    }
+  ],
+  "contentment": [
+    {
+      "visual": "cat stretched full length in pool of warm afternoon sunlight on wooden floor",
+      "context": "satisfaction needing nothing added"
+    },
+    {
+      "visual": "person in rocking chair on porch with half-finished cup of tea watching clouds",
+      "context": "having no place you would rather be"
+    },
+    {
+      "visual": "simple clay bowl filled to the brim with fresh clear water",
+      "context": "fullness in what is plain"
+    },
+    {
+      "visual": "small garden shed with all tools hung neatly and afternoon light through window",
+      "context": "everything you need already at hand"
+    }
+  ],
+  "protection": [
+    {
+      "visual": "mother hen with wings spread sheltering chicks from approaching rain",
+      "context": "covering others with your own body"
+    },
+    {
+      "visual": "thick stone walls of mountain monastery with peaceful garden inside",
+      "context": "what is built for safety becoming beautiful"
+    },
+    {
+      "visual": "umbrella tree providing shade to bench where traveler rests on hot road",
+      "context": "shelter that asks nothing of the sheltered"
+    }
+  ],
+  "discovery": [
+    {
+      "visual": "old attic door opened revealing forgotten room full of treasures in dusty light",
+      "context": "what was always there waiting to be found"
+    },
+    {
+      "visual": "child turning over rock and marveling at tiny world of insects beneath",
+      "context": "curiosity rewarded by what lies beneath"
+    },
+    {
+      "visual": "first page of an old map unrolled on table with unmapped regions marked",
+      "context": "the thrill of what is not yet known"
+    }
+  ],
+  "presence": [
+    {
+      "visual": "two people sitting in comfortable silence watching fire in stone hearth",
+      "context": "being together without filling the space"
+    },
+    {
+      "visual": "single tree casting cool shade on hot summer field where animals gather",
+      "context": "the gift of simply being there"
+    },
+    {
+      "visual": "fresh flowers in vase on table set for someone's return",
+      "context": "care expressed through what you prepare"
+    }
+  ],
+  "energy": [
+    {
+      "visual": "lightning bolt captured mid-strike illuminating entire storm landscape",
+      "context": "raw power concentrated in an instant"
+    },
+    {
+      "visual": "whitewater rapids churning through narrow rocky gorge in mountain",
+      "context": "force channeled by constraints"
+    },
+    {
+      "visual": "child mid-leap from swing at highest point with laughter in the air",
+      "context": "the moment between holding on and flying"
+    }
+  ],
+  "permission": [
+    {
+      "visual": "gate left intentionally open with welcome sign and wildflower path beyond",
+      "context": "the invitation to enter that was always there"
+    },
+    {
+      "visual": "empty dance floor with spotlight and music playing for no audience",
+      "context": "space that exists whether or not you claim it"
+    },
+    {
+      "visual": "open journal with pen resting beside crossed-out expectations list",
+      "context": "rewriting the rules you were given"
+    }
+  ],
+  "inner_child": [
+    {
+      "visual": "adult hands carefully picking up a paper boat from rain puddle",
+      "context": "tenderness toward the small self you once were"
+    },
+    {
+      "visual": "old swing set in garden with fresh coat of paint and drying in sun",
+      "context": "restoring what childhood built"
+    },
+    {
+      "visual": "crayon drawing framed in expensive gallery frame hanging in adult's office",
+      "context": "honoring what was made before the critic arrived"
+    }
+  ],
+  "effort": [
+    {
+      "visual": "hands covered in flour kneading bread dough in warm kitchen morning light",
+      "context": "transformation through sustained work"
+    },
+    {
+      "visual": "bricklayer placing one more brick on wall rising toward completion",
+      "context": "progress built one unit at a time"
+    },
+    {
+      "visual": "hand-stitched quilt nearly finished with needle still threaded on last square",
+      "context": "the beauty that comes from refusing shortcuts"
+    }
+  ],
+  "refuge": [
+    {
+      "visual": "reading nook built into window alcove with cushions blankets and rain outside",
+      "context": "a space carved out just for you"
+    },
+    {
+      "visual": "cave entrance overlooking storm-lashed sea with dry warm interior behind",
+      "context": "safety found at the edge of chaos"
+    },
+    {
+      "visual": "small library with deep armchair and single lamp in pool of golden light",
+      "context": "the room where you become yourself again"
+    }
+  ],
+  "cycle": [
+    {
+      "visual": "wheel of prayer flags spinning in mountain wind at high pass",
+      "context": "repetition that carries meaning forward"
+    },
+    {
+      "visual": "tidal pool draining and refilling twice each day on rocky shore",
+      "context": "emptying and filling as natural rhythm"
+    },
+    {
+      "visual": "moon phases shown in sequence across clear night sky",
+      "context": "fullness and emptiness as the same journey"
+    }
+  ],
+  "dignity": [
+    {
+      "visual": "elderly person walking with measured grace down tree-lined boulevard at sunset",
+      "context": "composure that needs no validation"
+    },
+    {
+      "visual": "single tall cypress standing straight while surrounding trees are bent by wind",
+      "context": "uprightness that is its own statement"
+    },
+    {
+      "visual": "clean pressed clothes hanging on simple rope line between humble houses in sunlight",
+      "context": "pride in what you have regardless of how much"
+    }
+  ],
+  "play": [
+    {
+      "visual": "kite tugging at string in strong spring wind above green hill",
+      "context": "holding on to something that wants to fly"
+    },
+    {
+      "visual": "bubbles floating over garden fence into neighboring yard",
+      "context": "joy that doesn't respect boundaries"
+    },
+    {
+      "visual": "stack of smooth river stones toppling in slow motion on sandy bank",
+      "context": "building just for the pleasure of it"
+    }
+  ],
+  "unity": [
+    {
+      "visual": "braided river channels reconverging into single stream in wide valley",
+      "context": "what separates eventually rejoins"
+    },
+    {
+      "visual": "choir of different voices blending into one resonant sound in cathedral",
+      "context": "harmony from distinct notes"
+    },
+    {
+      "visual": "roots of different trees intertwined beneath forest floor supporting each other",
+      "context": "connection invisible from above"
+    }
+  ],
+  "wonder": [
+    {
+      "visual": "child pressing face against aquarium glass watching jellyfish drift in blue light",
+      "context": "the world seen through awe"
+    },
+    {
+      "visual": "northern lights shimmering green and purple over snow-covered landscape",
+      "context": "nature exceeding imagination"
+    },
+    {
+      "visual": "firefly lighting up in cupped hands of child at twilight",
+      "context": "magic caught for a moment"
+    }
+  ],
+  "truth": [
+    {
+      "visual": "clear spring water bubbling up from rock face into mossy basin",
+      "context": "what comes from the source needs no filtering"
+    },
+    {
+      "visual": "mirror placed outdoors reflecting sky instead of the viewer",
+      "context": "seeing something larger than yourself when you look honestly"
+    },
+    {
+      "visual": "dawn light revealing landscape that was hidden in darkness all night",
+      "context": "what the light shows was always there"
+    }
+  ],
+  "devotion": [
+    {
+      "visual": "gardener tending same rose bush every morning for decades with worn kneeling pad",
+      "context": "love expressed through showing up daily"
+    },
+    {
+      "visual": "handmade prayer niche with fresh flowers replaced daily in home wall",
+      "context": "the sacred made from everyday ritual"
+    },
+    {
+      "visual": "lighthouse keeper climbing stairs to light the lamp at exact same time every dusk",
+      "context": "commitment that others depend on without knowing"
+    }
+  ],
+  "regret": [
+    {
+      "visual": "footprints leading to fork in road then stopping and turning back",
+      "context": "the path you chose not to take"
+    },
+    {
+      "visual": "flower pressed flat in old book discovered years later with faded color",
+      "context": "beauty preserved but no longer alive"
+    },
+    {
+      "visual": "unsent letter yellowed in desk drawer with stamp never affixed",
+      "context": "words that waited too long"
+    }
+  ],
+  "support": [
+    {
+      "visual": "hand reaching down from above to pull another up steep rocky trail",
+      "context": "help from someone already above"
+    },
+    {
+      "visual": "stake and string gently holding young tomato plant upright in garden",
+      "context": "structure that enables growth not confines it"
+    },
+    {
+      "visual": "bookend holding up row of leaning books on wooden shelf",
+      "context": "the quiet thing that keeps everything standing"
+    }
+  ]
+}
