@@ -515,7 +515,6 @@
       "context": "purity and life"
     }
   ],
-
   "self_worth": [
     {
       "visual": "uncut diamond resting on dark velvet cloth catching single beam of light",
@@ -644,6 +643,10 @@
     {
       "visual": "worn garden bench with two different book impressions left on its seat",
       "context": "comfortable silence between close souls"
+    },
+    {
+      "visual": "Irish ring",
+      "context": "Claddagh ring in Mumbai"
     }
   ],
   "boundaries": [
@@ -2446,6 +2449,30 @@
     {
       "visual": "bookend holding up row of leaning books on wooden shelf",
       "context": "the quiet thing that keeps everything standing"
+    }
+  ],
+  "general": [
+    {
+      "visual": "large suburb",
+      "context": "Chembur in Mumbai"
+    }
+  ],
+  "good_morning": [
+    {
+      "visual": "solar deity",
+      "context": "Surya in Mumbai"
+    },
+    {
+      "visual": "principal deities",
+      "context": "Shiva in Mumbai"
+    },
+    {
+      "visual": "major deity",
+      "context": "Krishna in Mumbai"
+    },
+    {
+      "visual": "eighth avatar",
+      "context": "Krishna in Mumbai"
     }
   ]
 }

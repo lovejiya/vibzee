@@ -163,6 +163,36 @@ def call_gemini(menu: str) -> dict:
     return json.loads(response.text)
 
 
+def translate_quote_to_english(quote: str, language: str) -> str:
+    """Translate quote to English using Gemini if language is not English."""
+    if not quote or language.lower() in ("english", "en"):
+        return quote
+
+    if not GEMINI_API_KEY:
+        return quote
+
+    prompt = f"Translate the following {language} quote into a clear, natural English sentence. Return only the translated English quote text, nothing else:\n\n{quote}"
+
+    try:
+        from google import genai
+        client = genai.Client(api_key=GEMINI_API_KEY)
+        resp = client.models.generate_content(model=GEMINI_MODEL, contents=prompt)
+        text = resp.text.strip().strip('"\'')
+        return text if text else quote
+    except Exception:
+        pass
+
+    try:
+        import google.generativeai as genai
+        genai.configure(api_key=GEMINI_API_KEY)
+        m = genai.GenerativeModel(GEMINI_MODEL)
+        resp = m.generate_content(prompt)
+        text = resp.text.strip().strip('"\'')
+        return text if text else quote
+    except Exception:
+        return quote
+
+
 def build_master_prompt(selections, candidates, location_details, photo_ratio) -> MasterPrompt:
     """Build MasterPrompt from Gemini's selections."""
     domain = selections.get("selected_domain", "PHOTOREALISTIC")
@@ -195,7 +225,7 @@ def build_master_prompt(selections, candidates, location_details, photo_ratio) -
         subject=subject,
         scene=scene,
         style=DOMAIN_PROFILES.get(domain, DOMAIN_PROFILES["PHOTOREALISTIC"])["style_text"],
-        lighting="",
+
         composition=LAYOUT_PROFILES.get(layout, LAYOUT_PROFILES["RB-V"])["gemini_guidance"],
         empty_space=empty_space,
         details=details,
@@ -211,11 +241,8 @@ def build_master_prompt(selections, candidates, location_details, photo_ratio) -
     )
 
 
-def verify_word_count(prompt: MasterPrompt, max_words=195) -> MasterPrompt:
-    """Check word count. Trim if over (rare, since Gemini has limits)."""
-    words = prompt.full_prompt.split()
-    if len(words) > max_words:
-        prompt.full_prompt = " ".join(words[:max_words])
+def verify_word_count(prompt: MasterPrompt) -> MasterPrompt:
+    """No-op — word count limit removed (DALL-E 3 via ChatGPT handles long prompts)."""
     return prompt
 
 
@@ -242,7 +269,7 @@ def fallback(candidates, context, location_details, photo_ratio) -> MasterPrompt
     # Scene description only — no composition/positioning language (matches the
     # scene-description contract used for the Gemini path).
     parts = [
-        "4:5 portrait image, high resolution.",
+        f"{photo_ratio} portrait image, high resolution.",
         f"{subject}." if subject else "",
         f"{scene}." if scene else "",
         f"{detail_text}." if detail_text else "",
@@ -250,7 +277,6 @@ def fallback(candidates, context, location_details, photo_ratio) -> MasterPrompt
         f"No text, no watermarks. {DOMAIN_PROFILES[domain]['avoid_text']}",
     ]
     full_prompt = " ".join(p for p in parts if p)
-    full_prompt = verify_word_count(MasterPrompt(full_prompt=full_prompt)).full_prompt
 
     return MasterPrompt(
         image_type_format="4:5 portrait image, high resolution",
@@ -288,6 +314,14 @@ def _filter_recent(options, used, keep_min):
 
 
 def load_recent() -> list:
+    try:
+        from logs.logger import cloud_load_recent
+        cloud_data = cloud_load_recent()
+        if cloud_data:
+            return cloud_data
+    except Exception:
+        pass
+
     path = Path(RECENT_RUNS_PATH)
     if path.exists():
         try:
@@ -298,14 +332,22 @@ def load_recent() -> list:
 
 
 def save_recent(prompt: MasterPrompt):
-    recent = load_recent()
-    recent.append({
+    entry = {
         "date": str(datetime.now()),
         "metaphor": prompt.metaphor_used,
         "domain": prompt.visual_domain,
         "layout": prompt.layout_id,
         "approach": prompt.photo_approach,
-    })
+    }
+
+    try:
+        from logs.logger import cloud_save_recent
+        cloud_save_recent(entry)
+    except Exception:
+        pass
+
+    recent = load_recent()
+    recent.append(entry)
     recent = recent[-30:]
     try:
         Path(RECENT_RUNS_PATH).parent.mkdir(parents=True, exist_ok=True)

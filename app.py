@@ -3,13 +3,11 @@ app.py — Vibzee Image Prompt Generator UI.
 Built with Flask (zero external GUI setup needed). Run directly with: python3 app.py
 """
 from datetime import datetime
-import html
 import json
-import random
-import webbrowser
-from flask import Flask, request, render_template_string
+from flask import Flask, request, render_template_string, jsonify
 
 from specs import LOCATIONS, QUOTES, MasterPrompt
+from panchange_engine import REGIONAL_PROFILES, get_coordinator
 import sources
 import generator
 
@@ -32,6 +30,46 @@ def classify_time(hour: int) -> str:
     if hour < 20:
         return "dusk"
     return "night"
+
+
+def run_pipeline(quote_input, location, date, time_of_day, photo_ratio, language="English", regional_profile: str = None):
+    """Run the full generation pipeline and log the result."""
+    translated_en_quote = ""
+    if language.lower() not in ("english", "en"):
+        translated_en_quote = generator.translate_quote_to_english(quote_input, language)
+
+    ctx = sources.enrich_context(
+        quote=quote_input,
+        location=location,
+        date=date,
+        time_of_day=time_of_day,
+        language=language,
+        translated_en_quote=translated_en_quote,
+        regional_profile=regional_profile,
+    )
+    candidates = sources.run_knowledge_chain(context=ctx, location=location)
+    loc_details = sources.discover_location_details(location)
+
+    prompt = generator.generate(
+        candidates=candidates,
+        context=ctx,
+        location_details=loc_details,
+        photo_ratio=photo_ratio,
+        location=location,
+    )
+
+    try:
+        from logs.logger import get_next_run_id, record_run_log, build_run_log
+        run_id = get_next_run_id()
+        log_body = build_run_log(
+            quote_input, location, photo_ratio, time_of_day,
+            ctx, candidates, loc_details, prompt,
+        )
+        record_run_log(run_id, date, log_body)
+    except Exception:
+        pass
+
+    return ctx, candidates, loc_details, prompt
 
 
 HTML_TEMPLATE = """
@@ -95,6 +133,36 @@ HTML_TEMPLATE = """
         </div>
       </div>
 
+      <div class="grid" style="margin-top: 10px;">
+        <div>
+          <label>Date</label>
+          <input type="date" name="date" value="{{ selected_date }}">
+        </div>
+        <div>
+          <label>Time</label>
+          <input type="time" name="time" value="{{ selected_time }}">
+        </div>
+      </div>
+
+      <div style="margin-top: 10px;">
+        <label>Quote Language</label>
+        <select name="language">
+          {% for lang in ["English", "Hindi", "Sanskrit", "Marathi", "Gujarati", "Bengali", "Tamil", "Telugu", "Kannada", "Punjabi", "Spanish", "French", "Japanese"] %}
+            <option value="{{ lang }}" {% if selected_lang == lang %}selected{% endif %}>{{ lang }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div style="margin-top: 10px;">
+        <label>Regional Calendar Profile</label>
+        <select name="regional_profile">
+          <option value="" {% if not selected_profile %}selected{% endif %}>Auto (Inferred by Location/Language)</option>
+          {% for pid, prof in regional_profiles.items() %}
+            <option value="{{ pid }}" {% if selected_profile == pid %}selected{% endif %}>{{ prof.display_name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
       <label>Choose Quote from Default Pool</label>
       <select name="preset_quote" onchange="document.getElementById('custom_quote').value = this.value">
         {% for q in quotes %}
@@ -114,9 +182,11 @@ HTML_TEMPLATE = """
   <div class="stage">
     <h2>Stage 2: Variables Chosen</h2>
     <p>
+      <span class="badge">Language: {{ selected_lang }}</span>
       <span class="badge">Location: {{ locations[selected_loc].name }}</span>
       <span class="badge">Ratio: {{ selected_ratio }}</span>
-      <span class="badge">Time of Day: {{ time_of_day }}</span>
+      <span class="badge">Date: {{ selected_date }}</span>
+      <span class="badge">Time: {{ selected_time }} ({{ time_of_day }})</span>
     </p>
     <p><strong>Quote Selected:</strong></p>
     <blockquote>{{ quote_input }}</blockquote>
@@ -131,6 +201,16 @@ HTML_TEMPLATE = """
       <span class="badge">Metaphor: {{ prompt.metaphor_used }}</span>
     </p>
     <p><strong>Weather:</strong> {{ ctx.weather.condition }}, {{ ctx.weather.temp }}°C | <strong>Festival:</strong> {{ ctx.festival or 'None' }}</p>
+    {% if ctx.panchang_details %}
+    <div style="margin: 10px 0; padding: 10px 14px; background: #f8fafc; border-radius: 6px; border: 1px solid #e2e8f0; font-size: 0.9em; line-height: 1.5;">
+      <p style="margin: 0 0 4px 0;"><strong>🗓 Regional Calendar:</strong> {{ ctx.panchang_details.astronomical_panchang.regional_calendar.regional_date_string }}</p>
+      <p style="margin: 0 0 4px 0;"><strong>✨ Panchang:</strong> Tithi: {{ ctx.panchang_details.astronomical_panchang.tithi.udaya_tithi }} | Nakshatra: {{ ctx.panchang_details.astronomical_panchang.nakshatra.udaya_nakshatra }} | Yoga: {{ ctx.panchang_details.astronomical_panchang.yoga.yoga_name }} | Karana: {{ ctx.panchang_details.astronomical_panchang.karana.current_karana }}</p>
+      <p style="margin: 0 0 4px 0;"><strong>☀️ Sun & Timings:</strong> Sunrise: {{ ctx.panchang_details.astronomical_panchang.sun_moon_timings.sunrise }} | Sunset: {{ ctx.panchang_details.astronomical_panchang.sun_moon_timings.sunset }} | Rahu Kaal: {{ ctx.panchang_details.astronomical_panchang.muhurats.rahu_kalam }} | Abhijit: {{ ctx.panchang_details.astronomical_panchang.muhurats.abhijit_muhurta }}</p>
+      {% if ctx.panchang_details.festival_intelligence.active_festival %}
+        <p style="margin: 0; color: #b45309;"><strong>🎉 Observance:</strong> {{ ctx.panchang_details.festival_intelligence.active_festival }} ({{ ctx.panchang_details.festival_intelligence.classification }})</p>
+      {% endif %}
+    </div>
+    {% endif %}
     <p><strong>Reasoning:</strong> {{ prompt.gemini_selections.reasoning or 'N/A' }}</p>
   </div>
 
@@ -151,48 +231,98 @@ HTML_TEMPLATE = """
 
 @app.route("/", methods=["GET", "POST"])
 def index():
+    now = datetime.now()
     selected_loc = "mumbai"
     selected_ratio = "1:1"
+    selected_lang = "English"
+    selected_profile = ""
+    selected_date = now.strftime("%Y-%m-%d")
+    selected_time = now.strftime("%H:%M")
     quote_input = QUOTES[0]
     prompt = None
     ctx = None
-    time_of_day = classify_time(datetime.now().hour)
+    time_of_day = classify_time(now.hour)
 
     if request.method == "POST":
         selected_loc = request.form.get("location_key", "mumbai")
         selected_ratio = request.form.get("photo_ratio", "1:1")
+        selected_lang = request.form.get("language", "English")
+        selected_profile = request.form.get("regional_profile", "").strip()
+        selected_date = request.form.get("date", selected_date)
+        selected_time = request.form.get("time", selected_time)
         custom = request.form.get("custom_quote", "").strip()
         quote_input = custom if custom else request.form.get("preset_quote", QUOTES[0])
 
         location = LOCATIONS[selected_loc]
-        date = datetime.now()
-        time_of_day = classify_time(date.hour)
+        try:
+            dt = datetime.strptime(f"{selected_date} {selected_time}", "%Y-%m-%d %H:%M")
+        except Exception:
+            dt = datetime.now()
+        time_of_day = classify_time(dt.hour)
 
-        ctx = sources.enrich_context(
-            quote=quote_input, location=location, date=date, time_of_day=time_of_day
-        )
-        candidates = sources.run_knowledge_chain(context=ctx, location=location)
-        loc_details = sources.discover_location_details(location)
-
-        prompt = generator.generate(
-            candidates=candidates,
-            context=ctx,
-            location_details=loc_details,
-            photo_ratio=selected_ratio,
-            location=location,
+        ctx, candidates, loc_details, prompt = run_pipeline(
+            quote_input, location, dt, time_of_day, selected_ratio,
+            language=selected_lang, regional_profile=selected_profile or None
         )
 
     return render_template_string(
         HTML_TEMPLATE,
         locations=LOCATIONS,
         quotes=QUOTES,
+        regional_profiles=REGIONAL_PROFILES,
         selected_loc=selected_loc,
         selected_ratio=selected_ratio,
+        selected_lang=selected_lang,
+        selected_profile=selected_profile,
+        selected_date=selected_date,
+        selected_time=selected_time,
         quote_input=quote_input,
         time_of_day=time_of_day,
         prompt=prompt,
         ctx=ctx,
     )
+
+
+@app.route("/api/panchang", methods=["GET"])
+def api_panchang():
+    """
+    Direct JSON endpoint for querying dual-branch dynamic Panchang.
+    Query parameters:
+      - date: YYYY-MM-DD (defaults to today)
+      - location: location key (e.g. mumbai, varanasi) or lat/lon
+      - profile: regional profile id (e.g. maharashtra, gujarat, tamil_nadu)
+      - language: language name (e.g. English, Hindi, Marathi)
+      - tradition: Smartha or Vaishnava
+    """
+    date_str = request.args.get("date", datetime.now().strftime("%Y-%m-%d"))
+    loc_key = request.args.get("location", "mumbai").lower()
+    profile_id = request.args.get("profile")
+    language = request.args.get("language", "English")
+    tradition = request.args.get("tradition", "Smartha")
+
+    loc = LOCATIONS.get(loc_key, LOCATIONS["mumbai"])
+    try:
+        lat = float(request.args.get("lat", loc["lat"]))
+        lon = float(request.args.get("lon", loc["lon"]))
+    except ValueError:
+        lat, lon = loc["lat"], loc["lon"]
+
+    try:
+        target_d = datetime.strptime(date_str, "%Y-%m-%d").date()
+    except Exception:
+        target_d = datetime.now().date()
+
+    coord = get_coordinator()
+    res = coord.calculate_panchang(
+        target_date=target_d,
+        lat=lat,
+        lon=lon,
+        location_name=loc.get("name"),
+        regional_profile_id=profile_id,
+        language=language,
+        tradition=tradition,
+    )
+    return jsonify(res)
 
 
 if __name__ == "__main__":

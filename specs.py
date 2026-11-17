@@ -66,7 +66,7 @@ class Context(BaseModel):
     quote: str = ""                     # original quote text
     visual_imagery: list = []           # quote's own concrete visual words
     visual_richness_score: int = 0      # count of visual words in quote
-    quote_festival: Optional[str] = None  # festival detected from quote text
+    panchang_details: Optional[dict] = None  # Full dual-engine dynamic panchang & festival results
 
 
 class PreparedCandidate(BaseModel):
@@ -98,7 +98,6 @@ class MasterPrompt(BaseModel):
     subject: str = ""
     scene: str = ""
     style: str = ""
-    lighting: str = ""
     composition: str = ""
     empty_space: str = ""
     details: str = ""
@@ -139,8 +138,10 @@ HTTP_USER_AGENT = "VibzeePromptGenerator/1.0 (image-prompt-research)"
 # ═══════════════════════════════════════════════════
 
 LOCATIONS = {
-    "mumbai": {"lat": 19.0760, "lon": 72.8777, "name": "Mumbai", "qid": "Q1156"},
-    "varanasi": {"lat": 25.3176, "lon": 83.0068, "name": "Varanasi", "qid": "Q22048"},
+    "mumbai": {"lat": 19.0760, "lon": 72.8777, "name": "Mumbai", "qid": "Q1156",
+               "subdist_qids": ["Q2341660", "Q2085374"]},
+    "varanasi": {"lat": 25.3176, "lon": 83.0068, "name": "Varanasi", "qid": "Q79980",
+                 "subdist_qids": []},
 }
 
 
@@ -160,10 +161,6 @@ DOMAIN_PROFILES = {
     "ANIME": {
         "style_text": "Anime art style, vibrant saturated colors, expressive dramatic lighting, dynamic composition, clean bold lines, painted backgrounds",
         "avoid_text": "no photorealism, no real human faces, no muted tones",
-    },
-    "GHIBLI": {
-        "style_text": "Studio Ghibli inspired, soft watercolor backgrounds, warm pastoral quality, gentle diffused light, detailed clouds, hand-painted feel",
-        "avoid_text": "no harsh lines, no photorealism, no dark themes, no sharp contrast",
     },
     "ILLUSTRATED": {
         "style_text": "Colorful illustrated style, bold clean outlines, warm cheerful tones, stylized simplified shapes, picture-book quality",
@@ -350,34 +347,10 @@ NONVISUAL_TOKENS = (
     "tribe", "community development block", "tehsil", "district", "municipality",
     "state of", "census", "human settlement", "administrative", "subdivision",
     "lok sabha", "assembly constituency", "demographics",
+    "neighborhood", "suburb", "railway station", "metro station",
+    "stock market index", "bombing", "attacks", "newspaper",
+    "school", "college", "university",
 )
-
-FALLBACK_LEXICON = {
-    "सुबह": "morning", "किरण": "ray", "नदी": "river", "सोना": "gold",
-    "प्रगति": "progress", "लक्ष्य": "goal", "पूर्णता": "perfection",
-    "आशा": "hope", "दीपक": "lamp", "अंधेरा": "darkness", "दीप": "lamp",
-    "बारिश": "rain", "हिम्मत": "courage", "विश्वास": "faith", "प्रेम": "love",
-    "प्रभु": "god", "कृपा": "grace", "वरदान": "blessing", "फूल": "flower",
-    "खुशबू": "fragrance", "पक्षी": "bird", "आवाज़": "sound", "सुंदरता": "beauty",
-    "जीवन": "life", "रोशनी": "light", "खुशी": "joy", "दीवाली": "diwali",
-    "प्रभात": "dawn", "शक्ति": "strength", "पेड़": "tree", "कमल": "lotus",
-    "मंदिर": "temple", "जल": "water", "पानी": "water", "आकाश": "sky",
-    "सवेरा": "morning", "उम्मीद": "hope", "खुशियाँ": "joy",
-    "परिस्थिति": "circumstance", "पल": "moment", "दिल": "heart",
-    "सुकून": "calm", "ईश्वर": "god", "आशीर्वाद": "blessing", "राह": "path",
-    "मन": "mind", "शांत": "calm", "दृश्य": "scene", "खास": "special",
-    "मुस्कुराइए": "smile", "गंगा": "river", "धारा": "flow", "शांति": "peace",
-    "सादगी": "simplicity", "दौलत": "wealth", "दुनिया": "world",
-    "चाँद": "moon", "अँधेरा": "darkness", "पहचान": "identity",
-    "बदलाव": "change", "शुरुआत": "beginning",
-    "रंग": "color", "रंगोली": "rangoli", "द्वार": "doorway", "घर": "home",
-    "मुस्कान": "smile", "अरमान": "aspiration", "त्योहार": "festival",
-    "दीपावली": "diwali", "दीया": "diya", "दीये": "diya", "दीप": "lamp",
-    "चिराग": "lamp", "लौ": "flame", "ज्योति": "flame", "प्रकाश": "light",
-    "तारा": "star", "सितारा": "star", "बगीचा": "garden", "झील": "lake",
-    "समुद्र": "ocean", "पहाड़": "mountain", "पत्ता": "leaf", "पंखुड़ी": "petal",
-    "किनारा": "shore", "सड़क": "road", "रास्ता": "path", "द्वार": "doorway",
-}
 
 
 # ═══════════════════════════════════════════════════
@@ -417,11 +390,12 @@ GENRE_TO_ARCHETYPE = {
     "Psychological": "introspective scene with layered shadow and light",
     "Sports": "dynamic figure in motion, energetic composition",
     "Tragedy": "solitary figure in muted, atmospheric distance",
+    "Romance": "two figures sharing a tender moment in warm light",
 }
 
 
 # ═══════════════════════════════════════════════════
-# SPARQL TEMPLATES (~9 query structures)
+# SPARQL TEMPLATES
 # ═══════════════════════════════════════════════════
 
 SPARQL_TEMPLATES = {
@@ -431,60 +405,105 @@ SPARQL_TEMPLATES = {
           SERVICE wikibase:label {{ bd:serviceParam wikibase:language "en,hi" }}
         }} LIMIT 10
     """,
-    "depicts_concept": """
-        SELECT ?object ?objectLabel WHERE {{
-          ?artwork wdt:P180 ?object .
-          ?artwork wdt:P180 wd:{concept_qid} .
-          SERVICE wikibase:label {{ bd:serviceParam wikibase:language "en,hi" }}
-        }} LIMIT 15
-    """,
-    "objects_at_location": """
-        SELECT ?item ?itemLabel ?itemDescription WHERE {{
-          ?item wdt:P131 wd:{location_qid} .
-          SERVICE wikibase:label {{ bd:serviceParam wikibase:language "en,hi" }}
-        }} LIMIT 20
-    """,
     "instance_of": """
         SELECT ?type ?typeLabel WHERE {{
           wd:{entity_qid} wdt:P31 ?type .
           SERVICE wikibase:label {{ bd:serviceParam wikibase:language "en" }}
         }} LIMIT 5
     """,
-    "hindu_religious_objects": """
-        SELECT ?item ?itemLabel WHERE {{
-          ?item wdt:P361 wd:Q9089 .
-          SERVICE wikibase:label {{ bd:serviceParam wikibase:language "en,hi" }}
-        }} LIMIT 20
-    """,
-    "mythological_figures": """
-        SELECT ?deity ?deityLabel ?deityDescription WHERE {{
-          {{ ?deity wdt:P31 wd:Q178885 }} UNION {{ ?deity wdt:P31 wd:Q4502142 }}
-          ?deity wdt:P361 wd:Q9089 .
-          SERVICE wikibase:label {{ bd:serviceParam wikibase:language "en,hi" }}
-        }} LIMIT 15
-    """,
-    "fictional_with_quality": """
-        SELECT ?char ?charLabel WHERE {{
-          ?char wdt:P31 wd:Q95074 .
-          ?char wdt:P1552 wd:{quality_qid} .
-          SERVICE wikibase:label {{ bd:serviceParam wikibase:language "en" }}
-        }} LIMIT 10
-    """,
-    "concept_search": """
-        SELECT ?item ?itemLabel ?itemDescription WHERE {{
-          ?item rdfs:label "{keyword}"@en .
-          SERVICE wikibase:label {{ bd:serviceParam wikibase:language "en" }}
-        }} LIMIT 5
-    """,
     "location_landmarks": """
-        SELECT ?item ?itemLabel WHERE {{
+        SELECT DISTINCT ?item ?itemLabel WHERE {{
           ?item wdt:P131 wd:{location_qid} .
-          {{ ?item wdt:P31 wd:Q570116 }} UNION
-          {{ ?item wdt:P31 wd:Q4989906 }} UNION
-          {{ ?item wdt:P31 wd:Q12518 }}
+          ?item wdt:P18 ?image .
           SERVICE wikibase:label {{ bd:serviceParam wikibase:language "en" }}
-        }} LIMIT 15
+        }} LIMIT 25
     """,
+    "location_landmarks_multi": """
+        SELECT DISTINCT ?item ?itemLabel WHERE {{
+          VALUES ?loc {{ wd:{location_qid} {subdist_values} }}
+          ?item wdt:P131 ?loc .
+          ?item wdt:P18 ?image .
+          SERVICE wikibase:label {{ bd:serviceParam wikibase:language "en" }}
+        }} LIMIT 80
+    """,
+    "batch_instance_of": """
+        SELECT ?entity ?entityLabel ?type ?typeLabel WHERE {{
+          VALUES ?entity {{ {entity_values} }}
+          ?entity wdt:P31 ?type .
+          SERVICE wikibase:label {{ bd:serviceParam wikibase:language "en" }}
+        }}
+    """,
+    "mythology_deities": """
+        SELECT DISTINCT ?deity ?deityLabel ?deityDescription WHERE {{
+          {{ ?deity wdt:P31/wdt:P279* wd:Q979507 }}
+          UNION {{ ?deity wdt:P361 wd:Q2176651 }}
+          UNION {{ ?deity wdt:P1049 wd:Q9089 }}
+          ?deity wdt:P18 ?image .
+          ?deity wikibase:sitelinks ?sl .
+          SERVICE wikibase:label {{ bd:serviceParam wikibase:language "en,hi,sa" }}
+        }} ORDER BY DESC(?sl) LIMIT 25
+    """,
+    "epic_characters": """
+        SELECT DISTINCT ?char ?charLabel ?charDescription WHERE {{
+          VALUES ?work {{ wd:{work_qid} }}
+          ?char wdt:P1441 ?work .
+          ?char wdt:P31 ?type .
+          VALUES ?type {{ wd:Q15773347 wd:Q4271324 wd:Q3658341 wd:Q13002315 wd:Q21070568 }}
+          SERVICE wikibase:label {{ bd:serviceParam wikibase:language "en" }}
+        }} LIMIT 30
+    """,
+}
+
+
+# ═══════════════════════════════════════════════════
+# MYTHOLOGY RELEVANCE SCORING (guides ranking of live SPARQL results)
+# ═══════════════════════════════════════════════════
+
+THEME_MYTHOLOGY_KEYWORDS = {
+    "friendship": ["sudama", "krishna", "hanuman", "companion", "bond", "devotee", "friend"],
+    "courage": ["hanuman", "arjuna", "durga", "warrior", "battle", "hero", "strength"],
+    "love": ["radha", "krishna", "parvati", "shiva", "romance", "beloved", "consort"],
+    "family": ["rama", "sita", "pandava", "brother", "mother", "father", "son"],
+    "devotion": ["hanuman", "rama", "prahlad", "devotee", "worship", "faith"],
+    "spiritual": ["shiva", "vishnu", "brahma", "meditation", "ascetic", "yogi"],
+    "motivation": ["arjuna", "krishna", "gita", "chariot", "battlefield", "victory"],
+    "peace": ["vishnu", "lakshmi", "saraswati", "lotus", "serene", "preserver"],
+    "nature": ["surya", "agni", "varuna", "indra", "river", "mountain", "rain"],
+    "festival": ["ganesha", "lakshmi", "durga", "celebration", "worship", "light"],
+    "good_morning": ["surya", "dawn", "light", "sun", "chariot", "radiance"],
+    "good_night": ["chandra", "moon", "star", "night", "rest", "dream"],
+    "birthday": ["ganesha", "krishna", "celebration", "birth", "joy", "blessing"],
+    "self_worth": ["durga", "shakti", "goddess", "power", "strength", "inner"],
+    "gratitude": ["lakshmi", "ganesha", "blessing", "abundance", "grace", "gift"],
+    "nostalgia": ["rama", "sita", "ayodhya", "memory", "return", "home"],
+    "general": ["vishnu", "shiva", "lakshmi", "ganesha"],
+}
+
+FESTIVAL_MYTHOLOGY_KEYWORDS = {
+    "ram navami": ["rama", "sita", "hanuman", "ayodhya", "bow", "prince"],
+    "janmashtami": ["krishna", "radha", "gopi", "flute", "butter", "mathura"],
+    "ganesh chaturthi": ["ganesha", "elephant", "obstacle", "modak", "mouse"],
+    "maha shivaratri": ["shiva", "parvati", "nandi", "trident", "lingam", "dance"],
+    "navaratri": ["durga", "lakshmi", "saraswati", "goddess", "lion", "nine"],
+    "navratri": ["durga", "lakshmi", "saraswati", "goddess", "lion", "nine"],
+    "diwali": ["lakshmi", "rama", "light", "lamp", "prosperity", "return"],
+    "deepawali": ["lakshmi", "rama", "light", "lamp", "prosperity", "return"],
+    "holi": ["krishna", "radha", "color", "spring", "love", "gulal"],
+    "makar sankranti": ["surya", "sun", "harvest", "kite", "chariot"],
+    "raksha bandhan": ["krishna", "draupadi", "brother", "sister", "protection"],
+    "karva chauth": ["shiva", "parvati", "moon", "devotion", "spouse"],
+    "guru purnima": ["vishnu", "guru", "knowledge", "full moon", "wisdom"],
+    "hanuman jayanti": ["hanuman", "rama", "strength", "devotion", "monkey"],
+    "krishna janmashtami": ["krishna", "radha", "gopi", "flute", "butter"],
+}
+
+THEME_TO_EPIC = {
+    "family": "Q180675",
+    "motivation": "Q180675",
+    "courage": "Q180675",
+    "love": "Q131130",
+    "devotion": "Q131130",
+    "friendship": "Q180675",
 }
 
 
@@ -501,11 +520,15 @@ You receive a MENU of pre-written text pieces. Your job:
 3. RESTRUCTURE selected pieces into a complete image generation prompt
 
 RULES:
-- You must NOT ADD any visual detail, object, color, texture not in the menu
-- You must NOT CHANGE the meaning of any phrase
-- You must NOT INVENT anything — every visual element must come from the menu
+- You may EXPAND and ENRICH the visual descriptions from the menu with vivid,
+  scene-appropriate details (colors, textures, lighting, materials, atmosphere).
+  The menu gives the SUBJECT and SETTING — you bring it to life with rich imagery.
+- You must NOT CHANGE the core meaning or subject of any selected piece
 - Never name specific copyrighted characters (say "anime-style warrior" not "Naruto")
-- Mythological figures (Hanuman, Surya, Agni) ARE allowed
+- Mythological figures (Hanuman, Surya, Agni, Krishna, Rama, etc.) ARE allowed
+  and should be described with their traditional iconographic details
+- If a candidate has minimal visual description, CREATE a vivid depiction
+  based on its name and cultural context — do not leave it bare
 FACE & FIGURE RULE:
 - Do NOT render realistic close-up human faces. 
 - Figures may appear as silhouettes, mid/long-distance forms, 
@@ -532,12 +555,12 @@ SELECTION GUIDELINES:
   Avoid metaphors and domains listed in "Recent (avoid)".
 - DOMAIN: Match the quote's emotion and theme authentically:
   * Determined/Heroic → ANIME
-  * Peaceful/Gentle/Cozy/Pastoral → GHIBLI
+  * Peaceful/Gentle/Cozy/Pastoral → ILLUSTRATED
   * Sacred/Spiritual/Timeless → MYTHOLOGICAL
   * Playful/Cheery/Poetic → ILLUSTRATED
   * Realistic/Reflective/Modern Everyday → PHOTOREALISTIC
-  * Warm/Friendly/Relatable/Everyday life → PHOTOREALISTIC or GHIBLI
-  * Loving/Family/Nostalgic → GHIBLI or PHOTOREALISTIC
+  * Warm/Friendly/Relatable/Everyday life → PHOTOREALISTIC or ILLUSTRATED
+  * Loving/Family/Nostalgic → ILLUSTRATED or PHOTOREALISTIC
   * Empowered/Self-worth/Growth → ANIME or PHOTOREALISTIC
   Avoid domains listed in Recent.
 - LAYOUT: Place the scene's visual weight OPPOSITE the empty corner.
@@ -600,7 +623,7 @@ EXAMPLE (for an English quote):
 RESPOND with JSON only:
 {
     "selected_metaphor_ids": ["id1"] or ["id1", "id2"],
-    "selected_domain": "PHOTOREALISTIC|MYTHOLOGICAL|ANIME|GHIBLI|ILLUSTRATED",
+    "selected_domain": "PHOTOREALISTIC|MYTHOLOGICAL|ANIME|ILLUSTRATED",
     "selected_layout": "LT-V|RT-V|LB-V|RB-V|LT-H|RT-H|LB-H|RB-H",
     "selected_approach": "1|2|3|4",
     "selected_details": ["D1", "D3"],

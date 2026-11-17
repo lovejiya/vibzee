@@ -1,205 +1,312 @@
 """
-logger.py — Dedicated logging utility for Vibzee.
+logger.py — Dedicated logging & cloud sync utility for Vibzee.
 
-Lives inside the logs/ folder. It runs the pipeline (or inspects existing pipeline data),
-captures all important function and API outputs (emotion, weather, panchang/tithi,
-knowledge graphs, Gemini selections, and final prompt), and saves them to run logs
-with an auto-incrementing run number and timestamp.
+Provides unified support for:
+1. Local disk logging & caching (when running on your computer)
+2. Upstash Redis cloud logging, caching, & recent runs (zero extra libraries needed; uses requests)
+3. Pulling remote Vercel logs/recent runs directly into your local machine
 """
-import io
+import json
+import os
 import re
 import sys
+import time
 from datetime import datetime
 from pathlib import Path
 
-# Add project root to sys.path so it can import app, sources, specs, generator cleanly
+# Add project root to sys.path
 ROOT_DIR = Path(__file__).resolve().parent.parent
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
-from specs import LOCATIONS, QUOTES, MasterPrompt
-import sources
-import generator
-import app
+import requests
 
 LOGS_DIR = Path(__file__).resolve().parent
+ALL_RUNS_FILE = LOGS_DIR / "all_runs.log"
+
+# Upstash REST credentials from environment
+UPSTASH_URL = os.getenv("UPSTASH_REDIS_REST_URL", "").rstrip("/")
+UPSTASH_TOKEN = os.getenv("UPSTASH_REDIS_REST_TOKEN", "")
 
 
-class LoggerWriter:
-    """Tees output to both terminal stdout and an in-memory buffer."""
-    def __init__(self, original_stdout):
-        self.terminal = original_stdout
-        self.buffer = io.StringIO()
+# ─────────────────────────────────────────────────────────────
+# 1. UPSTASH REST CLIENT (Lightweight, No extra pip dependencies)
+# ─────────────────────────────────────────────────────────────
 
-    def write(self, message):
-        self.terminal.write(message)
-        self.buffer.write(message)
-
-    def flush(self):
-        self.terminal.flush()
-
-    def get_log(self) -> str:
-        return self.buffer.getvalue()
-
-
-def _get_next_run_id() -> int:
-    """Determine the next incremental run number from all_runs.log."""
-    LOGS_DIR.mkdir(parents=True, exist_ok=True)
-    all_runs_file = LOGS_DIR / "all_runs.log"
-    if not all_runs_file.exists():
-        return 1
-
+def _redis_cmd(*args) -> any:
+    """Execute any Redis command via Upstash REST API using plain requests."""
+    if not UPSTASH_URL or not UPSTASH_TOKEN:
+        return None
     try:
-        content = all_runs_file.read_text(encoding="utf-8")
-        matches = re.findall(r"RUN #(\d+)", content)
-        if matches:
-            return max(int(m) for m in matches) + 1
+        url = f"{UPSTASH_URL}/" + "/".join(str(a) for a in args)
+        headers = {"Authorization": f"Bearer {UPSTASH_TOKEN}"}
+        resp = requests.get(url, headers=headers, timeout=3)
+        if resp.status_code == 200:
+            return resp.json().get("result")
     except Exception:
         pass
+    return None
+
+
+def _redis_post(cmd: list) -> any:
+    """Execute Redis command with JSON payload via POST (for complex/large values)."""
+    if not UPSTASH_URL or not UPSTASH_TOKEN:
+        return None
+    try:
+        headers = {
+            "Authorization": f"Bearer {UPSTASH_TOKEN}",
+            "Content-Type": "application/json",
+        }
+        resp = requests.post(f"{UPSTASH_URL}", headers=headers, json=cmd, timeout=3)
+        if resp.status_code == 200:
+            return resp.json().get("result")
+    except Exception:
+        pass
+    return None
+
+
+# ─────────────────────────────────────────────────────────────
+# 2. LOGGING (Local File + Upstash Cloud)
+# ─────────────────────────────────────────────────────────────
+
+
+def get_next_run_id() -> int:
+    """Determine the next incremental run number (checks local file first, then Redis)."""
+    LOGS_DIR.mkdir(parents=True, exist_ok=True)
+    if ALL_RUNS_FILE.exists():
+        try:
+            content = ALL_RUNS_FILE.read_text(encoding="utf-8")
+            matches = re.findall(r"RUN #(\d+)", content)
+            if matches:
+                return max(int(m) for m in matches) + 1
+        except Exception:
+            pass
+
+    # If local file is empty/on cloud, check Redis
+    cloud_len = _redis_cmd("llen", "vibzee:all_runs")
+    if cloud_len and isinstance(cloud_len, int):
+        return cloud_len + 1
     return 1
 
 
-def _save_run_log(run_id: int, timestamp: datetime, content: str):
-    """Save execution log into the single cumulative logs/all_runs.log file."""
-    LOGS_DIR.mkdir(parents=True, exist_ok=True)
+def record_run_log(run_id: int, timestamp: datetime, content: str):
+    """
+    Saves execution log:
+    - Locally to logs/all_runs.log (if local filesystem is writable)
+    - Remotely to Upstash Redis (key: 'vibzee:all_runs') so Vercel logs are captured
+    """
     header = f"RUN #{run_id:04d} | DATE & TIME: {timestamp.strftime('%Y-%m-%d %H:%M:%S')}\n"
     divider = "#" * 70 + "\n"
     full_entry = f"{divider}{header}{divider}\n{content}\n\n"
 
-    # Append strictly to the single master log file
-    with open(LOGS_DIR / "all_runs.log", "a", encoding="utf-8") as f:
-        f.write(full_entry)
-
-
-def log_run(quote: str = None, photo_ratio: str = "1:1", location_key: str = "mumbai") -> MasterPrompt:
-    """
-    Executes the Vibzee pipeline while extracting and printing the outputs of all
-    important functions (weather API, panchang, emotion NLP, knowledge graphs,
-    Gemini selection, final prompt) and persists everything to a log file.
-    """
-    run_id = _get_next_run_id()
-    start_time = datetime.now()
-
-    logger = LoggerWriter(sys.stdout)
-    sys.stdout = logger
-
+    # 1. Local disk write
     try:
-        location = LOCATIONS[location_key]
-        quote = quote or random.choice(QUOTES)
-        date = start_time
-        time_of_day = app.classify_time(date.hour)
+        LOGS_DIR.mkdir(parents=True, exist_ok=True)
+        with open(ALL_RUNS_FILE, "a", encoding="utf-8") as f:
+            f.write(full_entry)
+    except Exception:
+        pass
 
-        print(f"RUN ID: #{run_id:04d} | TIMESTAMP: {start_time.strftime('%Y-%m-%d %H:%M:%S')}")
-        print("-" * 60)
+    # 2. Upstash Cloud write (accessible from both Vercel & local)
+    _redis_post(["rpush", "vibzee:all_runs", full_entry])
 
-        # ── STAGE 1: CONTEXT ENRICHMENT & API OUTPUTS ──────
-        print("=" * 60)
-        print("STAGE 1: CONTEXT ENRICHMENT & API OUTPUTS")
-        print("=" * 60)
-        print(f"[Quote Input]\n  Hindi: \"{quote}\"")
 
-        context = sources.enrich_context(
-            quote=quote, location=location, date=date, time_of_day=time_of_day)
+# ─────────────────────────────────────────────────────────────
+# 3. LOG BODY BUILDER
+# ─────────────────────────────────────────────────────────────
 
-        print(f"  Key Terms: {context.quote_analysis.key_terms}")
-        print(f"  Theme: {context.quote_analysis.theme}")
-        print(f"  Translated Keywords: {context.en_keywords}")
-        print()
-        print(f"[API: Open-Meteo Weather]\n  Location: {location['name']} (Lat {location['lat']}, Lon {location['lon']})")
-        print(f"  Condition: {context.weather.get('condition')}")
-        print(f"  Temperature: {context.weather.get('temp')}°C | Humidity: {context.weather.get('humidity')}%")
-        print()
-        print(f"[Panchang Calendar Context]\n  Date: {date.strftime('%Y-%m-%d')}")
-        print(f"  Festival & Lunar Tithi: {context.festival or 'None'}")
-        print()
-        print(f"[Emotion Detection (NLP + WordNet)]\n  Primary Emotion: {context.emotion.get('primary')}")
-        print(f"  Sentiment: {context.emotion.get('sentiment')} | Score: {context.emotion.get('score')}")
-        print()
+def build_run_log(quote, location, ratio, time_of_day, ctx, candidates, loc_details, prompt):
+    """Build a comprehensive log capturing every pipeline stage."""
+    sep = "=" * 60
+    sub = "-" * 40
 
-        # ── STAGE 2: KNOWLEDGE GRAPH & DISCOVERY API OUTPUTS ──────
-        print("=" * 60)
-        print("STAGE 2: KNOWLEDGE GRAPH & DISCOVERY API OUTPUTS")
-        print("=" * 60)
-        candidates = sources.run_knowledge_chain(context=context, location=location)
-        location_details = sources.discover_location_details(location)
-
-        print(f"[Knowledge Chain & Metaphors Summary]")
-        print(f"  Total Candidates Prepared: {len(candidates.pool)}")
-        cultural_candidates = [c for c in candidates.pool if c.cultural]
-        print(f"  Cultural Metaphor Matches: {len(cultural_candidates)}")
-        for c in cultural_candidates[:3]:
-            print(f"    - \"{c.name}\" ({c.scene_text})")
-        if candidates.pool:
-            sample = candidates.pool[0]
-            print(f"  Sample Candidate: [{sample.id}] \"{sample.name}\" ({sample.domain})")
-            print(f"    Subject: \"{sample.subject_text}\"")
-            print(f"    Scene: \"{sample.scene_text}\"")
-        print(f"  Location Details Discovered: {len(location_details)}")
-        for d in location_details[:3]:
-            print(f"    - [{d['id']}] {d['text']} (from {d['source']})")
-        print()
-
-        # ── STAGE 3: GEMINI LLM API OUTPUT & FINAL SELECTIONS ──────
-        print("=" * 60)
-        print("STAGE 3: GEMINI LLM API OUTPUT & FINAL SELECTIONS")
-        print("=" * 60)
-        prompt = generator.generate(
-            candidates=candidates,
-            context=context,
-            location_details=location_details,
-            photo_ratio=photo_ratio,
-            location=location,
+    qa = ctx.quote_analysis
+    lines = [
+        sep,
+        "STAGE 1: CONTEXT ENRICHMENT",
+        sep,
+        "[Quote Input]",
+        f'  Text: "{quote}"',
+        f"  Key Terms: {qa.key_terms}",
+        f"  Nouns: {qa.nouns}",
+        f"  Theme: {qa.theme}",
+        f"  Has Concrete Nouns: {qa.has_concrete}",
+        f"  Translated Keywords: {ctx.en_keywords}",
+        "",
+        "[Weather — Open-Meteo]",
+        f"  Location: {location['name']} (Lat {location['lat']}, Lon {location['lon']})",
+        f"  Condition: {ctx.weather.get('condition')}",
+        f"  Temperature: {ctx.weather.get('temp')}°C | Humidity: {ctx.weather.get('humidity')}%",
+        "",
+        "[Panchang]",
+        f"  Festival/Tithi: {ctx.festival or 'None'}",
+        *(
+            [
+                f"  Regional Calendar: {ctx.panchang_details.get('astronomical_panchang', {}).get('regional_calendar', {}).get('regional_date_string', '')}",
+                f"  Sunrise: {ctx.panchang_details.get('astronomical_panchang', {}).get('sun_moon_timings', {}).get('sunrise', '')} | Sunset: {ctx.panchang_details.get('astronomical_panchang', {}).get('sun_moon_timings', {}).get('sunset', '')} | Rahu Kaal: {ctx.panchang_details.get('astronomical_panchang', {}).get('muhurats', {}).get('rahu_kalam', '')}",
+            ]
+            if getattr(ctx, "panchang_details", None)
+            else []
+        ),
+        "",
+        "[Emotion Detection]",
+        f"  Primary: {ctx.emotion.get('primary')}",
+        f"  Sentiment: {ctx.emotion.get('sentiment')} | Score: {ctx.emotion.get('score')}",
+        "",
+        "[Visual Imagery from Quote]",
+        f"  Richness Score: {ctx.visual_richness_score}",
+        f"  Items: {ctx.visual_imagery}",
+        "",
+        sep,
+        "STAGE 2: KNOWLEDGE CHAIN & CANDIDATES",
+        sep,
+        f"Total Candidates: {len(candidates.pool)}",
+        f"Quote-Native: {sum(1 for c in candidates.pool if c.quote_native)}",
+        "",
+    ]
+    for c in candidates.pool:
+        lines.append(
+            f'  [{c.id}] "{c.name}" domain={c.domain} '
+            f"groundable={c.groundable} cultural={c.cultural} "
+            f"chains={c.chain_sources}"
         )
+        lines.append(f'    subject: "{c.subject_text}"')
+        lines.append(f'    scene: "{c.scene_text}"')
+        lines.append(f"    visual_phrases: {c.visual_phrases}")
 
-        selections = prompt.gemini_selections
-        print(f"[API: Google Gemini ({generator.GEMINI_MODEL})]")
-        print(f"  Selected Metaphor IDs: {selections.get('selected_metaphor_ids', prompt.metaphor_used)}")
-        print(f"  Selected Visual Domain: {prompt.visual_domain}")
-        print(f"  Selected Layout: {prompt.layout_id}")
-        print(f"  Selected Approach: {prompt.photo_approach}")
-        print(f"  Selected Details: {selections.get('selected_details', [])}")
-        print()
-        print(f"[Gemini Reasoning]\n  {selections.get('reasoning', 'N/A')}")
-        print()
+    lines += [
+        "",
+        f"[Location Details Discovered: {len(loc_details)}]",
+    ]
+    for d in loc_details:
+        lines.append(f'  [{d["id"]}] "{d["text"]}" (from {d["source"]})')
 
-        # ── STAGE 4: FINAL MASTER PROMPT ──────
-        print("=" * 60)
-        print("STAGE 4: FINAL MASTER PROMPT")
-        print("=" * 60)
-        print("FLUX PROMPT:")
-        print("-" * 40)
-        print(prompt.full_prompt)
-        print()
-        print(f"Layout: {prompt.layout_id}")
-        print(f"Domain: {prompt.visual_domain}")
-        print(f"Photo approach: {prompt.photo_approach}")
-        print(f"Metaphor: {prompt.metaphor_used}")
-        print(f"Word count: {len(prompt.full_prompt.split())}")
-        print("=" * 60)
+    sel = prompt.gemini_selections
+    lines += [
+        "",
+        sep,
+        "STAGE 3: GEMINI LLM SELECTIONS",
+        sep,
+        f"Selected Metaphor IDs: {sel.get('selected_metaphor_ids', 'N/A')}",
+        f"Selected Domain: {sel.get('selected_domain', 'N/A')}",
+        f"Selected Layout: {sel.get('selected_layout', 'N/A')}",
+        f"Selected Approach: {sel.get('selected_approach', 'N/A')}",
+        f"Selected Details: {sel.get('selected_details', 'N/A')}",
+        f"Fallback Used: {sel.get('fallback', False)}",
+        f"Error: {sel.get('error', 'None')}",
+        "",
+        "[Reasoning]",
+        f"  {sel.get('reasoning', 'N/A')}",
+    ]
 
-        output_log = logger.get_log()
-        _save_run_log(run_id, start_time, output_log)
-        print(f"\n[Log Saved] Run #{run_id:04d} appended to logs/all_runs.log\n")
+    word_count = len(prompt.full_prompt.split())
+    lines += [
+        "",
+        sep,
+        "STAGE 4: FINAL PROMPT",
+        sep,
+        f"Domain: {prompt.visual_domain}",
+        f"Layout: {prompt.layout_id} | Approach: {prompt.photo_approach}",
+        f"Ratio: {ratio} | Metaphor: {prompt.metaphor_used}",
+        f"Word Count: {word_count}",
+        "",
+        "[Subject]",
+        f"  {prompt.subject}",
+        "[Scene]",
+        f"  {prompt.scene}",
+        "[Style]",
+        f"  {prompt.style}",
+        "[Composition]",
+        f"  {prompt.composition}",
+        "[Empty Space]",
+        f"  {prompt.empty_space}",
+        "[Details]",
+        f"  {prompt.details}",
+        "[Avoid]",
+        f"  {prompt.avoid}",
+        "",
+        sub,
+        "DALL-E PROMPT:",
+        sub,
+        prompt.full_prompt,
+        sep,
+    ]
 
-        return prompt
+    return "\n".join(lines)
 
-    finally:
-        sys.stdout = logger.terminal
+
+# ─────────────────────────────────────────────────────────────
+# 4. RECENT RUNS (Shared across Vercel & Local)
+# ─────────────────────────────────────────────────────────────
+
+def cloud_load_recent() -> list:
+    """Load recent runs from Upstash Redis, or fallback to empty list."""
+    res = _redis_cmd("get", "vibzee:recent_runs")
+    if res:
+        try:
+            return json.loads(res)
+        except Exception:
+            pass
+    return []
+
+
+def cloud_save_recent(entry: dict):
+    """Append a recent run to Upstash Redis (keeps last 30 runs)."""
+    recent = cloud_load_recent()
+    recent.append(entry)
+    recent = recent[-30:]
+    _redis_post(["set", "vibzee:recent_runs", json.dumps(recent, ensure_ascii=False)])
+
+
+# ─────────────────────────────────────────────────────────────
+# 4. CACHE (Shared across Vercel & Local)
+# ─────────────────────────────────────────────────────────────
+
+def cloud_load_cache(key: str):
+    """Fetch cached data from Upstash Redis."""
+    res = _redis_cmd("get", f"vibzee:cache:{key}")
+    if res:
+        try:
+            return json.loads(res)
+        except Exception:
+            pass
+    return None
+
+
+def cloud_save_cache(key: str, data, ttl_seconds: int = 86400):
+    """Save cached data into Upstash Redis with expiration TTL."""
+    payload = json.dumps(data, default=str, ensure_ascii=False)
+    _redis_post(["setex", f"vibzee:cache:{key}", ttl_seconds, payload])
+
+
+# ─────────────────────────────────────────────────────────────
+# 5. SYNC COMMAND: Pull all Vercel logs into your local file
+# ─────────────────────────────────────────────────────────────
+
+def pull_logs_from_cloud():
+    """
+    Downloads all run logs stored in Upstash Redis and writes them to
+    your local logs/all_runs.log file.
+    """
+    logs = _redis_post(["lrange", "vibzee:all_runs", 0, -1])
+    if not logs or not isinstance(logs, list):
+        print("No remote logs found in Upstash Redis.")
+        return
+
+    LOGS_DIR.mkdir(parents=True, exist_ok=True)
+    with open(ALL_RUNS_FILE, "w", encoding="utf-8") as f:
+        for entry in logs:
+            f.write(entry)
+    print(f"✓ Successfully synced {len(logs)} run logs into: {ALL_RUNS_FILE}")
 
 
 if __name__ == "__main__":
-    print("Vibzee Logging Runner")
-    print("-" * 40)
+    import argparse
+    parser = argparse.ArgumentParser(description="Vibzee Logger & Cloud Sync")
+    parser.add_argument("--sync", action="store_true", help="Pull logs from Upstash Redis to local file")
+    args = parser.parse_args()
 
-    user_input = input("Enter quote (or number 1-10, or Enter for random): ").strip()
-
-    if user_input.isdigit() and 1 <= int(user_input) <= len(QUOTES):
-        quote = QUOTES[int(user_input) - 1]
-    elif user_input:
-        quote = user_input
+    if args.sync:
+        pull_logs_from_cloud()
     else:
-        quote = None
-
-    ratio = input("Photo ratio (1:1 / 2:3 / 4:3) [default 1:1]: ").strip() or "1:1"
-
-    log_run(quote=quote, photo_ratio=ratio)
+        print("Vibzee Logger loaded. Run with --sync to pull logs from Vercel/Upstash.")

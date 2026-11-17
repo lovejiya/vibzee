@@ -20,7 +20,8 @@ import requests
 
 from specs import (
     SPARQL_TEMPLATES, EMOTION_SEEDS, EMOTION_TO_GENRE, GENRE_TO_ARCHETYPE,
-    EMOTION_CONCEPTS, THEME_HINTS, ENGLISH_STOPWORDS, NONVISUAL_TOKENS, FALLBACK_LEXICON,
+    EMOTION_CONCEPTS, THEME_HINTS, ENGLISH_STOPWORDS, NONVISUAL_TOKENS,
+    THEME_MYTHOLOGY_KEYWORDS, FESTIVAL_MYTHOLOGY_KEYWORDS, THEME_TO_EPIC,
     PreparedCandidate, QuoteAnalysis, Context, CandidatePool,
     PANCHANG_PATH, CULTURAL_METAPHORS_PATH,
     OPEN_METEO_URL, WIKIDATA_SPARQL_URL, DBPEDIA_SPARQL_URL,
@@ -51,32 +52,6 @@ def _get_expanded_emotion_seeds() -> dict:
 _models: dict = {}
 
 
-def _get_stanza():
-    """Lazy-load the Stanza Hindi pipeline. Returns None if unavailable."""
-    if "stanza" not in _models:
-        try:
-            import stanza
-            _models["stanza"] = stanza.Pipeline(
-                "hi", processors="tokenize,pos,lemma,depparse",
-                download_method=None, verbose=False,
-            )
-        except Exception:
-            _models["stanza"] = None
-    return _models["stanza"]
-
-
-def _get_translator():
-    """Lazy-load IndicTrans2 (indictranstoolkit). Returns None if unavailable."""
-    if "translator" not in _models:
-        try:
-            # IndicTrans2 loading differs across toolkit versions; wrap defensively.
-            from IndicTransToolkit import IndicProcessor  # noqa: F401
-            # Model wiring is left to the environment's installed toolkit build.
-            _models["translator"] = None
-        except Exception:
-            _models["translator"] = None
-    return _models["translator"]
-
 
 def _get_wordnet():
     """Lazy-load NLTK WordNet. Returns None if unavailable."""
@@ -102,25 +77,39 @@ def _session() -> requests.Session:
 # CONTEXT ENRICHMENT
 # ═══════════════════════════════════════════════════
 
-def enrich_context(quote, location, date, time_of_day) -> Context:
+def enrich_context(quote, location, date, time_of_day, language: str = "English", translated_en_quote: str = "", regional_profile: str = None) -> Context:
     """Gather all context data. Called by app.py Step 1."""
     weather = get_weather(location["lat"], location["lon"])
-    festival = get_festival(date)
-    quote_analysis = analyze_quote(quote)
+    panchang_data = get_full_panchang(date, location=location, regional_profile=regional_profile, language=language)
+    festival = None
+    if panchang_data:
+        fest_name = panchang_data.get("festival_intelligence", {}).get("active_festival")
+        t_dict = panchang_data.get("astronomical_panchang", {}).get("tithi", {})
+        udaya_t = t_dict.get("udaya_tithi")
+        p_name = t_dict.get("paksha")
+        t_str = f"{udaya_t} ({p_name} Paksha)" if udaya_t and p_name else (udaya_t or "")
+        if fest_name and t_str:
+            festival = f"{fest_name} [{t_str}]"
+        elif fest_name:
+            festival = fest_name
+        elif t_str:
+            festival = t_str
+    else:
+        festival = get_festival(date, location=location, regional_profile=regional_profile, language=language)
+
+    analysis_quote = translated_en_quote if translated_en_quote else quote
+    quote_analysis = analyze_quote(analysis_quote)
     en_keywords = translate_hi_to_en(quote_analysis.key_terms)
     emotion = detect_emotion(quote_analysis, en_keywords=en_keywords)
 
     visual_imagery = extract_visual_imagery(quote_analysis, en_keywords)
-    quote_festival = detect_quote_festival(quote, quote_analysis.tokens)
-    if quote_festival:
-        festival = quote_festival
 
     return Context(
         weather=weather, festival=festival, quote_analysis=quote_analysis,
         emotion=emotion, en_keywords=en_keywords, time=time_of_day, quote=quote,
         visual_imagery=visual_imagery,
         visual_richness_score=len(visual_imagery),
-        quote_festival=quote_festival,
+        panchang_details=panchang_data,
     )
 
 
@@ -165,12 +154,58 @@ def get_weather(lat, lon) -> dict:
         return {"condition": "clear", "temp": 20, "humidity": 60}
 
 
-def get_festival(date) -> str | None:
+def get_full_panchang(target_date, location=None, regional_profile=None, language="English") -> dict | None:
+    """
+    Execute the dual-branch parallel Panchang coordinator.
+    Returns unified Panchang JSON with astronomical calculations, regional calendar,
+    and preserved festival records.
+    """
+    try:
+        from panchange_engine import get_coordinator
+        coord = get_coordinator()
+        d = target_date.date() if hasattr(target_date, "date") else target_date
+        lat = location.get("lat", 19.0760) if location else 19.0760
+        lon = location.get("lon", 72.8777) if location else 72.8777
+        loc_name = location.get("name") if location else None
+        return coord.calculate_panchang(
+            target_date=d,
+            lat=lat,
+            lon=lon,
+            location_name=loc_name,
+            regional_profile_id=regional_profile,
+            language=language,
+        )
+    except Exception:
+        return None
+
+
+def get_festival(date, location=None, regional_profile=None, language="English") -> str | None:
     """
     Panchang lookup -> festival, tithi, and lunar phase (paksha).
-    Reuses parsed panchang_2026.json in memory rather than re-reading disk.
-    Combines festival observance with tithi details into contextual string.
+    Executes the dual-engine coordinator while preserving exact fallback compatibility
+    with panchang_2026.json.
     """
+    try:
+        from panchange_engine import get_coordinator
+        coord = get_coordinator()
+        d = date.date() if hasattr(date, "date") else date
+        lat = location.get("lat", 19.0760) if location else 19.0760
+        lon = location.get("lon", 72.8777) if location else 72.8777
+        loc_name = location.get("name") if location else None
+        res_str = coord.get_festival_string(
+            target_date=d,
+            lat=lat,
+            lon=lon,
+            location_name=loc_name,
+            regional_profile_id=regional_profile,
+            language=language,
+        )
+        if res_str:
+            return res_str
+    except Exception:
+        pass
+
+    # Direct fallback to preserved panchang_2026.json in memory
     global _PANCHANG_DATA
     if _PANCHANG_DATA is None:
         try:
@@ -194,25 +229,6 @@ def get_festival(date) -> str | None:
     return None
 
 
-def is_hindi_text(text: str) -> bool:
-    """Check if the text contains Devanagari script characters (U+0900 to U+097F)."""
-    return bool(re.search(r"[\u0900-\u097f]", text))
-
-
-def detect_quote_festival(quote_text, tokens) -> str | None:
-    """Scan quote for festival names using aliases from panchang JSON."""
-    global _PANCHANG_DATA
-    if _PANCHANG_DATA is None:
-        try:
-            _PANCHANG_DATA = json.loads(PANCHANG_PATH.read_text(encoding="utf-8"))
-        except Exception:
-            _PANCHANG_DATA = {}
-    aliases = _PANCHANG_DATA.get("_festival_aliases", {})
-    text_lower = quote_text.lower()
-    for alias, canonical in aliases.items():
-        if alias in quote_text or alias in text_lower:
-            return canonical
-    return None
 
 
 _KNOWN_VISUAL = {
@@ -223,20 +239,16 @@ _KNOWN_VISUAL = {
 
 
 def extract_visual_imagery(quote_analysis, en_keywords) -> list[dict]:
-    """Extract the quote's own concrete visual words."""
+    """Extract the quote's own concrete visual words (English input)."""
     visuals = []
     seen = set()
-    key_terms = quote_analysis.key_terms
-    for i, hindi_w in enumerate(key_terms):
-        en_w = en_keywords[i] if i < len(en_keywords) else hindi_w
-        if en_w == hindi_w:
-            en_w = FALLBACK_LEXICON.get(hindi_w, hindi_w)
-        en_lower = en_w.lower()
-        if en_lower in seen or en_lower in ENGLISH_STOPWORDS or en_lower == hindi_w:
+    for w in en_keywords:
+        w_lower = w.lower()
+        if w_lower in seen or w_lower in ENGLISH_STOPWORDS:
             continue
-        if is_visual_word(en_lower) or en_lower in _KNOWN_VISUAL:
-            visuals.append({"hindi": hindi_w, "english": en_lower})
-            seen.add(en_lower)
+        if is_visual_word(w_lower) or w_lower in _KNOWN_VISUAL:
+            visuals.append({"hindi": w, "english": w_lower})
+            seen.add(w_lower)
     return visuals
 
 
@@ -263,57 +275,15 @@ def build_quote_native_candidates(visual_imagery, weather, time_of_day) -> list[
 
 
 def analyze_quote(quote_text) -> QuoteAnalysis:
-    """Analyze quote NLP (Hindi via Stanza or English via WordNet/regex)."""
+    """Analyze quote NLP (English input assumed)."""
     analysis = QuoteAnalysis(text=quote_text)
-
-    # ── ENGLISH BYPASS PATH ─────────────────────────────────
-    if not is_hindi_text(quote_text):
-        wn = _get_wordnet()
-        words = re.findall(r"[A-Za-z]+", quote_text)
-        tokens = [w for w in words if w.lower() not in ENGLISH_STOPWORDS and len(w) > 2]
-        analysis.tokens = words
-        analysis.nouns = tokens[:5]
-        analysis.key_terms = tokens[:8]
-        analysis.has_concrete = any(is_visual_word(w) for w in analysis.nouns)
-        analysis.theme = _infer_theme(analysis)
-        return analysis
-
-    # ── HINDI NLP PATH ──────────────────────────────────────
-    nlp = _get_stanza()
-    if nlp is None:
-        # Fallback: whitespace tokens only, no POS. Pipeline still runs.
-        analysis.tokens = re.findall(r"[^\s।,.!?—]+", quote_text)
-        analysis.nouns = analysis.tokens[:5]
-        analysis.key_terms = analysis.nouns
-        analysis.theme = "general"
-        return analysis
-
-    try:
-        doc = nlp(quote_text)
-        negation_window: list[str] = []
-        for sent in doc.sentences:
-            for word in sent.words:
-                analysis.tokens.append(word.text)
-                upos = word.upos
-                if upos in ("NOUN", "PROPN"):
-                    analysis.nouns.append(word.lemma or word.text)
-                    if negation_window:
-                        analysis.negated_nouns.append(word.lemma or word.text)
-                elif upos == "VERB":
-                    analysis.verbs.append(word.lemma or word.text)
-                elif upos == "ADJ":
-                    analysis.adjectives.append(word.lemma or word.text)
-                # Hindi negation markers
-                if word.text in ("नहीं", "बिना", "न", "मत", "बग़ैर", "बगैर"):
-                    negation_window = analysis.nouns[-2:]
-        analysis.key_terms = list(dict.fromkeys(analysis.nouns + analysis.adjectives))
-        analysis.has_concrete = _has_concrete(analysis.nouns)
-        analysis.theme = _infer_theme(analysis)
-    except Exception:
-        analysis.tokens = re.findall(r"[^\s।,.!?—]+", quote_text)
-        analysis.nouns = analysis.tokens[:5]
-        analysis.key_terms = analysis.nouns
-        analysis.theme = "general"
+    words = re.findall(r"[A-Za-z]+", quote_text)
+    tokens = [w for w in words if w.lower() not in ENGLISH_STOPWORDS and len(w) > 2]
+    analysis.tokens = words
+    analysis.nouns = tokens[:5]
+    analysis.key_terms = tokens[:8]
+    analysis.has_concrete = any(is_visual_word(w) for w in analysis.nouns)
+    analysis.theme = _infer_theme(analysis)
     return analysis
 
 
@@ -346,32 +316,11 @@ def detect_emotion(quote_analysis, en_keywords: list = None) -> dict:
     return {"primary": best_emotion, "sentiment": sentiment, "score": best_score}
 
 
-def translate_hi_to_en(hindi_words: list) -> list:
-    """IndicTrans2 -> English translations. Passes through English words directly."""
-    if not hindi_words:
+def translate_hi_to_en(words: list) -> list:
+    """Lowercase passthrough (English-only input assumed)."""
+    if not words:
         return []
-
-    out = []
-    to_translate = []
-    for w in hindi_words:
-        if not is_hindi_text(w):
-            out.append(w.lower())
-        else:
-            to_translate.append(w)
-
-    if to_translate:
-        translator = _get_translator()
-        if translator is not None:
-            try:
-                out.extend(translator(to_translate))
-            except Exception:
-                for w in to_translate:
-                    out.append(FALLBACK_LEXICON.get(w, w))
-        else:
-            for w in to_translate:
-                out.append(FALLBACK_LEXICON.get(w, w))
-
-    return list(dict.fromkeys(out))
+    return list(dict.fromkeys(w.lower() for w in words))
 
 
 # ═══════════════════════════════════════════════════
@@ -399,12 +348,21 @@ def run_knowledge_chain(context, location) -> CandidatePool:
         wiki_results = {"entities": {}, "categories": []}
         dbpedia_results = []
     else:
-        wikidata_results = chain_2_wikidata(en_keywords, location)
+        wikidata_results = chain_2_wikidata(
+            en_keywords, location,
+            emotion=context.emotion,
+            theme=context.quote_analysis.theme,
+            festival=context.festival or "",
+        )
         wiki_results = chain_3_wikipedia(wikidata_results)
         dbpedia_results = chain_4_dbpedia(wiki_results.get("categories", []))
 
     # Chain 5: Fictional/anime discovery
-    fiction_results = chain_5_fictional(context.emotion)
+    fiction_results = chain_5_fictional(
+        context.emotion,
+        theme=context.quote_analysis.theme,
+        mythology_results=wikidata_results.get("mythology", []),
+    )
 
     # Chain 6: Cultural supplement (local) — matches keywords, theme, AND emotion.
     cultural_results = chain_6_cultural(
@@ -444,7 +402,7 @@ def run_knowledge_chain(context, location) -> CandidatePool:
     quote_candidates = build_quote_native_candidates(
         context.visual_imagery, context.weather, context.time)
     if richness in (1, 2):
-        prepared = prepared[:3]
+        prepared = prepared[:6]
     prepared = quote_candidates + prepared
 
     # Always guarantee at least one candidate (edge case 1: no nouns / all APIs down).
@@ -521,15 +479,52 @@ def chain_1_word_understanding(quote_analysis, en_keywords) -> dict:
             "related": list(dict.fromkeys(all_related))}
 
 
-def chain_2_wikidata(en_keywords, location) -> dict:
-    """Wikidata: symbols, location features, mythology, fiction."""
+def chain_2_wikidata(en_keywords, location, emotion="", theme="", festival="") -> dict:
+    """Live Wikidata discovery: mythology via SPARQL, location landmarks, symbols."""
+    import random
     out = {"symbols": [], "location_features": [], "mythology": [], "fiction": []}
+
+    # Location landmarks (uses multi-location if sub-districts available)
     try:
-        # location_landmarks filters by P31 (tourist attraction / monument / tower),
-        # so we get visible landmarks instead of languages, peoples or districts.
-        out["location_features"] = query_wikidata(
-            "location_landmarks", location_qid=location["qid"])
-        out["mythology"] = query_wikidata("mythological_figures")
+        subdist_qids = location.get("subdist_qids", [])
+        if subdist_qids:
+            subdist_values = " ".join(f"wd:{q}" for q in subdist_qids)
+            out["location_features"] = query_wikidata(
+                "location_landmarks_multi",
+                location_qid=location["qid"],
+                subdist_values=subdist_values)
+        else:
+            out["location_features"] = query_wikidata(
+                "location_landmarks", location_qid=location["qid"])
+    except Exception:
+        pass
+
+    # Live mythology discovery via three-way UNION SPARQL (cached — same for all quotes)
+    try:
+        cached_deities = load_cache("mythology_deities", "wikidata")
+        if cached_deities is not None:
+            raw_deities = cached_deities
+        else:
+            raw_deities = query_wikidata("mythology_deities")
+            save_cache("mythology_deities", raw_deities)
+        scored = _score_mythology_relevance(raw_deities, theme, emotion, festival)
+        out["mythology"] = scored
+    except Exception:
+        pass
+
+    # Epic characters when theme maps to an epic (Mahabharata/Ramayana)
+    if theme in THEME_TO_EPIC:
+        try:
+            epic_chars = query_wikidata("epic_characters", work_qid=THEME_TO_EPIC[theme])
+            epic_scored = _score_mythology_relevance(epic_chars, theme, emotion, festival)
+            for ch in epic_scored[:4]:
+                if not any(m["label"].lower() == ch["label"].lower() for m in out["mythology"]):
+                    out["mythology"].append(ch)
+        except Exception:
+            pass
+
+    # Symbols via P4878
+    try:
         for kw in en_keywords[:3]:
             qid = _resolve_qid(kw)
             if qid:
@@ -537,6 +532,53 @@ def chain_2_wikidata(en_keywords, location) -> dict:
     except Exception:
         pass
     return out
+
+
+def _score_mythology_relevance(deities, theme, emotion, festival) -> list:
+    """Rank live-discovered deities by relevance to theme/emotion/festival."""
+    import random
+
+    theme_kws = THEME_MYTHOLOGY_KEYWORDS.get(theme, THEME_MYTHOLOGY_KEYWORDS.get("general", []))
+
+    festival_kws = []
+    if festival:
+        fest_lower = festival.lower()
+        for fest_key, kws in FESTIVAL_MYTHOLOGY_KEYWORDS.items():
+            if fest_key in fest_lower or fest_lower in fest_key:
+                festival_kws = kws
+                break
+
+    emotion_primary = emotion.get("primary", "") if isinstance(emotion, dict) else str(emotion)
+    emotion_concepts = EMOTION_CONCEPTS.get(emotion_primary, [])
+
+    scored = []
+    for d in deities:
+        label = d.get("label", "").lower()
+        desc = d.get("description", "").lower()
+        blob = f"{label} {desc}"
+        score = 0
+
+        if any(kw in label for kw in theme_kws):
+            score += 3
+        if festival_kws and any(kw in label for kw in festival_kws):
+            score += 3
+        for kw in theme_kws:
+            if kw in desc:
+                score += 1
+        for kw in festival_kws:
+            if kw in desc:
+                score += 1
+        if any(c in blob for c in emotion_concepts):
+            score += 1
+
+        scored.append((score, d))
+
+    scored.sort(key=lambda x: x[0], reverse=True)
+    top = [d for _, d in scored[:8]]
+    remainder = [d for _, d in scored[8:]]
+    if remainder:
+        top.extend(random.sample(remainder, min(2, len(remainder))))
+    return top
 
 
 def chain_3_wikipedia(wikidata_results) -> dict:
@@ -569,15 +611,13 @@ def chain_4_dbpedia(categories) -> list:
         return []
 
 
-def chain_5_fictional(emotion) -> list:
+def chain_5_fictional(emotion, theme="", mythology_results=None) -> list:
     """
-    Anime/cartoon ARCHETYPES only.
+    Anime/cartoon archetypes + anime-style mythology figures.
 
-    AniList is consulted for genre/aesthetic context, but raw media TITLES are
-    never injected as candidates — using a copyrighted work's name verbatim in a
-    FLUX prompt is exactly what the system prompt forbids. We emit only the
-    generic GENRE_TO_ARCHETYPE phrases (e.g. "lone traveler gazing toward a vast
-    horizon"), which are safe and depictable.
+    Generic archetype phrases from GENRE_TO_ARCHETYPE (safe, depictable).
+    When theme matches mythology, also emits top-scored deity results with
+    ANIME domain so Gemini can render them in anime style.
     """
     out = []
     try:
@@ -588,6 +628,17 @@ def chain_5_fictional(emotion) -> list:
                 out.append({"label": arch, "genre": g, "fictional": True})
     except Exception:
         pass
+
+    # Offer mythology figures in anime style when theme overlaps
+    anime_themes = {"devotion", "spiritual", "family", "courage", "motivation", "festival"}
+    if theme in anime_themes and mythology_results:
+        for m in mythology_results[:3]:
+            out.append({
+                "label": m.get("label", ""),
+                "description": m.get("description", ""),
+                "type": "anime_mythology",
+                "fictional": True,
+            })
     return out
 
 
@@ -657,16 +708,35 @@ def discover_location_features(location) -> list:
 
     result = []
     try:
-        features = query_wikidata("location_landmarks", location_qid=location["qid"])
-        for f in features[:12]:
+        subdist_qids = location.get("subdist_qids", [])
+        if subdist_qids:
+            subdist_values = " ".join(f"wd:{q}" for q in subdist_qids)
+            features = query_wikidata(
+                "location_landmarks_multi",
+                location_qid=location["qid"],
+                subdist_values=subdist_values)
+        else:
+            features = query_wikidata("location_landmarks", location_qid=location["qid"])
+
+        pre_filtered = []
+        for f in features:
             name = f.get("label", "")
-            if not name or _is_nonvisual_entity(name):
-                continue
-            f_type = ""
-            qid = f.get("qid")
-            if qid:
-                types = query_wikidata("instance_of", entity_qid=qid)
-                f_type = types[0]["label"] if types else ""
+            if name and not _is_nonvisual_entity(name):
+                pre_filtered.append(f)
+
+        # Batch type lookup instead of N+1 queries
+        qids = [f["qid"] for f in pre_filtered if f.get("qid")]
+        type_map = {}
+        if qids:
+            try:
+                type_map = _batch_type_lookup(qids[:50])
+            except Exception:
+                pass
+
+        for f in pre_filtered[:25]:
+            name = f.get("label", "")
+            qid = f.get("qid", "")
+            f_type = type_map.get(qid, "")
             if _is_nonvisual_entity(name, f_type):
                 continue
             result.append({"name": name, "type": f_type, "qid": qid})
@@ -867,7 +937,7 @@ def assign_domain(data, source_chain) -> str:
     etype = (data.get("type") or data.get("entity_type") or "").lower()
 
     if source_chain == "chain_5_fictional":
-        return "GHIBLI" if "ghibli" in name else "ANIME"
+        return "ANIME"
     if source_chain in ("chain_2_mythology",):
         return "MYTHOLOGICAL"
     if source_chain == "chain_2_wikidata" and etype in (
@@ -896,22 +966,27 @@ def set_flags(candidate: dict, location_features, cultural_data):
 
 def merge_all(wikidata, wiki, dbpedia, fiction, cultural,
               location_features, cultural_data) -> list:
-    """Merge candidates from all chains, deduplicate by name similarity."""
-    all_raw = []
-    for item in wikidata.get("symbols", []):
-        all_raw.append({"data": item, "source": "chain_2_wikidata"})
-    for item in wikidata.get("location_features", []):
-        all_raw.append({"data": item, "source": "chain_2_wikidata"})
+    """Merge candidates from all chains. Live-discovered candidates first, cultural capped."""
+    live_raw = []
     for item in wikidata.get("mythology", []):
-        all_raw.append({"data": item, "source": "chain_2_mythology"})
+        live_raw.append({"data": item, "source": "chain_2_mythology"})
+    for item in wikidata.get("symbols", []):
+        live_raw.append({"data": item, "source": "chain_2_wikidata"})
+    for item in wikidata.get("location_features", []):
+        live_raw.append({"data": item, "source": "chain_2_wikidata"})
     for label, info in wiki.get("entities", {}).items():
-        all_raw.append({"data": {"label": label, **info}, "source": "chain_3_wikipedia"})
+        live_raw.append({"data": {"label": label, **info}, "source": "chain_3_wikipedia"})
     for item in dbpedia:
-        all_raw.append({"data": item, "source": "chain_4_dbpedia"})
+        live_raw.append({"data": item, "source": "chain_4_dbpedia"})
     for item in fiction:
-        all_raw.append({"data": item, "source": "chain_5_fictional"})
-    for item in cultural:
-        all_raw.append({"data": item, "source": "chain_6_cultural"})
+        live_raw.append({"data": item, "source": "chain_5_fictional"})
+
+    live_count = len(live_raw)
+    cultural_cap = max(3, 8 - live_count)
+    for item in cultural[:cultural_cap]:
+        live_raw.append({"data": item, "source": "chain_6_cultural"})
+
+    all_raw = live_raw
 
     # Sources whose entities must be visually depictable (drop languages/peoples/admin).
     _visual_required = {"chain_2_wikidata", "chain_3_wikipedia", "chain_4_dbpedia"}
@@ -955,13 +1030,20 @@ def merge_all(wikidata, wiki, dbpedia, fiction, cultural,
 # API HELPERS
 # ═══════════════════════════════════════════════════
 
+_NON_LATIN_LABEL_MAP = {
+    "Q11378": "Shiva", "Q11380": "Vishnu", "Q42891": "Krishna",
+    "Q132127": "Kali",
+}
+
+
 def query_wikidata(template_name, **params) -> list:
     """Execute SPARQL from SPARQL_TEMPLATES with params against Wikidata."""
     query = SPARQL_TEMPLATES[template_name].format(**params)
+    timeout = 15 if "mythology" in template_name or "epic" in template_name else 5
     resp = _session().get(
         WIKIDATA_SPARQL_URL,
         params={"query": query, "format": "json"},
-        timeout=5,
+        timeout=timeout,
     )
     resp.raise_for_status()
     bindings = resp.json().get("results", {}).get("bindings", [])
@@ -974,8 +1056,10 @@ def query_wikidata(template_name, **params) -> list:
         uri = b.get(var_key, {}).get("value", "") if var_key else ""
         qid = uri.rsplit("/", 1)[-1] if uri.startswith("http") else ""
         label = _clean_label(b.get(label_key, {}).get("value", "") if label_key else "")
+        if qid in _NON_LATIN_LABEL_MAP:
+            label = _NON_LATIN_LABEL_MAP[qid]
         if not label:
-            continue  # drop unlabeled / bare-QID results
+            continue
         out.append({
             "label": label,
             "description": (b.get(desc_key, {}).get("value", "") if desc_key else ""),
@@ -983,6 +1067,34 @@ def query_wikidata(template_name, **params) -> list:
             "type": "",
         })
     return out
+
+
+def _batch_type_lookup(qids: list) -> dict:
+    """Batch P31 lookup: returns {entity_qid: type_label} for up to 50 entities."""
+    entity_values = " ".join(f"wd:{q}" for q in qids)
+    query = SPARQL_TEMPLATES["batch_instance_of"].format(entity_values=entity_values)
+    resp = _session().get(
+        WIKIDATA_SPARQL_URL,
+        params={"query": query, "format": "json"},
+        timeout=8,
+    )
+    resp.raise_for_status()
+    type_map = {}
+    for b in resp.json().get("results", {}).get("bindings", []):
+        entity_uri = b.get("entity", {}).get("value", "")
+        entity_qid = entity_uri.rsplit("/", 1)[-1] if entity_uri.startswith("http") else ""
+        type_label = b.get("typeLabel", {}).get("value", "")
+        if entity_qid and type_label and not re.fullmatch(r"Q\d+", type_label):
+            type_map.setdefault(entity_qid, type_label)
+    return type_map
+
+
+def _clean_label(raw: str) -> str:
+    """Strip QID-only labels and extra whitespace from Wikidata results."""
+    text = raw.strip()
+    if re.fullmatch(r"Q\d+", text):
+        return ""
+    return text
 
 
 def _is_nonvisual_entity(name: str, etype: str = "") -> bool:
@@ -1159,12 +1271,22 @@ _memory_cache: dict = {}
 
 
 def load_cache(key: str, source: str = "general"):
-    """Check in-memory cache first, then disk."""
+    """Check in-memory cache, then Upstash Redis, then disk."""
     now = time.time()
     if key in _memory_cache:
         entry = _memory_cache[key]
         if now - entry["ts"] < CACHE_TTL.get(source, 86400):
             return entry["data"]
+
+    # Check Upstash Redis cloud cache
+    try:
+        from logs.logger import cloud_load_cache
+        cloud_val = cloud_load_cache(key)
+        if cloud_val is not None:
+            _memory_cache[key] = {"ts": now, "data": cloud_val}
+            return cloud_val
+    except Exception:
+        pass
 
     cache_path = CACHE_DIR / f"{key}.json"
     if cache_path.exists():
@@ -1179,9 +1301,18 @@ def load_cache(key: str, source: str = "general"):
 
 
 def save_cache(key: str, data):
-    """Save to memory and disk."""
-    entry = {"ts": time.time(), "data": data}
+    """Save to memory, Upstash Redis, and disk."""
+    now = time.time()
+    entry = {"ts": now, "data": data}
     _memory_cache[key] = entry
+
+    # Save to Upstash Redis cloud cache
+    try:
+        from logs.logger import cloud_save_cache
+        cloud_save_cache(key, data, ttl_seconds=CACHE_TTL.get("general", 86400))
+    except Exception:
+        pass
+
     try:
         CACHE_DIR.mkdir(parents=True, exist_ok=True)
         (CACHE_DIR / f"{key}.json").write_text(
