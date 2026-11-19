@@ -144,6 +144,7 @@ def call_gemini(menu: str) -> dict:
             config=types.GenerateContentConfig(
                 system_instruction=GEMINI_SYSTEM_PROMPT,
                 response_mime_type="application/json",
+                temperature=0.85,
             ),
         )
         return json.loads(response.text)
@@ -158,7 +159,10 @@ def call_gemini(menu: str) -> dict:
         GEMINI_MODEL, system_instruction=GEMINI_SYSTEM_PROMPT)
     response = model.generate_content(
         menu,
-        generation_config={"response_mime_type": "application/json"},
+        generation_config={
+            "response_mime_type": "application/json",
+            "temperature": 0.85,
+        },
     )
     return json.loads(response.text)
 
@@ -247,21 +251,22 @@ def verify_word_count(prompt: MasterPrompt) -> MasterPrompt:
 
 
 def fallback(candidates, context, location_details, photo_ratio) -> MasterPrompt:
-    """Rule-based fallback when Gemini is down. Prefer quote-native candidates."""
-    candidate = next(
-        (c for c in candidates.pool if c.quote_native),
-        next(
-            (c for c in candidates.pool if c.domain == "PHOTOREALISTIC" and (c.groundable or c.cultural)),
-            candidates.pool[0] if candidates.pool else None,
-        ),
-    )
+    """Rule-based fallback when Gemini is down. Picks diverse candidates & styles."""
+    pool = candidates.pool if candidates.pool else []
+    recent = load_recent()
+    filtered_pool = _filter_recent_metaphors(pool, recent) if pool else []
+    candidate_pool = filtered_pool or pool
+    candidate = random.choice(candidate_pool) if candidate_pool else None
 
     details = random.sample(location_details, min(3, len(location_details))) if location_details else []
     detail_text = ", ".join(d["text"] for d in details)
 
-    domain = "PHOTOREALISTIC"
-    layout = "RB-V"
-    approach = "3"
+    # Pick dynamic domain and layout from allowed profiles
+    available_domains = _filter_recent(list(DOMAIN_PROFILES), {r.get("domain") for r in recent[-4:]}, keep_min=2)
+    domain = candidate.domain if (candidate and candidate.domain in DOMAIN_PROFILES) else random.choice(available_domains)
+    available_layouts = _filter_recent(list(LAYOUT_PROFILES), {r.get("layout") for r in recent[-4:]}, keep_min=3)
+    layout = random.choice(available_layouts)
+    approach = str(random.randint(1, 4))
 
     subject = candidate.subject_text if candidate else ""
     scene = candidate.scene_text if candidate else ""

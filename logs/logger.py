@@ -19,14 +19,24 @@ ROOT_DIR = Path(__file__).resolve().parent.parent
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
+try:
+    from dotenv import load_dotenv
+    load_dotenv(ROOT_DIR / ".env")
+except ImportError:
+    pass
+
 import requests
 
 LOGS_DIR = Path(__file__).resolve().parent
 ALL_RUNS_FILE = LOGS_DIR / "all_runs.log"
 
-# Upstash REST credentials from environment
-UPSTASH_URL = os.getenv("UPSTASH_REDIS_REST_URL", "").rstrip("/")
-UPSTASH_TOKEN = os.getenv("UPSTASH_REDIS_REST_TOKEN", "")
+def _get_upstash_creds():
+    url = os.getenv("UPSTASH_REDIS_REST_URL", "").rstrip("/")
+    token = os.getenv("UPSTASH_REDIS_REST_TOKEN", "")
+    return url, token
+
+# Upstash REST credentials from environment (backward compatibility)
+UPSTASH_URL, UPSTASH_TOKEN = _get_upstash_creds()
 
 
 # ─────────────────────────────────────────────────────────────
@@ -35,12 +45,13 @@ UPSTASH_TOKEN = os.getenv("UPSTASH_REDIS_REST_TOKEN", "")
 
 def _redis_cmd(*args) -> any:
     """Execute any Redis command via Upstash REST API using plain requests."""
-    if not UPSTASH_URL or not UPSTASH_TOKEN:
+    url, token = _get_upstash_creds()
+    if not url or not token:
         return None
     try:
-        url = f"{UPSTASH_URL}/" + "/".join(str(a) for a in args)
-        headers = {"Authorization": f"Bearer {UPSTASH_TOKEN}"}
-        resp = requests.get(url, headers=headers, timeout=3)
+        req_url = f"{url}/" + "/".join(str(a) for a in args)
+        headers = {"Authorization": f"Bearer {token}"}
+        resp = requests.get(req_url, headers=headers, timeout=3)
         if resp.status_code == 200:
             return resp.json().get("result")
     except Exception:
@@ -50,14 +61,15 @@ def _redis_cmd(*args) -> any:
 
 def _redis_post(cmd: list) -> any:
     """Execute Redis command with JSON payload via POST (for complex/large values)."""
-    if not UPSTASH_URL or not UPSTASH_TOKEN:
+    url, token = _get_upstash_creds()
+    if not url or not token:
         return None
     try:
         headers = {
-            "Authorization": f"Bearer {UPSTASH_TOKEN}",
+            "Authorization": f"Bearer {token}",
             "Content-Type": "application/json",
         }
-        resp = requests.post(f"{UPSTASH_URL}", headers=headers, json=cmd, timeout=3)
+        resp = requests.post(f"{url}", headers=headers, json=cmd, timeout=3)
         if resp.status_code == 200:
             return resp.json().get("result")
     except Exception:
