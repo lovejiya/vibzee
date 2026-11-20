@@ -32,10 +32,14 @@ def classify_time(hour: int) -> str:
     return "night"
 
 
-def run_pipeline(quote_input, location, date, time_of_day, photo_ratio, language="English", regional_profile: str = None):
+def run_pipeline(
+    quote_input, location, date, time_of_day, photo_ratio,
+    language="English", regional_profile: str = None,
+    custom_keywords: list[str] = None, custom_candidates: list[str] = None
+):
     """Run the full generation pipeline and log the result."""
     translated_en_quote = ""
-    if language.lower() not in ("english", "en"):
+    if not custom_keywords and language.lower() not in ("english", "en"):
         translated_en_quote = generator.translate_quote_to_english(quote_input, language)
 
     ctx = sources.enrich_context(
@@ -46,9 +50,25 @@ def run_pipeline(quote_input, location, date, time_of_day, photo_ratio, language
         language=language,
         translated_en_quote=translated_en_quote,
         regional_profile=regional_profile,
+        custom_keywords=custom_keywords,
     )
-    candidates = sources.run_knowledge_chain(context=ctx, location=location)
-    loc_details = sources.discover_location_details(location)
+
+    # Landmark selection — runs after context enrichment so we have theme + emotion
+    lm_sel = sources.select_landmark(
+        location=location,
+        theme=ctx.quote_analysis.theme,
+        emotion=ctx.emotion,
+        time_of_day=time_of_day,
+        situation_keywords=ctx.en_keywords,
+    )
+    ctx.landmark_selection = lm_sel
+
+    candidates = sources.run_knowledge_chain(
+        context=ctx,
+        location=location,
+        custom_candidates=custom_candidates,
+    )
+    loc_details = sources.discover_location_details(location, landmark_selection=lm_sel)
 
     prompt = generator.generate(
         candidates=candidates,
@@ -173,6 +193,25 @@ HTML_TEMPLATE = """
       <label>Or Enter Custom Quote</label>
       <input type="text" id="custom_quote" name="custom_quote" value="{{ quote_input }}">
 
+      <!-- DIRECT USER OVERRIDES -->
+      <div style="margin-top: 18px; padding: 14px 16px; background: #eef2ff; border: 1.5px dashed #6366f1; border-radius: 8px;">
+        <h3 style="margin: 0 0 6px 0; font-size: 13px; color: #4338ca; text-transform: uppercase; letter-spacing: 0.5px;">
+          ⚡ Direct Overrides (Optional — bypasses search & extraction functions)
+        </h3>
+        <p style="margin: 0 0 10px 0; font-size: 12px; color: #64748b;">
+          Values entered here directly override the corresponding automated steps and advance straight to the next stage.
+        </p>
+
+        <label style="margin-top: 6px;">Own Location (overrides dropdown & landmark discovery)</label>
+        <input type="text" name="custom_location" value="{{ custom_location }}" placeholder="e.g. Jaipur, Rishikesh, Kyoto, Ladakh">
+
+        <label style="margin-top: 10px;">Own Key Words (overrides quote NLP extraction & translation)</label>
+        <input type="text" name="custom_keywords" value="{{ custom_keywords }}" placeholder="e.g. earthen lamp, calm waters, dawn mist, serenity (comma-separated)">
+
+        <label style="margin-top: 10px;">Own Candidates / Visual Subjects (overrides 6-chain knowledge search)</label>
+        <textarea name="custom_candidates" rows="2" placeholder="e.g. An illuminated brass diya floating gently, Solitary monk meditating on sandstone ghat (comma-separated or one per line)">{{ custom_candidates }}</textarea>
+      </div>
+
       <button type="submit">🚀 Generate Prompt</button>
     </form>
   </div>
@@ -183,13 +222,18 @@ HTML_TEMPLATE = """
     <h2>Stage 2: Variables Chosen</h2>
     <p>
       <span class="badge">Language: {{ selected_lang }}</span>
-      <span class="badge">Location: {{ locations[selected_loc].name }}</span>
+      <span class="badge">Location: {{ active_location_name }}{% if is_custom_loc %} (User Override){% endif %}</span>
       <span class="badge">Ratio: {{ selected_ratio }}</span>
       <span class="badge">Date: {{ selected_date }}</span>
       <span class="badge">Time: {{ selected_time }} ({{ time_of_day }})</span>
+      {% if is_custom_kw %}<span class="badge" style="background: #fef3c7; color: #92400e;">⚡ Custom Keywords Override</span>{% endif %}
+      {% if is_custom_cand %}<span class="badge" style="background: #fef3c7; color: #92400e;">⚡ Custom Candidates Override</span>{% endif %}
     </p>
     <p><strong>Quote Selected:</strong></p>
     <blockquote>{{ quote_input }}</blockquote>
+    {% if is_custom_kw %}
+      <p style="margin: 8px 0 0 0; font-size: 13px; color: #4338ca;"><strong>Active Keywords (User Override):</strong> {{ custom_keywords }}</p>
+    {% endif %}
   </div>
 
   <!-- STAGE 3: INTERMEDIATE SELECTIONS -->
@@ -200,7 +244,22 @@ HTML_TEMPLATE = """
       <span class="badge">Layout: {{ prompt.layout_id }}</span>
       <span class="badge">Metaphor: {{ prompt.metaphor_used }}</span>
     </p>
+    {% if is_custom_cand %}
+      <p style="margin: 4px 0 8px 0; color: #4338ca; font-size: 13px;"><strong>⚡ Knowledge Chains Bypassed:</strong> Generated prompt directly using {{ candidates.pool|length }} custom visual candidate(s).</p>
+    {% endif %}
     <p><strong>Weather:</strong> {{ ctx.weather.condition }}, {{ ctx.weather.temp }}°C | <strong>Festival:</strong> {{ ctx.festival or 'None' }}</p>
+    {% if ctx.landmark_selection %}
+    <div style="margin: 10px 0; padding: 10px 14px; background: #fef3c7; border-radius: 6px; border: 1px solid #f59e0b; font-size: 0.9em; line-height: 1.5;">
+      <p style="margin: 0 0 4px 0;"><strong>📍 Landmark:</strong> {{ ctx.landmark_selection.landmark.name }} <span class="badge" style="background: #fde68a; color: #92400e;">{{ ctx.landmark_selection.landmark.type }}</span></p>
+      <p style="margin: 0 0 4px 0;"><strong>Score:</strong> {{ ctx.landmark_selection.score }} | <strong>Track:</strong> {{ ctx.landmark_selection.track }} ({{ ctx.landmark_selection.category }}) | <strong>Contrast prob:</strong> {{ "%.0f"|format(ctx.landmark_selection.contrast_probability * 100) }}%</p>
+      <p style="margin: 0 0 4px 0; color: #78350f;"><strong>Visual:</strong> {{ ctx.landmark_selection.landmark.visual_description[:150] }}{% if ctx.landmark_selection.landmark.visual_description|length > 150 %}…{% endif %}</p>
+      <p style="margin: 0; font-size: 0.85em; color: #92400e;"><strong>Top 3:</strong>
+        {% for t in ctx.landmark_selection.top_3 %}
+          {{ t.name }} ({{ t.score }}){% if not loop.last %} · {% endif %}
+        {% endfor %}
+      </p>
+    </div>
+    {% endif %}
     {% if ctx.panchang_details %}
     <div style="margin: 10px 0; padding: 10px 14px; background: #f8fafc; border-radius: 6px; border: 1px solid #e2e8f0; font-size: 0.9em; line-height: 1.5;">
       <p style="margin: 0 0 4px 0;"><strong>🗓 Regional Calendar:</strong> {{ ctx.panchang_details.astronomical_panchang.regional_calendar.regional_date_string }}</p>
@@ -212,6 +271,24 @@ HTML_TEMPLATE = """
     </div>
     {% endif %}
     <p><strong>Reasoning:</strong> {{ prompt.gemini_selections.reasoning or 'N/A' }}</p>
+    {% if prompt.layout_plan %}
+    <div style="margin: 10px 0; padding: 10px 14px; background: #ede9fe; border-radius: 6px; border: 1px solid #8b5cf6; font-size: 0.9em; line-height: 1.5;">
+      <p style="margin: 0 0 4px 0;"><strong>📐 Layout Plan:</strong> {{ prompt.layout_plan.layout_id }}
+        <span class="badge" style="background: #ddd6fe; color: #5b21b6;">{{ prompt.layout_plan.visual_weight_zone }}</span>
+        {% if prompt.layout_plan.validation_passed %}<span class="badge" style="background: #d1fae5; color: #065f46;">✓ Valid</span>{% else %}<span class="badge" style="background: #fee2e2; color: #991b1b;">✗ Failed</span>{% endif %}
+        {% if prompt.layout_plan.repair_applied %}<span class="badge" style="background: #fef3c7; color: #92400e;">Repaired: {{ prompt.layout_plan.repair_reason }}</span>{% endif %}
+      </p>
+      {% if prompt.layout_plan.quote_box %}
+      <p style="margin: 0 0 2px 0; font-size: 0.85em; color: #5b21b6;"><strong>Quote:</strong> x={{ "%.2f"|format(prompt.layout_plan.quote_box.x) }} y={{ "%.2f"|format(prompt.layout_plan.quote_box.y) }} w={{ "%.2f"|format(prompt.layout_plan.quote_box.w) }} h={{ "%.2f"|format(prompt.layout_plan.quote_box.h) }}</p>
+      {% endif %}
+      {% if prompt.layout_plan.photo_box %}
+      <p style="margin: 0 0 2px 0; font-size: 0.85em; color: #5b21b6;"><strong>Photo:</strong> x={{ "%.2f"|format(prompt.layout_plan.photo_box.x) }} y={{ "%.2f"|format(prompt.layout_plan.photo_box.y) }} w={{ "%.2f"|format(prompt.layout_plan.photo_box.w) }} h={{ "%.2f"|format(prompt.layout_plan.photo_box.h) }}</p>
+      {% endif %}
+      {% if prompt.layout_plan.protected_regions %}
+      <p style="margin: 0; font-size: 0.85em; color: #7c3aed;"><strong>Protected:</strong> {{ prompt.layout_plan.protected_regions|length }} sacred region(s)</p>
+      {% endif %}
+    </div>
+    {% endif %}
   </div>
 
   <!-- STAGE 4: OUTPUT PROMPT (COPYPASTABLE) -->
@@ -241,7 +318,16 @@ def index():
     quote_input = QUOTES[0]
     prompt = None
     ctx = None
+    candidates = None
     time_of_day = classify_time(now.hour)
+
+    custom_location = ""
+    custom_keywords = ""
+    custom_candidates = ""
+    is_custom_loc = False
+    is_custom_kw = False
+    is_custom_cand = False
+    active_location_name = LOCATIONS.get(selected_loc, {}).get("name", "Mumbai")
 
     if request.method == "POST":
         selected_loc = request.form.get("location_key", "mumbai")
@@ -253,7 +339,40 @@ def index():
         custom = request.form.get("custom_quote", "").strip()
         quote_input = custom if custom else request.form.get("preset_quote", QUOTES[0])
 
-        location = LOCATIONS[selected_loc]
+        custom_location = request.form.get("custom_location", "").strip()
+        custom_keywords = request.form.get("custom_keywords", "").strip()
+        custom_candidates = request.form.get("custom_candidates", "").strip()
+
+        # Resolve location (direct override if provided)
+        if custom_location:
+            location = sources.resolve_location(selected_loc, custom_location)
+            is_custom_loc = True
+            active_location_name = location.get("name", custom_location)
+        else:
+            location = LOCATIONS.get(selected_loc, LOCATIONS["mumbai"])
+            active_location_name = location["name"]
+
+        # Parse custom keywords (direct override if provided)
+        parsed_keywords = None
+        if custom_keywords:
+            parsed_keywords = [k.strip() for k in custom_keywords.split(",") if k.strip()]
+            if parsed_keywords:
+                is_custom_kw = True
+
+        # Parse custom candidates (direct override if provided)
+        parsed_candidates = None
+        if custom_candidates:
+            lines = [l.strip() for l in custom_candidates.replace("\r", "").split("\n") if l.strip()]
+            cand_list = []
+            for line in lines:
+                for item in line.split(","):
+                    val = item.strip()
+                    if val:
+                        cand_list.append(val)
+            if cand_list:
+                parsed_candidates = cand_list
+                is_custom_cand = True
+
         try:
             dt = datetime.strptime(f"{selected_date} {selected_time}", "%Y-%m-%d %H:%M")
         except Exception:
@@ -262,7 +381,9 @@ def index():
 
         ctx, candidates, loc_details, prompt = run_pipeline(
             quote_input, location, dt, time_of_day, selected_ratio,
-            language=selected_lang, regional_profile=selected_profile or None
+            language=selected_lang, regional_profile=selected_profile or None,
+            custom_keywords=parsed_keywords,
+            custom_candidates=parsed_candidates,
         )
 
     return render_template_string(
@@ -280,6 +401,14 @@ def index():
         time_of_day=time_of_day,
         prompt=prompt,
         ctx=ctx,
+        candidates=candidates,
+        custom_location=custom_location,
+        custom_keywords=custom_keywords,
+        custom_candidates=custom_candidates,
+        is_custom_loc=is_custom_loc,
+        is_custom_kw=is_custom_kw,
+        is_custom_cand=is_custom_cand,
+        active_location_name=active_location_name,
     )
 
 

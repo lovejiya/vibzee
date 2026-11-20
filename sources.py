@@ -19,19 +19,228 @@ from pathlib import Path
 import requests
 
 from specs import (
-    SPARQL_TEMPLATES, EMOTION_SEEDS, EMOTION_TO_GENRE, GENRE_TO_ARCHETYPE,
+    LOCATIONS, SPARQL_TEMPLATES, EMOTION_SEEDS, EMOTION_TO_GENRE, GENRE_TO_ARCHETYPE,
     EMOTION_CONCEPTS, THEME_HINTS, ENGLISH_STOPWORDS, NONVISUAL_TOKENS,
     THEME_MYTHOLOGY_KEYWORDS, FESTIVAL_MYTHOLOGY_KEYWORDS, THEME_TO_EPIC,
     PreparedCandidate, QuoteAnalysis, Context, CandidatePool,
-    PANCHANG_PATH, CULTURAL_METAPHORS_PATH,
+    PANCHANG_PATH, CULTURAL_METAPHORS_PATH, LANDMARK_DB_PATH, RECENT_RUNS_PATH,
     OPEN_METEO_URL, WIKIDATA_SPARQL_URL, DBPEDIA_SPARQL_URL,
     WIKIPEDIA_SUMMARY_URL, WIKIPEDIA_API_URL,
     HTTP_USER_AGENT, CACHE_DIR,
+    LANDMARK_ADJACENT_TIMES, LANDMARK_ENERGY_PREFERENCE, LANDMARK_ENERGY_LEVELS,
+    LANDMARK_TYPE_AFFINITY, THEME_TO_LANDMARK_CATEGORY, EMOTION_TO_LANDMARK_CATEGORY,
+    APP_TIME_TO_LANDMARK_TIME,
 )
 
 
 _EXPANDED_EMOTION_SEEDS: dict = {}
 _PANCHANG_DATA = None
+_LANDMARK_DB = None
+
+
+# ═══════════════════════════════════════════════════
+# LANDMARK SELECTION ENGINE
+# ═══════════════════════════════════════════════════
+
+def _load_landmark_db() -> dict:
+    global _LANDMARK_DB
+    if _LANDMARK_DB is None:
+        _LANDMARK_DB = json.loads(LANDMARK_DB_PATH.read_text(encoding="utf-8"))
+    return _LANDMARK_DB
+
+
+def _resolve_landmark_category(theme: str, emotion: str) -> str:
+    if theme and theme in THEME_TO_LANDMARK_CATEGORY:
+        return THEME_TO_LANDMARK_CATEGORY[theme]
+    if emotion and emotion in EMOTION_TO_LANDMARK_CATEGORY:
+        return EMOTION_TO_LANDMARK_CATEGORY[emotion]
+    return "wisdom"
+
+
+def _find_city_in_db(location: dict) -> tuple[str, str, list] | None:
+    db = _load_landmark_db()
+    loc_name = (location.get("name") or "").lower().strip()
+    state_hint = (location.get("state") or "").lower().strip()
+
+    # Also try matching against the LOCATIONS dict key (e.g. "kutch_bhuj")
+    loc_key = ""
+    for k, v in LOCATIONS.items():
+        if v.get("name", "").lower() == loc_name:
+            loc_key = k.lower()
+            break
+
+    # Direct match by state+city key
+    if state_hint and state_hint in db:
+        for city_key, landmarks in db[state_hint].items():
+            city_clean = city_key.lower().replace("_", " ")
+            if city_key.lower() in (loc_name, loc_key) or city_clean == loc_name:
+                return state_hint, city_key, landmarks
+
+    # Search all states
+    for state, cities in db.items():
+        for city_key, landmarks in cities.items():
+            city_clean = city_key.lower().replace("_", " ")
+            if city_key.lower() in (loc_name, loc_key) or city_clean == loc_name:
+                return state, city_key, landmarks
+
+    # Fuzzy substring
+    for state, cities in db.items():
+        for city_key, landmarks in cities.items():
+            city_clean = city_key.lower().replace("_", " ")
+            if loc_name in city_clean or city_clean in loc_name:
+                return state, city_key, landmarks
+
+    return None
+
+
+def _pick_track(recent_runs: list, quote_category: str) -> tuple[str, float]:
+    import random as _rnd
+    same_cat = [r for r in recent_runs if r.get("quote_category") == quote_category]
+    last_3 = same_cat[-3:]
+
+    base = 0.30
+    if len(last_3) >= 3 and all(r.get("track") == "expected" for r in last_3):
+        base = 0.60
+    elif last_3 and last_3[-1].get("track") == "unexpected":
+        base = 0.15
+
+    track = "unexpected" if _rnd.random() < base else "expected"
+    return track, base
+
+
+def _score_landmark(landmark: dict, quote_category: str, time_of_day: str,
+                    situation_keywords: list, times_used: int, track: str) -> float:
+    score = 0.0
+
+    aff_dict = landmark.get(f"{track}_affinity", landmark.get("expected_affinity", {}))
+    score += aff_dict.get(quote_category, 0.2) * 40
+
+    best = landmark.get("best_time", [])
+    if time_of_day in best:
+        score += 20
+    elif any(t in best for t in LANDMARK_ADJACENT_TIMES.get(time_of_day, [])):
+        score += 10
+    elif not best:
+        score += 5
+    else:
+        score += 2
+
+    if situation_keywords:
+        overlap = set(k.lower() for k in situation_keywords) & set(
+            k.lower() for k in landmark.get("setting_keywords", []))
+        score += min(len(overlap) * 6, 15)
+
+    type_scores = LANDMARK_TYPE_AFFINITY.get(quote_category, {})
+    score += type_scores.get(landmark.get("type", ""), 2)
+
+    pref = LANDMARK_ENERGY_PREFERENCE.get(quote_category, "medium")
+    actual = landmark.get("energy", "medium")
+    if track == "unexpected":
+        score += 8 if actual != pref else 3
+    else:
+        pref_idx = LANDMARK_ENERGY_LEVELS.index(pref) if pref in LANDMARK_ENERGY_LEVELS else 1
+        actual_idx = LANDMARK_ENERGY_LEVELS.index(actual) if actual in LANDMARK_ENERGY_LEVELS else 1
+        diff = abs(actual_idx - pref_idx)
+        score += [10, 5, 1][diff]
+
+    score -= times_used * 12
+    return round(score, 2)
+
+
+def _get_landmark_usage(recent_runs: list, state: str, city: str) -> dict:
+    counts = {}
+    relevant = [r for r in recent_runs if r.get("landmark_state") == state and r.get("landmark_city") == city]
+    for run in relevant[-30:]:
+        lm = run.get("landmark_chosen")
+        if lm:
+            counts[lm] = counts.get(lm, 0) + 1
+    return counts
+
+
+def _load_landmark_recent() -> list:
+    try:
+        data = json.loads(RECENT_RUNS_PATH.read_text(encoding="utf-8"))
+        if isinstance(data, list):
+            return [r for r in data if r.get("landmark_chosen")]
+        return []
+    except Exception:
+        return []
+
+
+def _save_landmark_run(state, city, category, landmark_name, landmark_type,
+                       score, track, contrast_prob, top_3):
+    from datetime import datetime
+    entry = {
+        "timestamp": datetime.now().isoformat(),
+        "landmark_state": state,
+        "landmark_city": city,
+        "quote_category": category,
+        "landmark_chosen": landmark_name,
+        "landmark_type": landmark_type,
+        "landmark_score": score,
+        "track": track,
+        "contrast_probability": contrast_prob,
+        "top_3_considered": [{"name": lm["name"], "score": s} for s, lm in top_3],
+    }
+    try:
+        data = json.loads(RECENT_RUNS_PATH.read_text(encoding="utf-8")) if RECENT_RUNS_PATH.exists() else []
+        if not isinstance(data, list):
+            data = []
+        data.append(entry)
+        data = data[-200:]
+        RECENT_RUNS_PATH.write_text(json.dumps(data, indent=2, ensure_ascii=False, default=str), encoding="utf-8")
+    except Exception:
+        pass
+
+
+def select_landmark(location: dict, theme: str, emotion: str, time_of_day: str,
+                    situation_keywords: list = None) -> dict | None:
+    """Pick the best landmark for a quote from the curated DB. Returns None if city not in DB."""
+    import random as _rnd
+
+    result = _find_city_in_db(location)
+    if not result:
+        return None
+
+    state, city, landmarks = result
+    emotion_primary = emotion.get("primary", "") if isinstance(emotion, dict) else str(emotion)
+    category = _resolve_landmark_category(theme, emotion_primary)
+    landmark_time = APP_TIME_TO_LANDMARK_TIME.get(time_of_day, "morning")
+    keywords = situation_keywords or []
+
+    recent_runs = _load_landmark_recent()
+    usage_counts = _get_landmark_usage(recent_runs, state, city)
+    track, contrast_prob = _pick_track(recent_runs, category)
+
+    scored = []
+    for lm in landmarks:
+        used = usage_counts.get(lm["name"], 0)
+        s = _score_landmark(lm, category, landmark_time, keywords, used, track)
+        scored.append((s, lm))
+
+    scored.sort(key=lambda x: x[0], reverse=True)
+    top_3 = scored[:3]
+
+    if not top_3:
+        return None
+
+    weights = [max(s, 1.0) for s, _ in top_3]
+    chosen_score, chosen_lm = _rnd.choices(top_3, weights=weights, k=1)[0]
+
+    _save_landmark_run(state, city, category, chosen_lm["name"],
+                       chosen_lm.get("type", ""), chosen_score, track,
+                       contrast_prob, top_3)
+
+    return {
+        "landmark": chosen_lm,
+        "score": chosen_score,
+        "track": track,
+        "contrast_probability": contrast_prob,
+        "category": category,
+        "state": state,
+        "city": city,
+        "top_3": [{"name": lm["name"], "score": s, "type": lm.get("type", "")} for s, lm in top_3],
+    }
 
 
 def _get_expanded_emotion_seeds() -> dict:
@@ -74,11 +283,40 @@ def _session() -> requests.Session:
 
 
 # ═══════════════════════════════════════════════════
+# LOCATION RESOLVER
+# ═══════════════════════════════════════════════════
+
+def resolve_location(location_key: str = "mumbai", custom_location: str = None) -> dict:
+    """
+    Resolve location: returns predefined location from LOCATIONS or constructs
+    a dynamic location object for a custom user location, overriding predefined values.
+    """
+    if custom_location and custom_location.strip():
+        name = custom_location.strip()
+        for k, v in LOCATIONS.items():
+            if name.lower() in (k.lower(), v.get("name", "").lower()):
+                return v
+        return {
+            "name": name,
+            "lat": 20.5937,
+            "lon": 78.9629,
+            "custom": True,
+        }
+    return LOCATIONS.get(location_key, LOCATIONS.get("mumbai", {"name": "Mumbai", "lat": 19.0760, "lon": 72.8777}))
+
+
+# ═══════════════════════════════════════════════════
 # CONTEXT ENRICHMENT
 # ═══════════════════════════════════════════════════
 
-def enrich_context(quote, location, date, time_of_day, language: str = "English", translated_en_quote: str = "", regional_profile: str = None) -> Context:
-    """Gather all context data. Called by app.py Step 1."""
+def enrich_context(
+    quote, location, date, time_of_day,
+    language: str = "English", translated_en_quote: str = "",
+    regional_profile: str = None, custom_keywords: list[str] = None
+) -> Context:
+    """Gather all context data. Called by app.py Step 1.
+    If custom_keywords is provided, overrides subsequent NLP analysis and translation.
+    """
     weather = get_weather(location["lat"], location["lon"])
     panchang_data = get_full_panchang(date, location=location, regional_profile=regional_profile, language=language)
     festival = None
@@ -97,12 +335,25 @@ def enrich_context(quote, location, date, time_of_day, language: str = "English"
     else:
         festival = get_festival(date, location=location, regional_profile=regional_profile, language=language)
 
-    analysis_quote = translated_en_quote if translated_en_quote else quote
-    quote_analysis = analyze_quote(analysis_quote)
-    en_keywords = translate_hi_to_en(quote_analysis.key_terms)
-    emotion = detect_emotion(quote_analysis, en_keywords=en_keywords)
-
-    visual_imagery = extract_visual_imagery(quote_analysis, en_keywords)
+    if custom_keywords:
+        # Override subsequent NLP extraction & translation functions directly
+        clean_kws = [k.strip() for k in custom_keywords if k.strip()]
+        quote_analysis = QuoteAnalysis(
+            text=quote,
+            nouns=clean_kws,
+            key_terms=clean_kws,
+            has_concrete=True,
+        )
+        quote_analysis.theme = _infer_theme(quote_analysis)
+        en_keywords = clean_kws
+        emotion = detect_emotion(quote_analysis, en_keywords=en_keywords)
+        visual_imagery = clean_kws[:]
+    else:
+        analysis_quote = translated_en_quote if translated_en_quote else quote
+        quote_analysis = analyze_quote(analysis_quote)
+        en_keywords = translate_hi_to_en(quote_analysis.key_terms)
+        emotion = detect_emotion(quote_analysis, en_keywords=en_keywords)
+        visual_imagery = extract_visual_imagery(quote_analysis, en_keywords)
 
     return Context(
         weather=weather, festival=festival, quote_analysis=quote_analysis,
@@ -327,11 +578,57 @@ def translate_hi_to_en(words: list) -> list:
 # KNOWLEDGE CHAIN
 # ═══════════════════════════════════════════════════
 
-def run_knowledge_chain(context, location) -> CandidatePool:
+def run_knowledge_chain(context, location, custom_candidates: list[str] = None) -> CandidatePool:
     """
     Sequential 6-chain pipeline. Called by app.py Step 1.
     Each chain enriches the next. Returns pre-built candidates.
+    If custom_candidates is provided, completely overrides the 6 chains and builds pool directly.
     """
+    if custom_candidates:
+        prepared = []
+        loc_name = location.get("name", "India")
+        w_cond = context.weather.get("condition", "clear sky") if context.weather else "clear sky"
+        w_temp = context.weather.get("temp", 20) if context.weather else 20
+        weather_ctx = f"{w_cond}, {w_temp}C"
+
+        for idx, item in enumerate(custom_candidates):
+            item_str = item.strip()
+            if not item_str:
+                continue
+            cand_id = f"custom_candidate_{idx + 1}"
+            scene_text = f"Set against the authentic atmospheric backdrop of {loc_name} during {context.time}, with {w_cond} and natural ambient lighting."
+            prepared.append(
+                PreparedCandidate(
+                    id=cand_id,
+                    name=item_str,
+                    domain="PHOTOREALISTIC",
+                    entity_type="custom_user_candidate",
+                    groundable=True,
+                    cultural=True,
+                    chain_sources=["user_override"],
+                    subject_text=item_str,
+                    scene_text=scene_text,
+                    weather_context=weather_ctx,
+                    visual_phrases=[item_str],
+                    verb_type="physical",
+                    quote_native=True,
+                )
+            )
+
+        if not prepared:
+            prepared = _cultural_fallback_candidates(
+                context.emotion, context.quote_analysis.theme,
+                context.en_keywords, context.weather, context.time, location,
+            )
+
+        return CandidatePool(
+            pool=prepared,
+            emotion=context.emotion,
+            theme=context.quote_analysis.theme,
+            negated=context.quote_analysis.negated_nouns,
+            quote=context.quote,
+        )
+
     # Chain 1: word understanding via English WordNet (translate-first).
     # Replaces the discontinued pyiwn/IndoWordNet path.
     word_info = chain_1_word_understanding(context.quote_analysis, context.en_keywords)
@@ -369,7 +666,13 @@ def run_knowledge_chain(context, location) -> CandidatePool:
         en_keywords, emotion=context.emotion, theme=context.quote_analysis.theme)
 
     # Merge all results into candidate pool
-    location_features = discover_location_features(location)
+    # Landmark-based location features: use the chosen landmark if available
+    lm_sel = context.landmark_selection
+    if lm_sel:
+        lm = lm_sel["landmark"]
+        location_features = [{"name": lm["name"], "type": lm.get("type", ""), "qid": None}]
+    else:
+        location_features = [{"name": location.get("name", ""), "type": "location", "qid": None}]
     cultural_data = _load_cultural()
     raw_candidates = merge_all(
         wikidata_results, wiki_results, dbpedia_results,
@@ -480,24 +783,9 @@ def chain_1_word_understanding(quote_analysis, en_keywords) -> dict:
 
 
 def chain_2_wikidata(en_keywords, location, emotion="", theme="", festival="") -> dict:
-    """Live Wikidata discovery: mythology via SPARQL, location landmarks, symbols."""
+    """Live Wikidata discovery: mythology via SPARQL, symbols."""
     import random
     out = {"symbols": [], "location_features": [], "mythology": [], "fiction": []}
-
-    # Location landmarks (uses multi-location if sub-districts available)
-    try:
-        subdist_qids = location.get("subdist_qids", [])
-        if subdist_qids:
-            subdist_values = " ".join(f"wd:{q}" for q in subdist_qids)
-            out["location_features"] = query_wikidata(
-                "location_landmarks_multi",
-                location_qid=location["qid"],
-                subdist_values=subdist_values)
-        else:
-            out["location_features"] = query_wikidata(
-                "location_landmarks", location_qid=location["qid"])
-    except Exception:
-        pass
 
     # Live mythology discovery via three-way UNION SPARQL (cached — same for all quotes)
     try:
@@ -696,79 +984,40 @@ def chain_6_cultural(en_keywords, emotion=None, theme=None) -> list:
 
 
 # ═══════════════════════════════════════════════════
-# LOCATION DISCOVERY
+# LOCATION DETAILS (landmark-based)
 # ═══════════════════════════════════════════════════
 
-def discover_location_features(location) -> list:
-    """Wikidata: what notable things exist at this location? Cached."""
-    key = f"loc_features_{location['name']}"
-    cached = load_cache(key, "location")
-    if cached is not None:
-        return cached
-
-    result = []
-    try:
-        subdist_qids = location.get("subdist_qids", [])
-        if subdist_qids:
-            subdist_values = " ".join(f"wd:{q}" for q in subdist_qids)
-            features = query_wikidata(
-                "location_landmarks_multi",
-                location_qid=location["qid"],
-                subdist_values=subdist_values)
-        else:
-            features = query_wikidata("location_landmarks", location_qid=location["qid"])
-
-        pre_filtered = []
-        for f in features:
-            name = f.get("label", "")
-            if name and not _is_nonvisual_entity(name):
-                pre_filtered.append(f)
-
-        # Batch type lookup instead of N+1 queries
-        qids = [f["qid"] for f in pre_filtered if f.get("qid")]
-        type_map = {}
-        if qids:
-            try:
-                type_map = _batch_type_lookup(qids[:50])
-            except Exception:
-                pass
-
-        for f in pre_filtered[:25]:
-            name = f.get("label", "")
-            qid = f.get("qid", "")
-            f_type = type_map.get(qid, "")
-            if _is_nonvisual_entity(name, f_type):
-                continue
-            result.append({"name": name, "type": f_type, "qid": qid})
-    except Exception:
-        pass
-
-    save_cache(key, result)
-    return result
-
-
-def discover_location_details(location) -> list:
-    """Wikipedia: visual details for each location feature. Called by app.py."""
-    key = f"loc_details_{location['name']}"
-    cached = load_cache(key, "wikipedia")
-    if cached is not None:
-        return cached
-
+def discover_location_details(location, landmark_selection=None) -> list:
+    """Build location details from the chosen landmark's visual_description."""
     details = []
-    try:
-        features = discover_location_features(location)
-        for feat in features[:8]:
-            if not feat.get("name"):
-                continue
-            summary = fetch_wikipedia(feat["name"])
-            phrases = extract_visual_phrases(summary)
-            for phrase in phrases[:4]:
-                details.append({"id": f"D{len(details) + 1}",
-                                "text": phrase, "source": feat["name"]})
-    except Exception:
-        pass
 
-    save_cache(key, details)
+    if landmark_selection:
+        lm = landmark_selection["landmark"]
+        vis_desc = lm.get("visual_description", "")
+        known_for = lm.get("known_for", "")
+        lm_name = lm.get("name", "")
+
+        if vis_desc:
+            details.append({"id": "D1", "text": vis_desc, "source": lm_name})
+        if known_for:
+            details.append({"id": "D2", "text": known_for, "source": lm_name})
+
+        # Add setting keywords as atmospheric context
+        kws = lm.get("setting_keywords", [])
+        if kws:
+            details.append({
+                "id": "D3",
+                "text": f"atmospheric elements: {', '.join(kws[:6])}",
+                "source": lm_name,
+            })
+
+    if not details:
+        loc_name = location.get("name", "the location")
+        details = [
+            {"id": "D1", "text": f"characteristic architecture and natural atmosphere of {loc_name}", "source": loc_name},
+            {"id": "D2", "text": f"distinctive ambient scenery and textures of {loc_name}", "source": loc_name},
+        ]
+
     return details
 
 

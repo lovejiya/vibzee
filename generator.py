@@ -16,7 +16,11 @@ from datetime import datetime
 from specs import (
     GEMINI_SYSTEM_PROMPT, GEMINI_MODEL, GEMINI_API_KEY,
     DOMAIN_PROFILES, LAYOUT_PROFILES, APPROACH_TEMPLATES,
-    MasterPrompt, RECENT_RUNS_PATH,
+    MasterPrompt, RECENT_RUNS_PATH, SACRED_SUBJECT_TYPES,
+)
+from layout_engine import (
+    compute_layout, detect_sacred_regions, validate_layout,
+    repair_layout, select_layout, build_layout_context_for_gemini,
 )
 from pathlib import Path
 
@@ -25,28 +29,42 @@ def generate(candidates, context, location_details, photo_ratio, location) -> Ma
     """
     Main generation function. Called by app.py Step 2.
 
-    1. Build menu of pre-written pieces
-    2. Call Gemini to select + restructure
-    3. Verify word count
-    4. Save to recency
-    5. Return MasterPrompt
+    1. Compute deterministic layout geometry
+    2. Build menu of pre-written pieces (with layout context)
+    3. Call Gemini to select + restructure
+    4. Detect sacred regions from Gemini output, validate & repair
+    5. Save to recency
+    6. Return MasterPrompt
     """
     recent = load_recent()
-    menu = build_menu(candidates, context, location_details, photo_ratio, location, recent)
+
+    layout_id = select_layout(context, recent)
+    layout_plan = compute_layout(layout_id, photo_ratio)
+
+    menu = build_menu(candidates, context, location_details, photo_ratio, location, recent, layout_plan)
 
     try:
         selections = call_gemini(menu)
-        prompt = build_master_prompt(selections, candidates, location_details, photo_ratio)
+        sacred = detect_sacred_regions(selections)
+        layout_plan.protected_regions = sacred
+        passed, violations = validate_layout(layout_plan)
+        if not passed:
+            layout_plan = repair_layout(layout_plan)
+        else:
+            layout_plan.validation_passed = True
+
+        prompt = build_master_prompt(selections, candidates, location_details, photo_ratio, layout_plan)
         prompt = verify_word_count(prompt)
     except Exception as exc:
-        prompt = fallback(candidates, context, location_details, photo_ratio)
+        layout_plan.validation_passed = True
+        prompt = fallback(candidates, context, location_details, photo_ratio, layout_plan)
         prompt.gemini_selections.setdefault("error", str(exc))
 
     save_recent(prompt)
     return prompt
 
 
-def build_menu(candidates, context, location_details, photo_ratio, location, recent) -> str:
+def build_menu(candidates, context, location_details, photo_ratio, location, recent, layout_plan=None) -> str:
     """
     Format pre-built pieces into a structured menu for Gemini.
 
@@ -66,6 +84,15 @@ def build_menu(candidates, context, location_details, photo_ratio, location, rec
     quote_native = [c for c in pool if c.quote_native]
     supplementary = [c for c in pool if not c.quote_native]
 
+    # Landmark context for Gemini
+    lm_sel = context.landmark_selection
+    lm_context = ""
+    if lm_sel:
+        lm = lm_sel["landmark"]
+        lm_context = f"""  Landmark: {lm['name']} ({lm.get('type', '')})
+  Landmark visual: {lm.get('visual_description', '')}
+  Landmark track: {lm_sel['track']} (category: {lm_sel['category']})"""
+
     menu = f"""CONTEXT:
   Quote: "{candidates.quote}"
   Emotion: {context.emotion.get('primary')}
@@ -76,8 +103,16 @@ def build_menu(candidates, context, location_details, photo_ratio, location, rec
   Festival: {context.festival or "None"}
   Photo ratio: {photo_ratio}
   Location: {location['name']}
+{lm_context}
   Recent (avoid): {recent_avoid}
 """
+    if layout_plan:
+        menu += "\n=== LAYOUT GEOMETRY (pre-computed, do NOT change) ===\n"
+        menu += build_layout_context_for_gemini(layout_plan) + "\n"
+        menu += ("  Place the scene's visual weight in the " + layout_plan.visual_weight_zone + " zone.\n")
+        menu += ("  SACRED SUBJECT RULE: If the scene includes a deity, temple spire, dome,\n"
+                 "  sacred fire, or other sacred element, report its approximate position\n"
+                 "  in the 'sacred_subjects' field so we can protect it from text overlay.\n")
     if quote_native:
         menu += "\n=== QUOTE-NATIVE VISUALS ===\n"
         menu += "These come from the quote's own words. They are the PRIMARY subject.\n"
@@ -109,11 +144,17 @@ def build_menu(candidates, context, location_details, photo_ratio, location, rec
         prof = DOMAIN_PROFILES[name]
         menu += f'[{name}] style: "{prof["style_text"]}" | avoid: "{prof["avoid_text"]}"\n'
 
-    menu += ("\n=== LAYOUTS ===\nPick 1. Use this to guide WHERE to place scene "
-             "elements — do NOT put this text in the prompt.\n")
-    for name in layouts:
-        prof = LAYOUT_PROFILES[name]
-        menu += f'[{name}] ({prof["corner"]}, {prof["arrangement"]}): {prof["gemini_guidance"]}\n'
+    if layout_plan:
+        sel_prof = LAYOUT_PROFILES.get(layout_plan.layout_id, {})
+        menu += (f'\n=== SELECTED LAYOUT ===\n'
+                 f'[{layout_plan.layout_id}] ({sel_prof.get("corner", "")}, {sel_prof.get("arrangement", "")}): '
+                 f'{sel_prof.get("gemini_guidance", "")}\n')
+    else:
+        menu += ("\n=== LAYOUTS ===\nPick 1. Use this to guide WHERE to place scene "
+                 "elements — do NOT put this text in the prompt.\n")
+        for name in layouts:
+            prof = LAYOUT_PROFILES[name]
+            menu += f'[{name}] ({prof["corner"]}, {prof["arrangement"]}): {prof["gemini_guidance"]}\n'
 
     menu += ("\n=== APPROACHES ===\nPick 1. Use this to guide HOW the empty corner "
              "is described — do NOT put this text in the prompt.\n")
@@ -197,10 +238,10 @@ def translate_quote_to_english(quote: str, language: str) -> str:
         return quote
 
 
-def build_master_prompt(selections, candidates, location_details, photo_ratio) -> MasterPrompt:
+def build_master_prompt(selections, candidates, location_details, photo_ratio, layout_plan=None) -> MasterPrompt:
     """Build MasterPrompt from Gemini's selections."""
     domain = selections.get("selected_domain", "PHOTOREALISTIC")
-    layout = selections.get("selected_layout", "RB-V")
+    layout = layout_plan.layout_id if layout_plan else selections.get("selected_layout", "RB-V")
     approach = str(selections.get("selected_approach", "1"))
 
     # Subject from selected metaphor ids
@@ -229,7 +270,6 @@ def build_master_prompt(selections, candidates, location_details, photo_ratio) -
         subject=subject,
         scene=scene,
         style=DOMAIN_PROFILES.get(domain, DOMAIN_PROFILES["PHOTOREALISTIC"])["style_text"],
-
         composition=LAYOUT_PROFILES.get(layout, LAYOUT_PROFILES["RB-V"])["gemini_guidance"],
         empty_space=empty_space,
         details=details,
@@ -242,6 +282,7 @@ def build_master_prompt(selections, candidates, location_details, photo_ratio) -
         metaphor_used=str(chosen_ids),
         full_prompt=selections.get("full_prompt", "").strip(),
         gemini_selections=selections,
+        layout_plan=layout_plan,
     )
 
 
@@ -250,7 +291,7 @@ def verify_word_count(prompt: MasterPrompt) -> MasterPrompt:
     return prompt
 
 
-def fallback(candidates, context, location_details, photo_ratio) -> MasterPrompt:
+def fallback(candidates, context, location_details, photo_ratio, layout_plan=None) -> MasterPrompt:
     """Rule-based fallback when Gemini is down. Picks diverse candidates & styles."""
     pool = candidates.pool if candidates.pool else []
     recent = load_recent()
@@ -261,18 +302,22 @@ def fallback(candidates, context, location_details, photo_ratio) -> MasterPrompt
     details = random.sample(location_details, min(3, len(location_details))) if location_details else []
     detail_text = ", ".join(d["text"] for d in details)
 
-    # Pick dynamic domain and layout from allowed profiles
     available_domains = _filter_recent(list(DOMAIN_PROFILES), {r.get("domain") for r in recent[-4:]}, keep_min=2)
     domain = candidate.domain if (candidate and candidate.domain in DOMAIN_PROFILES) else random.choice(available_domains)
-    available_layouts = _filter_recent(list(LAYOUT_PROFILES), {r.get("layout") for r in recent[-4:]}, keep_min=3)
-    layout = random.choice(available_layouts)
+    layout = layout_plan.layout_id if layout_plan else random.choice(
+        _filter_recent(list(LAYOUT_PROFILES), {r.get("layout") for r in recent[-4:]}, keep_min=3))
     approach = str(random.randint(1, 4))
 
     subject = candidate.subject_text if candidate else ""
     scene = candidate.scene_text if candidate else ""
 
-    # Scene description only — no composition/positioning language (matches the
-    # scene-description contract used for the Gemini path).
+    # Inject landmark visual description into scene if available
+    lm_sel = context.landmark_selection if hasattr(context, "landmark_selection") else None
+    if lm_sel:
+        lm_vis = lm_sel["landmark"].get("visual_description", "")
+        if lm_vis:
+            scene = f"{lm_vis}, {scene}" if scene else lm_vis
+
     parts = [
         f"{photo_ratio} portrait image, high resolution.",
         f"{subject}." if subject else "",
@@ -300,6 +345,7 @@ def fallback(candidates, context, location_details, photo_ratio) -> MasterPrompt
         photo_ratio=photo_ratio,
         metaphor_used=candidate.name if candidate else "",
         gemini_selections={"fallback": True, "reasoning": "Gemini unavailable"},
+        layout_plan=layout_plan,
     )
 
 

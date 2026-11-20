@@ -13,6 +13,7 @@ from specs import LOCATIONS, QUOTES
 from panchange_engine import REGIONAL_PROFILES
 from app import run_pipeline, classify_time
 from logs.logger import build_run_log
+import sources
 
 
 def prompt_quote() -> str:
@@ -57,21 +58,38 @@ def prompt_language() -> str:
     return "English"
 
 
-def prompt_location() -> str:
+def prompt_location():
     print("\n--- Step 3: Select Location ---")
     loc_keys = list(LOCATIONS.keys())
     for idx, key in enumerate(loc_keys, 1):
         name = LOCATIONS[key].get("name", key.title())
         print(f"  {idx}. {name} ({key})")
+    print(f"  {len(loc_keys) + 1}. Custom location (enter own city/place)")
 
     default_idx = 1
     if "mumbai" in loc_keys:
         default_idx = loc_keys.index("mumbai") + 1
 
-    choice = input(f"Choose location (1-{len(loc_keys)}) [default: {default_idx}]: ").strip()
+    choice = input(f"Choose location (1-{len(loc_keys) + 1}) [default: {default_idx}]: ").strip()
+    if choice == str(len(loc_keys) + 1):
+        custom = input("Enter custom location name (e.g. Jaipur, Ladakh, Kyoto): ").strip()
+        if custom:
+            return sources.resolve_location(custom_location=custom), True
     if choice.isdigit() and 1 <= int(choice) <= len(loc_keys):
-        return loc_keys[int(choice) - 1]
-    return loc_keys[default_idx - 1]
+        k = loc_keys[int(choice) - 1]
+        return LOCATIONS[k], False
+    return LOCATIONS[loc_keys[default_idx - 1]], False
+
+
+def prompt_custom_overrides():
+    print("\n--- Optional: Direct Overrides (bypasses search/extraction steps) ---")
+    kw_in = input("Enter own key words (comma-separated, or press Enter to auto-extract): ").strip()
+    keywords = [k.strip() for k in kw_in.split(",") if k.strip()] if kw_in else None
+
+    cand_in = input("Enter own visual candidates/subjects (comma-separated, or press Enter for 6-chain search): ").strip()
+    candidates = [c.strip() for c in cand_in.split(",") if c.strip()] if cand_in else None
+
+    return keywords, candidates
 
 
 def prompt_ratio() -> str:
@@ -132,26 +150,49 @@ def main():
 
     quote = prompt_quote()
     language = prompt_language()
-    location_key = prompt_location()
-    location = LOCATIONS[location_key]
+    location, is_custom_loc = prompt_location()
     ratio = prompt_ratio()
     regional_profile = prompt_regional_profile()
     dt = prompt_datetime()
     time_of_day = classify_time(dt.hour)
+    custom_keywords, custom_candidates = prompt_custom_overrides()
     quiet = prompt_view_mode()
 
     print("\n" + "=" * 55)
     print(f"🚀 Generating Prompt...")
     print(f"Quote:    \"{quote}\"")
-    print(f"Language: {language} | Location: {location['name']} | Ratio: {ratio}")
+    print(f"Language: {language} | Location: {location['name']}{' (Override)' if is_custom_loc else ''} | Ratio: {ratio}")
+    if custom_keywords:
+        print(f"Custom Keywords (Override): {custom_keywords}")
+    if custom_candidates:
+        print(f"Custom Candidates (Override): {custom_candidates}")
     print(f"Regional Profile: {regional_profile or 'Auto (Inferred)'}")
     print(f"Date:     {dt.strftime('%Y-%m-%d')} | Time: {dt.strftime('%H:%M')} ({time_of_day})")
-    print("=" * 55 + "\n")
+    print("=" * 55)
 
     ctx, candidates, loc_details, prompt = run_pipeline(
         quote, location, dt, time_of_day, ratio,
-        language=language, regional_profile=regional_profile
+        language=language, regional_profile=regional_profile,
+        custom_keywords=custom_keywords,
+        custom_candidates=custom_candidates,
     )
+
+    # Show landmark selection
+    if ctx.landmark_selection:
+        lm = ctx.landmark_selection
+        print(f"\n📍 Landmark: {lm['landmark']['name']} ({lm['landmark'].get('type', '')})")
+        print(f"   Score: {lm['score']} | Track: {lm['track']} | Category: {lm['category']}")
+        print(f"   Top 3: {', '.join(t['name'] + ' (' + str(t['score']) + ')' for t in lm['top_3'])}")
+
+    # Show layout plan
+    if prompt.layout_plan:
+        lp = prompt.layout_plan
+        status = "✓ Valid" if lp.validation_passed else "✗ Failed"
+        print(f"\n📐 Layout: {lp.layout_id} | Weight: {lp.visual_weight_zone} | {status}")
+        if lp.repair_applied:
+            print(f"   Repaired: {lp.repair_reason}")
+        if lp.protected_regions:
+            print(f"   Protected: {len(lp.protected_regions)} sacred region(s)")
 
     if quiet:
         print("\n" + "=" * 60)

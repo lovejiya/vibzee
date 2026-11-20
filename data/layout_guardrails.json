@@ -1,0 +1,79 @@
+{
+  "policy_version": "1.0",
+  "canvas": {
+    "aspect_ratio": "4:5",
+    "width_norm": 1.0,
+    "height_norm": 1.0,
+    "margin": 0.03
+  },
+  "quote_zone": {
+    "min_width": 0.30,
+    "max_width": 0.55,
+    "min_height": 0.15,
+    "max_height": 0.35,
+    "padding": 0.02
+  },
+  "photo_zone": {
+    "default_size": 0.22,
+    "min_size": 0.15,
+    "max_size": 0.30,
+    "gap_from_quote": 0.02
+  },
+  "sacred_rules": {
+    "deity_face": {
+      "rule": "no_overlap",
+      "description": "Quote/photo must never overlap a deity's face region"
+    },
+    "temple_spire": {
+      "rule": "no_overlap",
+      "description": "Do not clip or overlap architectural spires, domes, minarets"
+    },
+    "sacred_object": {
+      "rule": "no_overlap",
+      "description": "Sacred flames, lingams, crosses — no overlay"
+    },
+    "dome_apex": {
+      "rule": "no_overlap",
+      "description": "Dome apex and surrounding area must be clear"
+    }
+  },
+  "overlap_limits": {
+    "max_quote_photo_overlap_pct": 0.0,
+    "max_text_on_sacred_pct": 0.0,
+    "max_photo_on_sacred_pct": 0.0
+  },
+  "layout_geometry": {
+    "LT-V": {
+      "quote": {"x": 0.03, "y": 0.03, "w": 0.45, "h": 0.25},
+      "photo": {"x": 0.03, "y": 0.30, "w": 0.22, "h": 0.22}
+    },
+    "RT-V": {
+      "quote": {"x": 0.52, "y": 0.03, "w": 0.45, "h": 0.25},
+      "photo": {"x": 0.75, "y": 0.30, "w": 0.22, "h": 0.22}
+    },
+    "LB-V": {
+      "quote": {"x": 0.03, "y": 0.72, "w": 0.45, "h": 0.25},
+      "photo": {"x": 0.03, "y": 0.48, "w": 0.22, "h": 0.22}
+    },
+    "RB-V": {
+      "quote": {"x": 0.52, "y": 0.72, "w": 0.45, "h": 0.25},
+      "photo": {"x": 0.75, "y": 0.48, "w": 0.22, "h": 0.22}
+    },
+    "LT-H": {
+      "quote": {"x": 0.03, "y": 0.03, "w": 0.45, "h": 0.25},
+      "photo": {"x": 0.50, "y": 0.03, "w": 0.22, "h": 0.22}
+    },
+    "RT-H": {
+      "quote": {"x": 0.52, "y": 0.03, "w": 0.45, "h": 0.25},
+      "photo": {"x": 0.28, "y": 0.03, "w": 0.22, "h": 0.22}
+    },
+    "LB-H": {
+      "quote": {"x": 0.03, "y": 0.72, "w": 0.45, "h": 0.25},
+      "photo": {"x": 0.50, "y": 0.73, "w": 0.22, "h": 0.22}
+    },
+    "RB-H": {
+      "quote": {"x": 0.52, "y": 0.72, "w": 0.45, "h": 0.25},
+      "photo": {"x": 0.28, "y": 0.73, "w": 0.22, "h": 0.22}
+    }
+  }
+}

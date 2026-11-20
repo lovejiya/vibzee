@@ -38,6 +38,7 @@ CACHE_DIR = DATA_DIR / "cache"
 PANCHANG_PATH = ROOT / "panchang_2026.json"
 CULTURAL_METAPHORS_PATH = DATA_DIR / "cultural_metaphors.json"
 RECENT_RUNS_PATH = DATA_DIR / "recent_runs.json"
+LANDMARK_DB_PATH = ROOT / "landmark_db.json"
 
 
 # ═══════════════════════════════════════════════════
@@ -67,6 +68,7 @@ class Context(BaseModel):
     visual_imagery: list = []           # quote's own concrete visual words
     visual_richness_score: int = 0      # count of visual words in quote
     panchang_details: Optional[dict] = None  # Full dual-engine dynamic panchang & festival results
+    landmark_selection: Optional[dict] = None  # Chosen landmark + scoring metadata
 
 
 class PreparedCandidate(BaseModel):
@@ -93,6 +95,51 @@ class CandidatePool(BaseModel):
     quote: str = ""                     # original quote (passed through for menu)
 
 
+class BoundingBox(BaseModel):
+    x: float          # left edge, 0.0–1.0
+    y: float          # top edge, 0.0–1.0
+    w: float          # width, 0.0–1.0
+    h: float          # height, 0.0–1.0
+
+    @property
+    def right(self) -> float:
+        return self.x + self.w
+
+    @property
+    def bottom(self) -> float:
+        return self.y + self.h
+
+    @property
+    def area(self) -> float:
+        return self.w * self.h
+
+    def overlaps(self, other: "BoundingBox") -> bool:
+        return not (self.right <= other.x or other.right <= self.x
+                    or self.bottom <= other.y or other.bottom <= self.y)
+
+    def overlap_area(self, other: "BoundingBox") -> float:
+        dx = max(0, min(self.right, other.right) - max(self.x, other.x))
+        dy = max(0, min(self.bottom, other.bottom) - max(self.y, other.y))
+        return dx * dy
+
+
+class ProtectedRegion(BaseModel):
+    label: str = ""               # e.g. "deity_face", "dome_apex"
+    box: BoundingBox
+    rule: str = "no_overlap"      # "no_overlap" | "partial_ok"
+
+
+class LayoutPlan(BaseModel):
+    layout_id: str = ""
+    quote_box: Optional[BoundingBox] = None
+    photo_box: Optional[BoundingBox] = None
+    protected_regions: list[ProtectedRegion] = []
+    visual_weight_zone: str = ""  # human description: "lower-right", "upper-left"
+    validation_passed: bool = False
+    repair_applied: bool = False
+    repair_reason: str = ""
+
+
 class MasterPrompt(BaseModel):
     image_type_format: str = "4:5 portrait image, high resolution"
     subject: str = ""
@@ -110,6 +157,7 @@ class MasterPrompt(BaseModel):
     metaphor_used: str = ""
     full_prompt: str = ""
     gemini_selections: dict = {}
+    layout_plan: Optional[LayoutPlan] = None
 
 
 # ═══════════════════════════════════════════════════
@@ -138,10 +186,110 @@ HTTP_USER_AGENT = "VibzeePromptGenerator/1.0 (image-prompt-research)"
 # ═══════════════════════════════════════════════════
 
 LOCATIONS = {
-    "mumbai": {"lat": 19.0760, "lon": 72.8777, "name": "Mumbai", "qid": "Q1156",
-               "subdist_qids": ["Q2341660", "Q2085374"]},
-    "varanasi": {"lat": 25.3176, "lon": 83.0068, "name": "Varanasi", "qid": "Q79980",
-                 "subdist_qids": []},
+    # Maharashtra
+    "mumbai": {"lat": 19.0760, "lon": 72.8777, "name": "Mumbai", "state": "maharashtra"},
+    "pune": {"lat": 18.5204, "lon": 73.8567, "name": "Pune", "state": "maharashtra"},
+    "nashik": {"lat": 19.9975, "lon": 73.7898, "name": "Nashik", "state": "maharashtra"},
+    "aurangabad": {"lat": 19.8762, "lon": 75.3433, "name": "Aurangabad", "state": "maharashtra"},
+    "kolhapur": {"lat": 16.7050, "lon": 74.2433, "name": "Kolhapur", "state": "maharashtra"},
+    "nagpur": {"lat": 21.1458, "lon": 79.0882, "name": "Nagpur", "state": "maharashtra"},
+    # Rajasthan
+    "jaipur": {"lat": 26.9124, "lon": 75.7873, "name": "Jaipur", "state": "rajasthan"},
+    "udaipur": {"lat": 24.5854, "lon": 73.7125, "name": "Udaipur", "state": "rajasthan"},
+    "jodhpur": {"lat": 26.2389, "lon": 73.0243, "name": "Jodhpur", "state": "rajasthan"},
+    "jaisalmer": {"lat": 26.9157, "lon": 70.9083, "name": "Jaisalmer", "state": "rajasthan"},
+    "pushkar": {"lat": 26.4898, "lon": 74.5511, "name": "Pushkar", "state": "rajasthan"},
+    "bikaner": {"lat": 28.0229, "lon": 73.3119, "name": "Bikaner", "state": "rajasthan"},
+    "chittorgarh": {"lat": 24.8887, "lon": 74.6269, "name": "Chittorgarh", "state": "rajasthan"},
+    # Uttar Pradesh
+    "varanasi": {"lat": 25.3176, "lon": 83.0068, "name": "Varanasi", "state": "uttar_pradesh"},
+    "lucknow": {"lat": 26.8467, "lon": 80.9462, "name": "Lucknow", "state": "uttar_pradesh"},
+    "agra": {"lat": 27.1767, "lon": 78.0081, "name": "Agra", "state": "uttar_pradesh"},
+    "prayagraj": {"lat": 25.4358, "lon": 81.8463, "name": "Prayagraj", "state": "uttar_pradesh"},
+    "mathura": {"lat": 27.4924, "lon": 77.6737, "name": "Mathura", "state": "uttar_pradesh"},
+    "ayodhya": {"lat": 26.7922, "lon": 82.1998, "name": "Ayodhya", "state": "uttar_pradesh"},
+    # Madhya Pradesh
+    "bhopal": {"lat": 23.2599, "lon": 77.4126, "name": "Bhopal", "state": "madhya_pradesh"},
+    "indore": {"lat": 22.7196, "lon": 75.8577, "name": "Indore", "state": "madhya_pradesh"},
+    "ujjain": {"lat": 23.1765, "lon": 75.7885, "name": "Ujjain", "state": "madhya_pradesh"},
+    "gwalior": {"lat": 26.2183, "lon": 78.1828, "name": "Gwalior", "state": "madhya_pradesh"},
+    "jabalpur": {"lat": 23.1815, "lon": 79.9864, "name": "Jabalpur", "state": "madhya_pradesh"},
+    "orchha": {"lat": 25.3520, "lon": 78.6408, "name": "Orchha", "state": "madhya_pradesh"},
+    "khajuraho": {"lat": 24.8318, "lon": 79.9199, "name": "Khajuraho", "state": "madhya_pradesh"},
+    # Bihar
+    "patna": {"lat": 25.6093, "lon": 85.1376, "name": "Patna", "state": "bihar"},
+    "bodh_gaya": {"lat": 24.6961, "lon": 84.9869, "name": "Bodh Gaya", "state": "bihar"},
+    "rajgir": {"lat": 25.0286, "lon": 85.4258, "name": "Rajgir", "state": "bihar"},
+    "vaishali": {"lat": 25.6841, "lon": 85.3119, "name": "Vaishali", "state": "bihar"},
+    "gaya": {"lat": 24.7955, "lon": 84.9994, "name": "Gaya", "state": "bihar"},
+    # Gujarat
+    "ahmedabad": {"lat": 23.0225, "lon": 72.5714, "name": "Ahmedabad", "state": "gujarat"},
+    "vadodara": {"lat": 22.3072, "lon": 73.1812, "name": "Vadodara", "state": "gujarat"},
+    "dwarka": {"lat": 22.2394, "lon": 68.9678, "name": "Dwarka", "state": "gujarat"},
+    "somnath": {"lat": 20.8880, "lon": 70.4013, "name": "Somnath", "state": "gujarat"},
+    "kutch_bhuj": {"lat": 23.2420, "lon": 69.6669, "name": "Kutch (Bhuj)", "state": "gujarat"},
+    "junagadh": {"lat": 21.5222, "lon": 70.4579, "name": "Junagadh", "state": "gujarat"},
+}
+
+
+# ═══════════════════════════════════════════════════
+# LANDMARK SCORING CONSTANTS
+# ═══════════════════════════════════════════════════
+
+LANDMARK_ADJACENT_TIMES = {
+    "dawn": ["morning", "night"],
+    "morning": ["dawn", "midday"],
+    "midday": ["morning", "afternoon"],
+    "afternoon": ["midday", "golden_hour"],
+    "golden_hour": ["afternoon", "sunset"],
+    "sunset": ["golden_hour", "twilight"],
+    "twilight": ["sunset", "night"],
+    "night": ["twilight", "dawn"],
+}
+
+LANDMARK_ENERGY_PREFERENCE = {
+    "spiritual": "low", "love": "low", "friendship": "medium",
+    "motivation": "high", "courage": "high", "solitude": "low",
+    "nature": "low", "wisdom": "low", "gratitude": "medium",
+    "celebration": "high",
+}
+
+LANDMARK_ENERGY_LEVELS = ["low", "medium", "high"]
+
+LANDMARK_TYPE_AFFINITY = {
+    "spiritual": {"temple": 10, "ghat": 8, "mosque": 9, "shrine": 9, "cave": 7, "garden": 4, "ruin": 5, "lake": 6},
+    "love": {"garden": 10, "palace": 8, "lake": 9, "bridge": 7, "park": 7, "haveli": 7, "ghat": 5, "promenade": 8},
+    "friendship": {"market": 9, "street": 10, "cafe": 9, "campus": 8, "park": 7, "ghat": 7, "garden": 6, "beach": 7},
+    "motivation": {"fort": 10, "monument": 8, "stadium": 9, "campus": 7, "bridge": 8, "ruin": 7, "street": 6},
+    "courage": {"fort": 10, "monument": 9, "ruin": 8, "bridge": 7, "ghat": 5},
+    "solitude": {"ruin": 10, "lake": 9, "forest": 10, "cave": 8, "garden": 7, "ghat": 7, "temple": 6, "hill": 8},
+    "nature": {"lake": 10, "forest": 10, "hill": 9, "garden": 9, "beach": 9, "park": 8, "ghat": 7, "ruin": 6},
+    "wisdom": {"library": 10, "ruin": 10, "temple": 9, "museum": 7, "campus": 8, "garden": 7, "lake": 6},
+    "gratitude": {"garden": 9, "temple": 8, "shrine": 7, "ghat": 7, "home": 8, "market": 5},
+    "celebration": {"palace": 10, "market": 9, "haveli": 8, "ghat": 8, "street": 7, "stadium": 7, "fort": 6},
+}
+
+THEME_TO_LANDMARK_CATEGORY = {
+    "spiritual": "spiritual", "devotion": "spiritual", "love": "love",
+    "friendship": "friendship", "motivation": "motivation", "courage": "courage",
+    "solitude": "solitude", "nature": "nature", "wisdom": "wisdom",
+    "gratitude": "gratitude", "celebration": "celebration", "festival": "celebration",
+    "family": "gratitude", "peace": "solitude", "self_worth": "motivation",
+    "nostalgia": "wisdom", "good_morning": "gratitude", "good_night": "solitude",
+    "birthday": "celebration", "general": "wisdom",
+}
+
+EMOTION_TO_LANDMARK_CATEGORY = {
+    "hopeful": "motivation", "peaceful": "solitude", "determined": "courage",
+    "devotional": "spiritual", "joyful": "celebration", "reflective": "wisdom",
+    "melancholic": "solitude", "warm": "love", "grateful": "gratitude",
+    "empowered": "motivation", "nostalgic": "wisdom", "loving": "love",
+}
+
+APP_TIME_TO_LANDMARK_TIME = {
+    "pre-dawn": "night", "dawn": "dawn", "morning": "morning",
+    "late-morning": "midday", "afternoon": "afternoon",
+    "evening": "golden_hour", "dusk": "sunset", "night": "night",
 }
 
 
@@ -176,37 +324,68 @@ DOMAIN_PROFILES = {
 LAYOUT_PROFILES = {
     "LT-V": {
         "corner": "left-top", "arrangement": "vertical",
+        "anchor_x": "left", "anchor_y": "top",
+        "quote_position": "top-left", "photo_position": "below-quote",
+        "visual_weight": "lower-right",
         "gemini_guidance": "Main visual weight in lower-right. Upper-left should naturally have open sky, distant haze, or soft atmospheric elements.",
     },
     "RT-V": {
         "corner": "right-top", "arrangement": "vertical",
+        "anchor_x": "right", "anchor_y": "top",
+        "quote_position": "top-right", "photo_position": "below-quote",
+        "visual_weight": "lower-left",
         "gemini_guidance": "Main visual weight in lower-left. Upper-right should naturally have open sky, cloud gradient, or distant mountains.",
     },
     "LB-V": {
         "corner": "left-bottom", "arrangement": "vertical",
+        "anchor_x": "left", "anchor_y": "bottom",
+        "quote_position": "bottom-left", "photo_position": "above-quote",
+        "visual_weight": "upper-right",
         "gemini_guidance": "Main visual weight in upper-right. Lower-left should naturally have calm water, ground fog, or empty foreground.",
     },
     "RB-V": {
         "corner": "right-bottom", "arrangement": "vertical",
+        "anchor_x": "right", "anchor_y": "bottom",
+        "quote_position": "bottom-right", "photo_position": "above-quote",
+        "visual_weight": "upper-left",
         "gemini_guidance": "Main visual weight in upper-left. Lower-right should naturally have distant landscape, fading fog, or still water.",
     },
     "LT-H": {
         "corner": "left-top", "arrangement": "horizontal",
+        "anchor_x": "left", "anchor_y": "top",
+        "quote_position": "top-left", "photo_position": "right-of-quote",
+        "visual_weight": "lower-right",
         "gemini_guidance": "Main visual weight in lower-right and center. Upper-left should have wide open sky or soft cloud gradient.",
     },
     "RT-H": {
         "corner": "right-top", "arrangement": "horizontal",
+        "anchor_x": "right", "anchor_y": "top",
+        "quote_position": "top-right", "photo_position": "left-of-quote",
+        "visual_weight": "lower-left",
         "gemini_guidance": "Main visual weight in lower-left and center. Upper-right should have wide open sky or atmospheric haze.",
     },
     "LB-H": {
         "corner": "left-bottom", "arrangement": "horizontal",
+        "anchor_x": "left", "anchor_y": "bottom",
+        "quote_position": "bottom-left", "photo_position": "right-of-quote",
+        "visual_weight": "upper-right",
         "gemini_guidance": "Main visual weight in upper-right and center. Lower-left should have calm foreground, water surface, or ground mist.",
     },
     "RB-H": {
         "corner": "right-bottom", "arrangement": "horizontal",
+        "anchor_x": "right", "anchor_y": "bottom",
+        "quote_position": "bottom-right", "photo_position": "left-of-quote",
+        "visual_weight": "upper-left",
         "gemini_guidance": "Main visual weight in upper-left and center. Lower-right should have distant background fading into atmosphere.",
     },
 }
+
+GUARDRAIL_POLICY_VERSION = "1.0"
+
+SACRED_SUBJECT_TYPES = frozenset({
+    "deity", "god", "goddess", "temple_spire", "dome", "minaret",
+    "sacred_fire", "sacred_tree", "lingam", "cross", "crescent",
+})
 
 
 # ═══════════════════════════════════════════════════
@@ -620,13 +799,19 @@ can be placed there beside the text. 4:5 portrait aspect ratio image. Avoid: no 
 EXAMPLE (for an English quote):
 "A quiet stone veranda bathed in soft morning light, overlooking an ancient lush courtyard with rain-washed leaves and a steaming cup of tea resting on a weathered wooden table, in a warm Studio Ghibli inspired watercolor style. In the upper-right area, render the following English text in clean, elegant serif typography with gentle contrast and subtle shadow for legibility: 'In a world that never slows down, give yourself permission to pause.' Keep the upper-left area as a serene, uncluttered morning sky with delicate soft cloud gradients to leave space for a separate portrait frame. 4:5 portrait aspect ratio image. Avoid: no harsh lines, no dark moody themes."
 
+SACRED SUBJECT REPORTING:
+If your scene contains any deity, god/goddess figure, temple spire, dome, minaret,
+sacred fire, sacred tree, lingam, cross, or crescent, report each in
+"sacred_subjects" with its approximate normalized position (0.0–1.0) and type.
+This protects sacred elements from being covered by text or photo overlays.
+
 RESPOND with JSON only:
 {
     "selected_metaphor_ids": ["id1"] or ["id1", "id2"],
     "selected_domain": "PHOTOREALISTIC|MYTHOLOGICAL|ANIME|ILLUSTRATED",
-    "selected_layout": "LT-V|RT-V|LB-V|RB-V|LT-H|RT-H|LB-H|RB-H",
     "selected_approach": "1|2|3|4",
     "selected_details": ["D1", "D3"],
+    "sacred_subjects": [{"type": "deity", "position": {"x": 0.4, "y": 0.3, "w": 0.2, "h": 0.3}}],
     "full_prompt": "the complete prompt as described above, including scene,
                     text instruction with the quote in its ORIGINAL language, layout instruction, style",
     "reasoning": "2-3 sentences explaining selections"

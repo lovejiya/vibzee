@@ -2455,6 +2455,18 @@
     {
       "visual": "large suburb",
       "context": "Chembur in Mumbai"
+    },
+    {
+      "visual": "historic neighbourhood",
+      "context": "Cuffe Parade in Mumbai"
+    },
+    {
+      "visual": "final incarnation",
+      "context": "Kalki in Varanasi"
+    },
+    {
+      "visual": "chief consort",
+      "context": "Rādhā in Mumbai"
     }
   ],
   "good_morning": [
@@ -2473,6 +2485,46 @@
     {
       "visual": "eighth avatar",
       "context": "Krishna in Mumbai"
+    }
+  ],
+  "nature": [
+    {
+      "visual": "Vedic god",
+      "context": "Indra in delhi"
+    },
+    {
+      "visual": "Hindu god",
+      "context": "Agni in delhi"
+    },
+    {
+      "visual": "earliest deities",
+      "context": "Varuna in delhi"
+    }
+  ],
+  "festival": [
+    {
+      "visual": "Hindu pantheon",
+      "context": "Ganesha in Varanasi"
+    },
+    {
+      "visual": "principal goddesses",
+      "context": "Lakshmi in Varanasi"
+    },
+    {
+      "visual": "important deities",
+      "context": "Durga in Varanasi"
+    },
+    {
+      "visual": "Hindu goddess",
+      "context": "Sita in Varanasi"
+    },
+    {
+      "visual": "female protagonist",
+      "context": "Sita in Varanasi"
+    },
+    {
+      "visual": "devoted companion",
+      "context": "Hanuman in Varanasi"
     }
   ]
 }
