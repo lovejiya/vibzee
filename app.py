@@ -108,6 +108,8 @@ HTML_TEMPLATE = """
     select, input, textarea { width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; font-size: 14px; }
     button { background: #4f46e5; color: #fff; border: none; padding: 10px 18px; border-radius: 6px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 14px; }
     button:hover { background: #4338ca; }
+    .generation-error { color: #9f1239; font-size: 14px; margin: 12px 0 0; }
+    .retry-btn { margin: 0 0 0 8px; padding: 4px 8px; font-size: 12px; }
     .copy-btn { background: #10b981; float: right; margin-top: -6px; padding: 6px 12px; font-size: 13px; }
     .copy-btn:hover { background: #059669; }
     .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
@@ -208,11 +210,17 @@ HTML_TEMPLATE = """
         <label style="margin-top: 10px;">Own Key Words (overrides quote NLP extraction & translation)</label>
         <input type="text" name="custom_keywords" value="{{ custom_keywords }}" placeholder="e.g. earthen lamp, calm waters, dawn mist, serenity (comma-separated)">
 
-        <label style="margin-top: 10px;">Own Candidates / Visual Subjects (overrides 6-chain knowledge search)</label>
+        <label style="margin-top: 10px;">Own Candidates / Visual Subjects (overrides automatic search)</label>
         <textarea name="custom_candidates" rows="2" placeholder="e.g. An illuminated brass diya floating gently, Solitary monk meditating on sandstone ghat (comma-separated or one per line)">{{ custom_candidates }}</textarea>
       </div>
 
       <button type="submit">🚀 Generate Prompt</button>
+      {% if generation_error %}
+      <p class="generation-error">
+        <span role="alert">{{ generation_error }}</span>
+        <button type="submit" class="retry-btn">Retry</button>
+      </p>
+      {% endif %}
     </form>
   </div>
 
@@ -317,6 +325,7 @@ def index():
     selected_time = now.strftime("%H:%M")
     quote_input = QUOTES[0]
     prompt = None
+    generation_error = None
     ctx = None
     candidates = None
     time_of_day = classify_time(now.hour)
@@ -372,19 +381,18 @@ def index():
             if cand_list:
                 parsed_candidates = cand_list
                 is_custom_cand = True
-
-        try:
-            dt = datetime.strptime(f"{selected_date} {selected_time}", "%Y-%m-%d %H:%M")
-        except Exception:
-            dt = datetime.now()
+        dt = datetime.strptime(f"{selected_date} {selected_time}", "%Y-%m-%d %H:%M")
         time_of_day = classify_time(dt.hour)
 
-        ctx, candidates, loc_details, prompt = run_pipeline(
-            quote_input, location, dt, time_of_day, selected_ratio,
-            language=selected_lang, regional_profile=selected_profile or None,
-            custom_keywords=parsed_keywords,
-            custom_candidates=parsed_candidates,
-        )
+        try:
+            ctx, candidates, loc_details, prompt = run_pipeline(
+                quote_input, location, dt, time_of_day, selected_ratio,
+                language=selected_lang, regional_profile=selected_profile or None,
+                custom_keywords=parsed_keywords,
+                custom_candidates=parsed_candidates,
+            )
+        except generator.PromptGenerationError as exc:
+            generation_error = str(exc)
 
     return render_template_string(
         HTML_TEMPLATE,
@@ -400,6 +408,7 @@ def index():
         quote_input=quote_input,
         time_of_day=time_of_day,
         prompt=prompt,
+        generation_error=generation_error,
         ctx=ctx,
         candidates=candidates,
         custom_location=custom_location,
@@ -409,7 +418,7 @@ def index():
         is_custom_kw=is_custom_kw,
         is_custom_cand=is_custom_cand,
         active_location_name=active_location_name,
-    )
+    ), 503 if generation_error else 200
 
 
 @app.route("/api/panchang", methods=["GET"])

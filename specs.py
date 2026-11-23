@@ -26,9 +26,7 @@ except Exception:
     pass
 
 
-# ═══════════════════════════════════════════════════
 # PATHS
-# ═══════════════════════════════════════════════════
 
 ROOT = Path(__file__).parent
 DATA_DIR = ROOT / "data"
@@ -41,9 +39,7 @@ RECENT_RUNS_PATH = DATA_DIR / "recent_runs.json"
 LANDMARK_DB_PATH = ROOT / "landmark_db.json"
 
 
-# ═══════════════════════════════════════════════════
 # MODELS
-# ═══════════════════════════════════════════════════
 
 class QuoteAnalysis(BaseModel):
     text: str = ""                      # original Hindi quote
@@ -76,9 +72,9 @@ class PreparedCandidate(BaseModel):
     name: str                           # human-readable: "Ganges river", "earthen diya"
     domain: str = "PHOTOREALISTIC"      # PHOTOREALISTIC/MYTHOLOGICAL/ANIME/GHIBLI/ILLUSTRATED
     entity_type: str = ""               # from Wikidata P31: "river", "lamp", "deity"
-    groundable: bool = False            # does this exist at the current location?
     cultural: bool = False              # from cultural_metaphors.json?
     chain_sources: list[str] = []       # ["chain_2_wikidata", "chain_3_wikipedia"]
+    selection_context: str = ""         # why this subject was offered
     subject_text: str = ""              # pre-built from visual phrases
     scene_text: str = ""                # pre-built from location + weather
     weather_context: str = ""           # "mist, 18C"
@@ -160,9 +156,7 @@ class MasterPrompt(BaseModel):
     layout_plan: Optional[LayoutPlan] = None
 
 
-# ═══════════════════════════════════════════════════
 # API ENDPOINTS + KEYS
-# ═══════════════════════════════════════════════════
 
 # LLM (Gemini) — key and model come from .env.
 GEMINI_API_KEY = os.getenv("VIBZEE_LLM_API_KEY", "")
@@ -181,9 +175,7 @@ WIKIPEDIA_API_URL = "https://en.wikipedia.org/w/api.php"
 HTTP_USER_AGENT = "VibzeePromptGenerator/1.0 (image-prompt-research)"
 
 
-# ═══════════════════════════════════════════════════
 # LOCATIONS (just coordinates + qid; everything else discovered)
-# ═══════════════════════════════════════════════════
 
 LOCATIONS = {
     # Maharashtra
@@ -232,9 +224,7 @@ LOCATIONS = {
 }
 
 
-# ═══════════════════════════════════════════════════
 # LANDMARK SCORING CONSTANTS
-# ═══════════════════════════════════════════════════
 
 LANDMARK_ADJACENT_TIMES = {
     "dawn": ["morning", "night"],
@@ -293,9 +283,7 @@ APP_TIME_TO_LANDMARK_TIME = {
 }
 
 
-# ═══════════════════════════════════════════════════
 # 5 DOMAIN PROFILES
-# ═══════════════════════════════════════════════════
 
 DOMAIN_PROFILES = {
     "PHOTOREALISTIC": {
@@ -317,9 +305,7 @@ DOMAIN_PROFILES = {
 }
 
 
-# ═══════════════════════════════════════════════════
 # 8 LAYOUT PROFILES
-# ═══════════════════════════════════════════════════
 
 LAYOUT_PROFILES = {
     "LT-V": {
@@ -388,9 +374,7 @@ SACRED_SUBJECT_TYPES = frozenset({
 })
 
 
-# ═══════════════════════════════════════════════════
 # 4 APPROACH TEMPLATES
-# ═══════════════════════════════════════════════════
 
 APPROACH_TEMPLATES = {
     "1": {
@@ -451,9 +435,7 @@ EMOTION_SEEDS = {
 }
 
 
-# ═══════════════════════════════════════════════════
 # EMOTION CONCEPTS (for cultural fallback expansion)
-# ═══════════════════════════════════════════════════
 
 EMOTION_CONCEPTS = {
     "hopeful": ["hope", "dawn", "morning", "new_beginnings", "sunrise"],
@@ -471,9 +453,7 @@ EMOTION_CONCEPTS = {
 }
 
 
-# ═══════════════════════════════════════════════════
 # THEME HINTS (for thematic classification)
-# ═══════════════════════════════════════════════════
 
 THEME_HINTS = {
     "good_morning": ("morning", "dawn", "sunrise", "wake", "new day", "early", "sun"),
@@ -505,9 +485,7 @@ THEME_HINTS = {
 }
 
 
-# ═══════════════════════════════════════════════════
 # LEXICONS & NLP DICTIONARIES
-# ═══════════════════════════════════════════════════
 
 ENGLISH_STOPWORDS = {
     "the", "a", "an", "is", "are", "was", "were", "and", "or", "to", "in",
@@ -532,50 +510,7 @@ NONVISUAL_TOKENS = (
 )
 
 
-# ═══════════════════════════════════════════════════
-# EMOTION -> ANILIST GENRE (~10 entries, aesthetic judgment)
-# ═══════════════════════════════════════════════════
-
-EMOTION_TO_GENRE = {
-    "hopeful": ["Adventure", "Slice of Life"],
-    "peaceful": ["Slice of Life", "Supernatural"],
-    "determined": ["Action", "Sports"],
-    "devotional": ["Fantasy", "Mythology"],
-    "joyful": ["Comedy", "Slice of Life"],
-    "reflective": ["Drama", "Psychological"],
-    "melancholic": ["Drama", "Tragedy"],
-    "warm": ["Slice of Life", "Comedy"],
-    "grateful": ["Slice of Life", "Drama"],
-    "empowered": ["Adventure", "Action"],
-    "nostalgic": ["Drama", "Slice of Life"],
-    "loving": ["Slice of Life", "Romance"],
-}
-
-
-# ═══════════════════════════════════════════════════
-# GENRE -> ARCHETYPE (aesthetic judgment)
-# Keyed by a frozenset of genres (order-independent) with a flat fallback by genre.
-# ═══════════════════════════════════════════════════
-
-GENRE_TO_ARCHETYPE = {
-    "Action": "determined hero silhouette against dramatic sky",
-    "Adventure": "lone traveler gazing toward a vast horizon",
-    "Slice of Life": "quiet everyday moment bathed in soft light",
-    "Supernatural": "ethereal figure amid glowing natural elements",
-    "Fantasy": "mythic landscape with luminous atmosphere",
-    "Mythology": "radiant divine presence in a sacred setting",
-    "Comedy": "warm, lively scene full of gentle color",
-    "Drama": "contemplative figure in expressive lighting",
-    "Psychological": "introspective scene with layered shadow and light",
-    "Sports": "dynamic figure in motion, energetic composition",
-    "Tragedy": "solitary figure in muted, atmospheric distance",
-    "Romance": "two figures sharing a tender moment in warm light",
-}
-
-
-# ═══════════════════════════════════════════════════
 # SPARQL TEMPLATES
-# ═══════════════════════════════════════════════════
 
 SPARQL_TEMPLATES = {
     "symbols_for_concept": """
@@ -634,9 +569,7 @@ SPARQL_TEMPLATES = {
 }
 
 
-# ═══════════════════════════════════════════════════
 # MYTHOLOGY RELEVANCE SCORING (guides ranking of live SPARQL results)
-# ═══════════════════════════════════════════════════
 
 THEME_MYTHOLOGY_KEYWORDS = {
     "friendship": ["sudama", "krishna", "hanuman", "companion", "bond", "devotee", "friend"],
@@ -686,142 +619,72 @@ THEME_TO_EPIC = {
 }
 
 
-# ═══════════════════════════════════════════════════
 # GEMINI SYSTEM PROMPT
-# ═══════════════════════════════════════════════════
 
 GEMINI_SYSTEM_PROMPT = """
-You are a prompt assembler for ChatGPT's image generation (DALL-E 3).
+You are a creative Art Director and prompt designer for image generation (DALL-E 3).
 
-You receive a MENU of pre-written text pieces. Your job:
-1. SELECT pieces from each menu section
-2. REDUCE redundancy when combining pieces
-3. RESTRUCTURE selected pieces into a complete image generation prompt
+You are provided with RAW COMPONENTS:
+- A Quote (and its native language/script)
+- Emotional Mood & Core Theme
+- Ambient Environment (Weather, Time of Day lighting, Location/Landmark)
+- Raw Visual Candidates & Cultural Symbols
+- Pre-computed Layout Geometry (designated visual weight zone and calm photo corner)
 
-RULES:
-- You may EXPAND and ENRICH the visual descriptions from the menu with vivid,
-  scene-appropriate details (colors, textures, lighting, materials, atmosphere).
-  The menu gives the SUBJECT and SETTING — you bring it to life with rich imagery.
-- You must NOT CHANGE the core meaning or subject of any selected piece
-- Never name specific copyrighted characters (say "anime-style warrior" not "Naruto")
-- Mythological figures (Hanuman, Surya, Agni, Krishna, Rama, etc.) ARE allowed
-  and should be described with their traditional iconographic details
-- If a candidate has minimal visual description, CREATE a vivid depiction
-  based on its name and cultural context — do not leave it bare
+Your job is NOT to mechanically copy pre-written text, but to IMAGINE, COMPOSE, and WRITE an original, high-detail image generation prompt (full_prompt) using your own visual storytelling and thoughts.
+
+CREATIVE ART DIRECTION:
+- Treat the candidates and location details as creative seeds. Envision vivid lighting, physical textures, color palette, camera perspective, and depth as a master photographer or painter would.
+- Bring fresh, non-generic descriptions to life based on the quote's core emotion.
+- Never name specific copyrighted characters (say "anime-style warrior", not "Naruto").
+- Mythological figures (Hanuman, Surya, Agni, Krishna, Rama, etc.) ARE allowed with their traditional iconographic details.
+
 FACE & FIGURE RULE:
-- Do NOT render realistic close-up human faces. 
-- Figures may appear as silhouettes, mid/long-distance forms, 
-  stylized illustrations, or from behind.
-- Exception: only if the prompt explicitly requests a named character 
-  (mythological or anime-style) may a face be rendered, and even then 
-  in the domain's stylized manner — never photorealistic.
-QUOTE-FIRST RULE:
-- If QUOTE-NATIVE VISUALS exist in the menu, they MUST form the scene's
-  primary subject. Supplementary candidates may only add atmosphere/texture.
-- The quote's own visual words (rangoli, diya, flower, river, etc.) define
-  the image. External metaphors are supporting decoration only.
-- Festival from context is background decoration, not the main subject,
-  UNLESS the quote itself mentions that festival.
-- NEVER force a festival-driven or external metaphor onto a quote that
-  already has its own visual imagery.
-SELECTION GUIDELINES:
-- METAPHOR: If QUOTE-NATIVE VISUALS are listed, you MUST select at least one
-  of them — they are the quote's own imagery and take priority. Supplementary
-  candidates can be added for atmosphere only.
-  If no quote-native visuals exist, choose the candidate that best captures
-  the quote's core message. VARY your subjects — avoid defaulting to diya
-  lamps or riverbanks when other elements fit better.
-  Avoid metaphors and domains listed in "Recent (avoid)".
-- DOMAIN: Match the quote's emotion and theme authentically:
-  * Determined/Heroic → ANIME
-  * Peaceful/Gentle/Cozy/Pastoral → ILLUSTRATED
-  * Sacred/Spiritual/Timeless → MYTHOLOGICAL
-  * Playful/Cheery/Poetic → ILLUSTRATED
-  * Realistic/Reflective/Modern Everyday → PHOTOREALISTIC
-  * Warm/Friendly/Relatable/Everyday life → PHOTOREALISTIC or ILLUSTRATED
-  * Loving/Family/Nostalgic → ILLUSTRATED or PHOTOREALISTIC
-  * Empowered/Self-worth/Growth → ANIME or PHOTOREALISTIC
-  Avoid domains listed in Recent.
-- LAYOUT: Place the scene's visual weight OPPOSITE the empty corner.
-PHOTO PLACEHOLDER RULES:
-- The reserved photo area must be placed in a visually CALM zone — 
-  flat sky, soft mist, plain wall, open water, or gradient background.
-- NEVER place the reserved photo area over or touching any architectural 
-  element, devotional, spiritual, god related things, structure top, spire, dome, tree canopy, or object silhouette.
-  It must float entirely within an unobstructed, featureless background region.
-- Size the placeholder must be 2.5 inch square. 
-  Treat both elements as a matched pair in visual weight.
-- The photo placeholder should always be beside the quote text, not above or below it and must create a balanced composition with the text with something like a rectangle as an over all but this shouldn't be written in the prompt just the scene should be described in a way that naturally leaves space for it.
-- APPROACH: Match the scene's natural atmosphere to the best empty-space strategy.
-- DETAILS: Pick 2-3 that add authentic texture without cluttering.
+- Do NOT render realistic close-up human faces.
+- Human figures may appear as silhouettes, mid/long-distance forms, stylized figures, or viewed from behind.
+- Exception: only if explicitly requesting a named mythological or anime figure may a stylized face appear — never photorealistic close-ups.
 
-HOW TO WRITE THE PROMPT (full_prompt):
+SUBJECT SELECTION:
+- Choose the strongest main subject for the quote's meaning and emotion from any candidate source. You may select one supporting candidate that improves the scene.
+- If the shortlist is weak, propose one concrete original subject based on the quote and setting. You may also pair one original subject with one shortlisted candidate if they express the same idea more clearly together.
+- For an original subject, use the ID "original" and describe the subject in original_subject. Put the main subject ID first and explain why the original subject fits in reasoning.
+- Quote imagery can be the main subject, a supporting motif, or part of the setting.
+- Choose a deity only when a specific traditional association or story deepens the quote's meaning. Explain that connection in your reasoning.
+- When user-supplied subjects are present, select only from those options and leave original_subject null.
 
-Unlike models that struggle with text, ChatGPT's image generation CAN render
-text accurately, and CAN follow explicit layout instructions.
-Structure the prompt as:
+PHOTO PLACEHOLDER & COMPOSITION:
+- Follow the pre-computed layout geometry: place the scene's primary visual weight in the designated zone.
+- Crucially, describe the calm corner naturally as part of the scene (e.g. soft atmospheric mist, open dawn sky gradient, peaceful water surface, or smooth stone wall) so a 2.5-inch square framed photo can float there beside the quote text without overlapping architectural spires, domes, deities, or silhouettes.
 
-1. SCENE DESCRIPTION — a vivid, detailed description of the subject, setting,
-   lighting, and style (from the selected metaphor + domain pieces), written
-   as a photographer/artist would envision it. Ensure fresh, diverse compositions.
-
-2. TEXT INSTRUCTION — explicitly instruct that the following quote must be
-   rendered in the image with clean, legible, well-kerned typography:
-   QUOTE: "{quote_text}"
-   CRITICAL SCRIPT & LANGUAGE RULE:
-   - Render the quote EXACTLY in its ORIGINAL language and script.
-   - If the quote is in ENGLISH, render in clean Latin English typography. Do NOT translate English into Hindi/Devanagari!
-   - If the quote is in HINDI (Devanagari), render in clean Hindi Devanagari typography.
-   Specify: elegant typography, strong contrast against the background,
-   color that complements the scene (e.g., warm gold, clean white with subtle shadow).
-
-3. LAYOUT INSTRUCTION — explicitly state where the quote text goes (based on
-   selected layout's corner) and that a rectangular region of the chosen
-   corner must be kept visually calm/uncluttered (soft gradient, sky, mist,
-   or plain surface) to later hold a separately-added photo, sized
-   approximately for a {photo_ratio} aspect-ratio image. Describe this as
-   part of the scene's natural composition rather than as a technical instruction.
-
-4. STYLE + QUALITY — style_text and avoid_text from the selected domain.
-
-5. FORMAT — ALWAYS specify: "4:5 portrait aspect ratio image."
-
-EXAMPLE (for a Hindi quote):
-"A saffron-robed yogi meditating on a rocky hilltop at sunset, overlooking
-a vast green valley with a winding river below, dramatic pink and amber
-clouds filling the sky above the mountains, in a photorealistic cinematic
-style with natural textures and warm golden light. In the upper portion of
-the image, render the following Hindi text in elegant, clean Devanagari
-typography with good contrast: 'हे अर्जुन, जो प्राणी सभी में एक समान आत्मा को देखता है, वही श्रेष्ठ योगी है।'
-Leave the upper-left area as soft open sky with gentle gradient, keeping it visually calm so a framed photo
-can be placed there beside the text. 4:5 portrait aspect ratio image. Avoid: no photorealistic human faces close-up, no watermarks, no logos."
-
-EXAMPLE (for an English quote):
-"A quiet stone veranda bathed in soft morning light, overlooking an ancient lush courtyard with rain-washed leaves and a steaming cup of tea resting on a weathered wooden table, in a warm Studio Ghibli inspired watercolor style. In the upper-right area, render the following English text in clean, elegant serif typography with gentle contrast and subtle shadow for legibility: 'In a world that never slows down, give yourself permission to pause.' Keep the upper-left area as a serene, uncluttered morning sky with delicate soft cloud gradients to leave space for a separate portrait frame. 4:5 portrait aspect ratio image. Avoid: no harsh lines, no dark moody themes."
+HOW TO WRITE THE IMAGE PROMPT (full_prompt):
+Write a single, rich, cohesive paragraph containing:
+1. SCENE & SUBJECT: Your original, evocative visualization of the subject, environment, lighting, colors, and textures.
+2. TEXT INSTRUCTION: Render the exact quote in its ORIGINAL language and script within the quote zone, with clean, legible, high-contrast typography. In full_prompt, state whether the quote sits above, below, to the left, or to the right of the separate photo zone, following the selected layout.
+   - If HINDI, render in clean Hindi Devanagari typography.
+   - If ENGLISH, render in clean Latin typography.
+   - NEVER translate the quote inside the image.
+3. CALM PHOTO CORNER: In full_prompt, explicitly state where on the canvas to reserve the photo zone and whether it sits above, below, to the left, or to the right of the quote, following the selected layout. Describe it as a natural, uncluttered part of the scene and keep the entire zone free of text for the framed photo.
+4. STYLE & AVOID: The selected visual domain style and negative constraints (e.g. no watermarks, no logos, no photorealistic close-up faces).
+5. FORMAT: Always end with "4:5 portrait aspect ratio image."
 
 SACRED SUBJECT REPORTING:
-If your scene contains any deity, god/goddess figure, temple spire, dome, minaret,
-sacred fire, sacred tree, lingam, cross, or crescent, report each in
-"sacred_subjects" with its approximate normalized position (0.0–1.0) and type.
-This protects sacred elements from being covered by text or photo overlays.
+If your scene contains any deity, god/goddess figure, temple spire, dome, minaret, sacred fire, sacred tree, lingam, cross, or crescent, report each in "sacred_subjects" with its approximate normalized bounding box (x, y, w, h from 0.0 to 1.0) and type. This ensures text and photo overlays do not cover sacred elements.
 
 RESPOND with JSON only:
 {
-    "selected_metaphor_ids": ["id1"] or ["id1", "id2"],
+    "selected_metaphor_ids": ["main_id"] or ["main_id", "supporting_id"],
+    "original_subject": null or "a short description of the original subject",
     "selected_domain": "PHOTOREALISTIC|MYTHOLOGICAL|ANIME|ILLUSTRATED",
     "selected_approach": "1|2|3|4",
     "selected_details": ["D1", "D3"],
     "sacred_subjects": [{"type": "deity", "position": {"x": 0.4, "y": 0.3, "w": 0.2, "h": 0.3}}],
-    "full_prompt": "the complete prompt as described above, including scene,
-                    text instruction with the quote in its ORIGINAL language, layout instruction, style",
-    "reasoning": "2-3 sentences explaining selections"
+    "full_prompt": "the complete creative prompt as described above, including original scene description, exact quote typography in original script, calm photo corner, and style constraints",
+    "reasoning": "2-3 sentences explaining your artistic choices and concept"
 }
 """
 
 
-# ═══════════════════════════════════════════════════
 # QUOTES (default pool + test quotes covering edge cases)
-# ═══════════════════════════════════════════════════
 
 QUOTES = [
     "हर नया सवेरा अपने साथ नई उम्मीदें और नई खुशियाँ लेकर आता है।",

@@ -19,7 +19,7 @@ from pathlib import Path
 import requests
 
 from specs import (
-    LOCATIONS, SPARQL_TEMPLATES, EMOTION_SEEDS, EMOTION_TO_GENRE, GENRE_TO_ARCHETYPE,
+    LOCATIONS, SPARQL_TEMPLATES, EMOTION_SEEDS,
     EMOTION_CONCEPTS, THEME_HINTS, ENGLISH_STOPWORDS, NONVISUAL_TOKENS,
     THEME_MYTHOLOGY_KEYWORDS, FESTIVAL_MYTHOLOGY_KEYWORDS, THEME_TO_EPIC,
     PreparedCandidate, QuoteAnalysis, Context, CandidatePool,
@@ -38,9 +38,7 @@ _PANCHANG_DATA = None
 _LANDMARK_DB = None
 
 
-# ═══════════════════════════════════════════════════
 # LANDMARK SELECTION ENGINE
-# ═══════════════════════════════════════════════════
 
 def _load_landmark_db() -> dict:
     global _LANDMARK_DB
@@ -49,27 +47,19 @@ def _load_landmark_db() -> dict:
     return _LANDMARK_DB
 
 
-def _resolve_landmark_category(theme: str, emotion: str) -> str:
-    if theme and theme in THEME_TO_LANDMARK_CATEGORY:
-        return THEME_TO_LANDMARK_CATEGORY[theme]
-    if emotion and emotion in EMOTION_TO_LANDMARK_CATEGORY:
-        return EMOTION_TO_LANDMARK_CATEGORY[emotion]
-    return "wisdom"
-
-
+# Locate city and its landmarks in the database
 def _find_city_in_db(location: dict) -> tuple[str, str, list] | None:
     db = _load_landmark_db()
     loc_name = (location.get("name") or "").lower().strip()
     state_hint = (location.get("state") or "").lower().strip()
 
-    # Also try matching against the LOCATIONS dict key (e.g. "kutch_bhuj")
     loc_key = ""
     for k, v in LOCATIONS.items():
         if v.get("name", "").lower() == loc_name:
             loc_key = k.lower()
             break
 
-    # Direct match by state+city key
+    # Direct match by state hint
     if state_hint and state_hint in db:
         for city_key, landmarks in db[state_hint].items():
             city_clean = city_key.lower().replace("_", " ")
@@ -80,19 +70,13 @@ def _find_city_in_db(location: dict) -> tuple[str, str, list] | None:
     for state, cities in db.items():
         for city_key, landmarks in cities.items():
             city_clean = city_key.lower().replace("_", " ")
-            if city_key.lower() in (loc_name, loc_key) or city_clean == loc_name:
-                return state, city_key, landmarks
-
-    # Fuzzy substring
-    for state, cities in db.items():
-        for city_key, landmarks in cities.items():
-            city_clean = city_key.lower().replace("_", " ")
-            if loc_name in city_clean or city_clean in loc_name:
+            if city_key.lower() in (loc_name, loc_key) or city_clean == loc_name or loc_name in city_clean or city_clean in loc_name:
                 return state, city_key, landmarks
 
     return None
 
 
+# Determine expected vs unexpected track based on recent run history
 def _pick_track(recent_runs: list, quote_category: str) -> tuple[str, float]:
     import random as _rnd
     same_cat = [r for r in recent_runs if r.get("quote_category") == quote_category]
@@ -108,10 +92,10 @@ def _pick_track(recent_runs: list, quote_category: str) -> tuple[str, float]:
     return track, base
 
 
+# Score an individual landmark based on affinity, timing, and energy
 def _score_landmark(landmark: dict, quote_category: str, time_of_day: str,
                     situation_keywords: list, times_used: int, track: str) -> float:
     score = 0.0
-
     aff_dict = landmark.get(f"{track}_affinity", landmark.get("expected_affinity", {}))
     score += aff_dict.get(quote_category, 0.2) * 40
 
@@ -140,63 +124,18 @@ def _score_landmark(landmark: dict, quote_category: str, time_of_day: str,
     else:
         pref_idx = LANDMARK_ENERGY_LEVELS.index(pref) if pref in LANDMARK_ENERGY_LEVELS else 1
         actual_idx = LANDMARK_ENERGY_LEVELS.index(actual) if actual in LANDMARK_ENERGY_LEVELS else 1
-        diff = abs(actual_idx - pref_idx)
-        score += [10, 5, 1][diff]
+        score += [10, 5, 1][abs(actual_idx - pref_idx)]
 
     score -= times_used * 12
     return round(score, 2)
 
 
-def _get_landmark_usage(recent_runs: list, state: str, city: str) -> dict:
-    counts = {}
-    relevant = [r for r in recent_runs if r.get("landmark_state") == state and r.get("landmark_city") == city]
-    for run in relevant[-30:]:
-        lm = run.get("landmark_chosen")
-        if lm:
-            counts[lm] = counts.get(lm, 0) + 1
-    return counts
-
-
-def _load_landmark_recent() -> list:
-    try:
-        data = json.loads(RECENT_RUNS_PATH.read_text(encoding="utf-8"))
-        if isinstance(data, list):
-            return [r for r in data if r.get("landmark_chosen")]
-        return []
-    except Exception:
-        return []
-
-
-def _save_landmark_run(state, city, category, landmark_name, landmark_type,
-                       score, track, contrast_prob, top_3):
-    from datetime import datetime
-    entry = {
-        "timestamp": datetime.now().isoformat(),
-        "landmark_state": state,
-        "landmark_city": city,
-        "quote_category": category,
-        "landmark_chosen": landmark_name,
-        "landmark_type": landmark_type,
-        "landmark_score": score,
-        "track": track,
-        "contrast_probability": contrast_prob,
-        "top_3_considered": [{"name": lm["name"], "score": s} for s, lm in top_3],
-    }
-    try:
-        data = json.loads(RECENT_RUNS_PATH.read_text(encoding="utf-8")) if RECENT_RUNS_PATH.exists() else []
-        if not isinstance(data, list):
-            data = []
-        data.append(entry)
-        data = data[-200:]
-        RECENT_RUNS_PATH.write_text(json.dumps(data, indent=2, ensure_ascii=False, default=str), encoding="utf-8")
-    except Exception:
-        pass
-
-
+# Pick best landmark for location and quote category
 def select_landmark(location: dict, theme: str, emotion: str, time_of_day: str,
                     situation_keywords: list = None) -> dict | None:
     """Pick the best landmark for a quote from the curated DB. Returns None if city not in DB."""
     import random as _rnd
+    from datetime import datetime
 
     result = _find_city_in_db(location)
     if not result:
@@ -204,12 +143,26 @@ def select_landmark(location: dict, theme: str, emotion: str, time_of_day: str,
 
     state, city, landmarks = result
     emotion_primary = emotion.get("primary", "") if isinstance(emotion, dict) else str(emotion)
-    category = _resolve_landmark_category(theme, emotion_primary)
+    category = THEME_TO_LANDMARK_CATEGORY.get(theme) or EMOTION_TO_LANDMARK_CATEGORY.get(emotion_primary) or "wisdom"
     landmark_time = APP_TIME_TO_LANDMARK_TIME.get(time_of_day, "morning")
     keywords = situation_keywords or []
 
-    recent_runs = _load_landmark_recent()
-    usage_counts = _get_landmark_usage(recent_runs, state, city)
+    # Load recent landmark runs to determine usage and contrast track
+    recent_runs = []
+    try:
+        if RECENT_RUNS_PATH.exists():
+            data = json.loads(RECENT_RUNS_PATH.read_text(encoding="utf-8"))
+            if isinstance(data, list):
+                recent_runs = [r for r in data if r.get("landmark_chosen")]
+    except Exception:
+        pass
+
+    usage_counts = {}
+    for r in [r for r in recent_runs if r.get("landmark_state") == state and r.get("landmark_city") == city][-30:]:
+        lm_name = r.get("landmark_chosen")
+        if lm_name:
+            usage_counts[lm_name] = usage_counts.get(lm_name, 0) + 1
+
     track, contrast_prob = _pick_track(recent_runs, category)
 
     scored = []
@@ -220,16 +173,32 @@ def select_landmark(location: dict, theme: str, emotion: str, time_of_day: str,
 
     scored.sort(key=lambda x: x[0], reverse=True)
     top_3 = scored[:3]
-
     if not top_3:
         return None
 
     weights = [max(s, 1.0) for s, _ in top_3]
     chosen_score, chosen_lm = _rnd.choices(top_3, weights=weights, k=1)[0]
 
-    _save_landmark_run(state, city, category, chosen_lm["name"],
-                       chosen_lm.get("type", ""), chosen_score, track,
-                       contrast_prob, top_3)
+    # Save landmark run history for contrast tracking
+    try:
+        data = json.loads(RECENT_RUNS_PATH.read_text(encoding="utf-8")) if RECENT_RUNS_PATH.exists() else []
+        if not isinstance(data, list):
+            data = []
+        data.append({
+            "timestamp": datetime.now().isoformat(),
+            "landmark_state": state,
+            "landmark_city": city,
+            "quote_category": category,
+            "landmark_chosen": chosen_lm["name"],
+            "landmark_type": chosen_lm.get("type", ""),
+            "landmark_score": chosen_score,
+            "track": track,
+            "contrast_probability": contrast_prob,
+            "top_3_considered": [{"name": lm["name"], "score": s} for s, lm in top_3],
+        })
+        RECENT_RUNS_PATH.write_text(json.dumps(data[-200:], indent=2, ensure_ascii=False, default=str), encoding="utf-8")
+    except Exception:
+        pass
 
     return {
         "landmark": chosen_lm,
@@ -282,9 +251,7 @@ def _session() -> requests.Session:
     return _models["session"]
 
 
-# ═══════════════════════════════════════════════════
 # LOCATION RESOLVER
-# ═══════════════════════════════════════════════════
 
 def resolve_location(location_key: str = "mumbai", custom_location: str = None) -> dict:
     """
@@ -305,9 +272,7 @@ def resolve_location(location_key: str = "mumbai", custom_location: str = None) 
     return LOCATIONS.get(location_key, LOCATIONS.get("mumbai", {"name": "Mumbai", "lat": 19.0760, "lon": 72.8777}))
 
 
-# ═══════════════════════════════════════════════════
 # CONTEXT ENRICHMENT
-# ═══════════════════════════════════════════════════
 
 def enrich_context(
     quote, location, date, time_of_day,
@@ -347,7 +312,7 @@ def enrich_context(
         quote_analysis.theme = _infer_theme(quote_analysis)
         en_keywords = clean_kws
         emotion = detect_emotion(quote_analysis, en_keywords=en_keywords)
-        visual_imagery = clean_kws[:]
+        visual_imagery = [{"hindi": k, "english": k} for k in dict.fromkeys(clean_kws)]
     else:
         analysis_quote = translated_en_quote if translated_en_quote else quote
         quote_analysis = analyze_quote(analysis_quote)
@@ -513,9 +478,9 @@ def build_quote_native_candidates(visual_imagery, weather, time_of_day) -> list[
             name=v["english"],
             domain="PHOTOREALISTIC",
             entity_type="quote_visual",
-            groundable=False,
             cultural=False,
             chain_sources=["quote_native"],
+            selection_context="Imagery supplied by the quote or keyword override.",
             subject_text=v["english"],
             scene_text=f"{v['english']} in {time_of_day} light",
             weather_context=weather_ctx,
@@ -574,15 +539,12 @@ def translate_hi_to_en(words: list) -> list:
     return list(dict.fromkeys(w.lower() for w in words))
 
 
-# ═══════════════════════════════════════════════════
 # KNOWLEDGE CHAIN
-# ═══════════════════════════════════════════════════
 
 def run_knowledge_chain(context, location, custom_candidates: list[str] = None) -> CandidatePool:
     """
-    Sequential 6-chain pipeline. Called by app.py Step 1.
-    Each chain enriches the next. Returns pre-built candidates.
-    If custom_candidates is provided, completely overrides the 6 chains and builds pool directly.
+    Use the knowledge chains to build a shortlist of visual candidates.
+    Custom candidates replace automatic discovery.
     """
     if custom_candidates:
         prepared = []
@@ -603,9 +565,9 @@ def run_knowledge_chain(context, location, custom_candidates: list[str] = None) 
                     name=item_str,
                     domain="PHOTOREALISTIC",
                     entity_type="custom_user_candidate",
-                    groundable=True,
                     cultural=True,
                     chain_sources=["user_override"],
+                    selection_context="Subject supplied by the user.",
                     subject_text=item_str,
                     scene_text=scene_text,
                     weather_context=weather_ctx,
@@ -633,33 +595,20 @@ def run_knowledge_chain(context, location, custom_candidates: list[str] = None) 
     # Replaces the discontinued pyiwn/IndoWordNet path.
     word_info = chain_1_word_understanding(context.quote_analysis, context.en_keywords)
 
-    # WordNet synonyms/related are already English — extend the KG keyword set directly.
-    en_keywords = list(dict.fromkeys(
-        context.en_keywords + word_info.get("synonyms", []) + word_info.get("related", [])
-    ))
+    expanded = list(dict.fromkeys(word_info["synonyms"] + word_info["related"]))
+    expanded = [term for term in expanded if term not in context.en_keywords]
+    en_keywords = context.en_keywords + expanded
 
-    # Gate chains 2-4 based on quote's visual richness.
-    richness = context.visual_richness_score
-    if richness >= 3:
-        wikidata_results = {"symbols": [], "location_features": [], "mythology": [], "fiction": []}
-        wiki_results = {"entities": {}, "categories": []}
-        dbpedia_results = []
-    else:
-        wikidata_results = chain_2_wikidata(
-            en_keywords, location,
-            emotion=context.emotion,
-            theme=context.quote_analysis.theme,
-            festival=context.festival or "",
-        )
-        wiki_results = chain_3_wikipedia(wikidata_results)
-        dbpedia_results = chain_4_dbpedia(wiki_results.get("categories", []))
-
-    # Chain 5: Fictional/anime discovery
-    fiction_results = chain_5_fictional(
-        context.emotion,
+    wikidata_results = chain_2_wikidata(
+        context.en_keywords, location,
+        emotion=context.emotion,
         theme=context.quote_analysis.theme,
-        mythology_results=wikidata_results.get("mythology", []),
+        festival=context.festival or "",
+        quote=context.quote_analysis.text,
+        expanded_keywords=expanded,
     )
+    wiki_results = chain_3_wikipedia(wikidata_results)
+    dbpedia_results = chain_4_dbpedia(wiki_results["categories"])
 
     # Chain 6: Cultural supplement (local) — matches keywords, theme, AND emotion.
     cultural_results = chain_6_cultural(
@@ -676,7 +625,7 @@ def run_knowledge_chain(context, location, custom_candidates: list[str] = None) 
     cultural_data = _load_cultural()
     raw_candidates = merge_all(
         wikidata_results, wiki_results, dbpedia_results,
-        fiction_results, cultural_results, location_features, cultural_data,
+        cultural_results, location_features, cultural_data,
     )
 
     # Persist newly discovered visual metaphors from live chains (Wikidata, Wikipedia, DBpedia)
@@ -694,19 +643,29 @@ def run_knowledge_chain(context, location, custom_candidates: list[str] = None) 
     if new_to_save:
         save_discovered_cultural_metaphors(new_to_save)
 
-    # Pre-build text pieces for each candidate — pass quote key terms for scene blending.
-    prepared = [
-        pre_build_candidate(c, location_features, context.weather, context.time,
-                            quote_terms=context.en_keywords)
-        for c in raw_candidates
-    ]
-
-    # Prepend quote-native candidates so they appear first in Gemini's menu.
     quote_candidates = build_quote_native_candidates(
-        context.visual_imagery, context.weather, context.time)
-    if richness in (1, 2):
-        prepared = prepared[:6]
-    prepared = quote_candidates + prepared
+        context.visual_imagery[:2], context.weather, context.time,
+    )
+    by_name = {c.name.casefold(): c for c in quote_candidates}
+    source_counts = {}
+    for raw in raw_candidates:
+        name = raw["name"].strip().casefold()
+        source = raw["chain_sources"][0]
+        if source_counts.get(source, 0) >= 2:
+            continue
+
+        candidate = pre_build_candidate(
+            raw, location_features, context.weather, context.time,
+            quote_terms=context.en_keywords,
+        )
+        existing = by_name.get(name)
+        if existing:
+            candidate.quote_native = True
+            candidate.chain_sources = existing.chain_sources + candidate.chain_sources
+        by_name[name] = candidate
+        source_counts[source] = source_counts.get(source, 0) + 1
+
+    prepared = list(by_name.values())
 
     # Always guarantee at least one candidate (edge case 1: no nouns / all APIs down).
     # Route through Chain 6 cultural metaphors matched by emotion, not hardcoded location.
@@ -725,7 +684,7 @@ def run_knowledge_chain(context, location, custom_candidates: list[str] = None) 
     )
 
 
-# ── CHAIN IMPLEMENTATIONS ──────────────────────────
+# CHAIN IMPLEMENTATIONS
 
 def chain_1_word_understanding(quote_analysis, en_keywords) -> dict:
     """
@@ -757,8 +716,9 @@ def chain_1_word_understanding(quote_analysis, en_keywords) -> dict:
             continue
         synsets = wn.synsets(en_word, pos=wn.NOUN)
 
-        synonyms = list({lemma.name().replace("_", " ")
-                         for s in synsets for lemma in s.lemmas()})
+        synonyms = list(dict.fromkeys(
+            lemma.name().replace("_", " ") for s in synsets for lemma in s.lemmas()
+        ))
 
         is_abs = False
         if synsets:
@@ -771,7 +731,7 @@ def chain_1_word_understanding(quote_analysis, en_keywords) -> dict:
             related += [l.name().replace("_", " ") for ss in s.similar_tos() for l in ss.lemmas()]
 
         synonyms = synonyms[:10]
-        related = list(set(related))[:10]
+        related = list(dict.fromkeys(related))[:10]
         all_synonyms.extend(synonyms)
         all_related.extend(related)
         results.append({"word": hindi_word, "en_word": en_word,
@@ -782,91 +742,82 @@ def chain_1_word_understanding(quote_analysis, en_keywords) -> dict:
             "related": list(dict.fromkeys(all_related))}
 
 
-def chain_2_wikidata(en_keywords, location, emotion="", theme="", festival="") -> dict:
-    """Live Wikidata discovery: mythology via SPARQL, symbols."""
-    import random
-    out = {"symbols": [], "location_features": [], "mythology": [], "fiction": []}
+def chain_2_wikidata(en_keywords, location, emotion="", theme="", festival="",
+                    *, quote="", expanded_keywords=()) -> dict:
+    """Find relevant mythological figures and symbols."""
+    out = {"symbols": [], "location_features": [], "mythology": []}
+    deities = []
 
-    # Live mythology discovery via three-way UNION SPARQL (cached — same for all quotes)
     try:
         cached_deities = load_cache("mythology_deities", "wikidata")
-        if cached_deities is not None:
-            raw_deities = cached_deities
-        else:
-            raw_deities = query_wikidata("mythology_deities")
-            save_cache("mythology_deities", raw_deities)
-        scored = _score_mythology_relevance(raw_deities, theme, emotion, festival)
-        out["mythology"] = scored
+        if cached_deities is None:
+            cached_deities = query_wikidata("mythology_deities")
+            save_cache("mythology_deities", cached_deities)
+        deities.extend(cached_deities)
     except Exception:
         pass
 
-    # Epic characters when theme maps to an epic (Mahabharata/Ramayana)
     if theme in THEME_TO_EPIC:
         try:
-            epic_chars = query_wikidata("epic_characters", work_qid=THEME_TO_EPIC[theme])
-            epic_scored = _score_mythology_relevance(epic_chars, theme, emotion, festival)
-            for ch in epic_scored[:4]:
-                if not any(m["label"].lower() == ch["label"].lower() for m in out["mythology"]):
-                    out["mythology"].append(ch)
+            deities.extend(query_wikidata("epic_characters", work_qid=THEME_TO_EPIC[theme]))
         except Exception:
             pass
 
-    # Symbols via P4878
-    try:
-        for kw in en_keywords[:3]:
-            qid = _resolve_qid(kw)
-            if qid:
-                out["symbols"].extend(query_wikidata("symbols_for_concept", concept_qid=qid))
-    except Exception:
-        pass
+    out["mythology"] = _score_mythology_relevance(deities, theme, emotion, festival, quote)
+
+    # Try up to three original terms, then one WordNet term if more options are needed.
+    symbols = {}
+    for keyword in list(en_keywords[:3]) + list(expanded_keywords[:1]):
+        if len(symbols) >= 2:
+            break
+        qid = _resolve_qid(keyword)
+        if not qid:
+            continue
+        try:
+            for item in query_wikidata("symbols_for_concept", concept_qid=qid):
+                label = item["label"].strip().casefold()
+                entity = f"{label} {item.get('type') or ''}".lower()
+                if label and not any(token in entity for token in NONVISUAL_TOKENS):
+                    symbols.setdefault(label, {**item, "selection_context": f"Symbol for {keyword}."})
+        except Exception:
+            continue
+    out["symbols"] = list(symbols.values())[:2]
     return out
 
 
-def _score_mythology_relevance(deities, theme, emotion, festival) -> list:
-    """Rank live-discovered deities by relevance to theme/emotion/festival."""
-    import random
-
-    theme_kws = THEME_MYTHOLOGY_KEYWORDS.get(theme, THEME_MYTHOLOGY_KEYWORDS.get("general", []))
-
-    festival_kws = []
-    if festival:
-        fest_lower = festival.lower()
-        for fest_key, kws in FESTIVAL_MYTHOLOGY_KEYWORDS.items():
-            if fest_key in fest_lower or fest_lower in fest_key:
-                festival_kws = kws
-                break
-
-    emotion_primary = emotion.get("primary", "") if isinstance(emotion, dict) else str(emotion)
-    emotion_concepts = EMOTION_CONCEPTS.get(emotion_primary, [])
+def _score_mythology_relevance(deities, theme, emotion, festival, quote) -> list:
+    """Rank candidates with an identifiable connection to the quote."""
+    quote_tokens = re.findall(r"[a-z]+", quote.lower())
+    quote_text = " " + " ".join(quote_tokens) + " "
+    quote_words = {word for word in quote_tokens if len(word) > 2} - ENGLISH_STOPWORDS
+    theme_words = set(THEME_MYTHOLOGY_KEYWORDS.get(theme, [])) if theme != "general" else set()
+    festival_words = next(
+        (set(words) for name, words in FESTIVAL_MYTHOLOGY_KEYWORDS.items() if name in festival.lower()),
+        set(),
+    )
+    primary = emotion.get("primary", "") if isinstance(emotion, dict) else str(emotion)
+    mood_words = set(EMOTION_CONCEPTS.get(primary, []))
 
     scored = []
-    for d in deities:
-        label = d.get("label", "").lower()
-        desc = d.get("description", "").lower()
-        blob = f"{label} {desc}"
-        score = 0
+    for deity in deities:
+        name = " ".join(re.findall(r"[a-z]+", deity["label"].lower()))
+        description = deity.get("description", "")
+        words = set(re.findall(r"[a-z]+", description.lower()))
+        named = bool(name) and f" {name} " in quote_text
+        quote_matches = quote_words & words
+        theme_matches = theme_words & (words | {name})
+        if not (named or quote_matches or theme_matches):
+            continue
 
-        if any(kw in label for kw in theme_kws):
-            score += 3
-        if festival_kws and any(kw in label for kw in festival_kws):
-            score += 3
-        for kw in theme_kws:
-            if kw in desc:
-                score += 1
-        for kw in festival_kws:
-            if kw in desc:
-                score += 1
-        if any(c in blob for c in emotion_concepts):
-            score += 1
+        festival_match = bool(festival_words & (words | {name}))
+        score = (named, len(quote_matches), len(theme_matches), festival_match, bool(words & mood_words))
+        reason = "Named in the quote." if named else f"Matches {', '.join(sorted(quote_matches | theme_matches))}."
+        scored.append((score, {**deity, "selection_context": f"{reason} {description}".strip()}))
 
-        scored.append((score, d))
-
-    scored.sort(key=lambda x: x[0], reverse=True)
-    top = [d for _, d in scored[:8]]
-    remainder = [d for _, d in scored[8:]]
-    if remainder:
-        top.extend(random.sample(remainder, min(2, len(remainder))))
-    return top
+    results = {}
+    for _, deity in sorted(scored, key=lambda item: item[0], reverse=True):
+        results.setdefault(deity["label"].strip().casefold(), deity)
+    return list(results.values())[:2]
 
 
 def chain_3_wikipedia(wikidata_results) -> dict:
@@ -897,37 +848,6 @@ def chain_4_dbpedia(categories) -> list:
         return explore_dbpedia_categories(categories, max_hops=1, max_cats=5, max_items=10)
     except Exception:
         return []
-
-
-def chain_5_fictional(emotion, theme="", mythology_results=None) -> list:
-    """
-    Anime/cartoon archetypes + anime-style mythology figures.
-
-    Generic archetype phrases from GENRE_TO_ARCHETYPE (safe, depictable).
-    When theme matches mythology, also emits top-scored deity results with
-    ANIME domain so Gemini can render them in anime style.
-    """
-    out = []
-    try:
-        genres = EMOTION_TO_GENRE.get(emotion.get("primary"), ["Drama"])
-        for g in genres:
-            arch = GENRE_TO_ARCHETYPE.get(g)
-            if arch:
-                out.append({"label": arch, "genre": g, "fictional": True})
-    except Exception:
-        pass
-
-    # Offer mythology figures in anime style when theme overlaps
-    anime_themes = {"devotion", "spiritual", "family", "courage", "motivation", "festival"}
-    if theme in anime_themes and mythology_results:
-        for m in mythology_results[:3]:
-            out.append({
-                "label": m.get("label", ""),
-                "description": m.get("description", ""),
-                "type": "anime_mythology",
-                "fictional": True,
-            })
-    return out
 
 
 def _find_cultural_matches(en_keywords: list, emotion: dict = None, theme: str = None) -> list[tuple[dict, str]]:
@@ -978,14 +898,15 @@ def chain_6_cultural(en_keywords, emotion=None, theme=None) -> list:
     """Cultural supplement: Indian-specific metaphors from cultural_metaphors.json."""
     raw_matches = _find_cultural_matches(en_keywords, emotion=emotion, theme=theme)
     return [
-        {"label": m["visual"], "context": m.get("context", ""), "concept": concept}
+        {
+            "label": m["visual"],
+            "selection_context": f"Metaphor for {concept}. {m.get('context', '')}".strip(),
+        }
         for m, concept in raw_matches
     ]
 
 
-# ═══════════════════════════════════════════════════
 # LOCATION DETAILS (landmark-based)
-# ═══════════════════════════════════════════════════
 
 def discover_location_details(location, landmark_selection=None) -> list:
     """Build location details from the chosen landmark's visual_description."""
@@ -1021,9 +942,7 @@ def discover_location_details(location, landmark_selection=None) -> list:
     return details
 
 
-# ═══════════════════════════════════════════════════
 # NLP UTILITIES (resolved at runtime, nothing hardcoded)
-# ═══════════════════════════════════════════════════
 
 def is_visual_word(word, pos="NOUN") -> bool:
     """WordNet concreteness check -> is this photographable?"""
@@ -1123,9 +1042,9 @@ def pre_build_candidate(raw, location_features, weather, time,
         name=raw.get("name", ""),
         domain=raw.get("domain", "PHOTOREALISTIC"),
         entity_type=raw.get("entity_type", ""),
-        groundable=raw.get("groundable", False),
         cultural=raw.get("cultural", False),
         chain_sources=raw.get("chain_sources", []),
+        selection_context=raw.get("selection_context", ""),
         subject_text=subject_text,
         scene_text=scene_text,
         weather_context=f"{weather['condition']}, {weather['temp']}C",
@@ -1138,9 +1057,9 @@ def _cultural_fallback_candidates(emotion, theme, en_keywords, weather, time, lo
     """Fallback via Chain 6 cultural metaphors matched by emotion/theme/keywords."""
     matches = _find_cultural_matches(en_keywords, emotion=emotion, theme=theme)
 
-    # Build candidates from matches (up to 3).
+    # Keep the same limit as the cultural route.
     prepared = []
-    for m, concept in matches[:3]:
+    for m, concept in matches[:2]:
         loc_hint = location["name"]
         prepared.append(PreparedCandidate(
             id=f"cultural_fallback_{concept}_{len(prepared)}",
@@ -1149,6 +1068,7 @@ def _cultural_fallback_candidates(emotion, theme, en_keywords, weather, time, lo
             entity_type="metaphor",
             cultural=True,
             chain_sources=["chain_6_cultural", "fallback"],
+            selection_context=f"Metaphor for {concept}.",
             subject_text=m["visual"],
             scene_text=f"{m.get('context', concept)}, {weather['condition']} {time} near {loc_hint}",
             weather_context=f"{weather['condition']}, {weather['temp']}C",
@@ -1176,46 +1096,12 @@ def _cultural_fallback_candidates(emotion, theme, en_keywords, weather, time, lo
     return prepared
 
 
-# ═══════════════════════════════════════════════════
 # MERGE AND DEDUP
-# ═══════════════════════════════════════════════════
 
-def assign_domain(data, source_chain) -> str:
-    """Assign visual domain based on the candidate's origin."""
-    name = (data.get("label") or data.get("name") or "").lower()
-    etype = (data.get("type") or data.get("entity_type") or "").lower()
-
-    if source_chain == "chain_5_fictional":
-        return "ANIME"
-    if source_chain in ("chain_2_mythology",):
-        return "MYTHOLOGICAL"
-    if source_chain == "chain_2_wikidata" and etype in (
-        "deity", "mythological character", "god", "goddess"):
-        return "MYTHOLOGICAL"
-    if source_chain == "chain_6_cultural":
-        return "PHOTOREALISTIC"
-    return "PHOTOREALISTIC"
-
-
-def set_flags(candidate: dict, location_features, cultural_data):
-    """Set groundable and cultural flags on a merged candidate dict."""
-    location_types = {f.get("type", "").lower() for f in location_features}
-    location_names = {f.get("name", "").lower() for f in location_features}
-    name = candidate.get("name", "").lower()
-    etype = candidate.get("entity_type", "").lower()
-
-    candidate["groundable"] = bool(
-        (etype and etype in location_types)
-        or (name and name in location_names)
-        or any(fn and fn in name for fn in location_names)
-    )
-    all_visuals = cultural_data.get("_all_visuals", [])
-    candidate["cultural"] = name in set(v.lower() for v in all_visuals)
-
-
-def merge_all(wikidata, wiki, dbpedia, fiction, cultural,
+# Merge candidates from all chains and assign domains
+def merge_all(wikidata, wiki, dbpedia, cultural,
               location_features, cultural_data) -> list:
-    """Merge candidates from all chains. Live-discovered candidates first, cultural capped."""
+    """Merge candidates from all chains, assign domains, and set cultural flags."""
     live_raw = []
     for item in wikidata.get("mythology", []):
         live_raw.append({"data": item, "source": "chain_2_mythology"})
@@ -1227,34 +1113,34 @@ def merge_all(wikidata, wiki, dbpedia, fiction, cultural,
         live_raw.append({"data": {"label": label, **info}, "source": "chain_3_wikipedia"})
     for item in dbpedia:
         live_raw.append({"data": item, "source": "chain_4_dbpedia"})
-    for item in fiction:
-        live_raw.append({"data": item, "source": "chain_5_fictional"})
-
-    live_count = len(live_raw)
-    cultural_cap = max(3, 8 - live_count)
-    for item in cultural[:cultural_cap]:
+    for item in cultural:
         live_raw.append({"data": item, "source": "chain_6_cultural"})
 
-    all_raw = live_raw
-
-    # Sources whose entities must be visually depictable (drop languages/peoples/admin).
     _visual_required = {"chain_2_wikidata", "chain_3_wikipedia", "chain_4_dbpedia"}
-
     seen: dict = {}
-    for item in all_raw:
+
+    for item in live_raw:
         data = item["data"]
         name = (data.get("label") or data.get("name") or data.get("visual") or "").lower().strip()
+        etype = (data.get("type") or data.get("entity_type") or "").lower()
         if not name:
             continue
-        if item["source"] in _visual_required and _is_nonvisual_entity(
-                name, data.get("type") or data.get("entity_type", "")):
+        # Skip non-visual entities like administrative regions or languages
+        if item["source"] in _visual_required and any(tok in f"{name} {etype}" for tok in NONVISUAL_TOKENS):
             continue
+
         if name in seen:
             if item["source"] not in seen[name]["chain_sources"]:
                 seen[name]["chain_sources"].append(item["source"])
             if data.get("visual"):
                 seen[name].setdefault("visual_phrases", []).extend(data["visual"])
-        else:
+        elif item["source"] != "chain_3_wikipedia":
+            # Assign visual domain based on origin
+            if item["source"] == "chain_2_mythology" or (item["source"] == "chain_2_wikidata" and etype in ("deity", "mythological character", "god", "goddess")):
+                domain = "MYTHOLOGICAL"
+            else:
+                domain = "PHOTOREALISTIC"
+
             merged = {
                 "id": f"{item['source']}_{name.replace(' ', '_')[:24]}",
                 "name": data.get("label") or data.get("name") or data.get("visual"),
@@ -1262,22 +1148,28 @@ def merge_all(wikidata, wiki, dbpedia, fiction, cultural,
                 "visual_phrases": list(data.get("visual", [])),
                 "associated_verb": data.get("associated_verb"),
                 "chain_sources": [item["source"]],
-                "domain": assign_domain(data, item["source"]),
+                "selection_context": (
+                    data.get("selection_context") or data.get("description")
+                    or data.get("entity_type", "")
+                ),
+                "domain": domain,
             }
-            # cultural metaphors carry their visual phrase as the subject itself
             if item["source"] == "chain_6_cultural" and not merged["visual_phrases"]:
                 merged["visual_phrases"] = [merged["name"]]
             seen[name] = merged
 
+    # Set cultural flag
+    all_visuals = set(v.lower() for v in cultural_data.get("_all_visuals", []))
+
     merged_list = list(seen.values())
     for c in merged_list:
-        set_flags(c, location_features, cultural_data)
+        c_name = c.get("name", "").lower()
+        c["cultural"] = c_name in all_visuals
+
     return merged_list
 
 
-# ═══════════════════════════════════════════════════
 # API HELPERS
-# ═══════════════════════════════════════════════════
 
 _NON_LATIN_LABEL_MAP = {
     "Q11378": "Shiva", "Q11380": "Vishnu", "Q42891": "Krishna",
@@ -1304,7 +1196,8 @@ def query_wikidata(template_name, **params) -> list:
                         and not k.endswith("Description")), None)
         uri = b.get(var_key, {}).get("value", "") if var_key else ""
         qid = uri.rsplit("/", 1)[-1] if uri.startswith("http") else ""
-        label = _clean_label(b.get(label_key, {}).get("value", "") if label_key else "")
+        raw_label = (b.get(label_key, {}).get("value", "") if label_key else "").strip()
+        label = "" if re.fullmatch(r"Q\d+", raw_label) else raw_label
         if qid in _NON_LATIN_LABEL_MAP:
             label = _NON_LATIN_LABEL_MAP[qid]
         if not label:
@@ -1336,20 +1229,6 @@ def _batch_type_lookup(qids: list) -> dict:
         if entity_qid and type_label and not re.fullmatch(r"Q\d+", type_label):
             type_map.setdefault(entity_qid, type_label)
     return type_map
-
-
-def _clean_label(raw: str) -> str:
-    """Strip QID-only labels and extra whitespace from Wikidata results."""
-    text = raw.strip()
-    if re.fullmatch(r"Q\d+", text):
-        return ""
-    return text
-
-
-def _is_nonvisual_entity(name: str, etype: str = "") -> bool:
-    """True if a name/type looks like a language, people, or admin division."""
-    blob = f"{name} {etype}".lower()
-    return any(tok in blob for tok in NONVISUAL_TOKENS)
 
 
 def _resolve_qid(keyword) -> str | None:
@@ -1438,9 +1317,7 @@ def _has_concrete(nouns) -> bool:
     return any(is_visual_word(w) for w in en)
 
 
-# ═══════════════════════════════════════════════════
 # CULTURAL DATA + CACHE
-# ═══════════════════════════════════════════════════
 
 def _load_cultural() -> dict:
     try:

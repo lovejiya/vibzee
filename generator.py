@@ -1,28 +1,25 @@
 """
 generator.py — Builds the menu for Gemini, calls Gemini, parses the result.
 
-Called by app.py. Does NOT gather data — that is sources.py's job.
-
-Deviation from plan v14:
-  The plan imports `google.generativeai`. This project's model is
-  gemini-3.1-flash-lite, so we prefer the current unified SDK (`google.genai`)
-  and fall back to `google.generativeai`. If neither SDK / no key is available,
-  the rule-based fallback() produces a valid prompt (edge case 3).
+Called by app.py after source discovery.
 """
 import json
-import random
 from datetime import datetime
+from pathlib import Path
 
 from specs import (
     GEMINI_SYSTEM_PROMPT, GEMINI_MODEL, GEMINI_API_KEY,
     DOMAIN_PROFILES, LAYOUT_PROFILES, APPROACH_TEMPLATES,
-    MasterPrompt, RECENT_RUNS_PATH, SACRED_SUBJECT_TYPES,
+    MasterPrompt, RECENT_RUNS_PATH,
 )
 from layout_engine import (
     compute_layout, detect_sacred_regions, validate_layout,
     repair_layout, select_layout, build_layout_context_for_gemini,
 )
-from pathlib import Path
+
+
+class PromptGenerationError(RuntimeError):
+    """Gemini could not return a usable image prompt."""
 
 
 def generate(candidates, context, location_details, photo_ratio, location) -> MasterPrompt:
@@ -45,44 +42,36 @@ def generate(candidates, context, location_details, photo_ratio, location) -> Ma
 
     try:
         selections = call_gemini(menu)
+        full_prompt = selections.get("full_prompt") if isinstance(selections, dict) else None
+        if not isinstance(full_prompt, str) or not full_prompt.strip():
+            raise PromptGenerationError("Gemini returned an empty or invalid prompt.")
+
         sacred = detect_sacred_regions(selections)
         layout_plan.protected_regions = sacred
-        passed, violations = validate_layout(layout_plan)
+        passed, _ = validate_layout(layout_plan)
         if not passed:
             layout_plan = repair_layout(layout_plan)
         else:
             layout_plan.validation_passed = True
 
         prompt = build_master_prompt(selections, candidates, location_details, photo_ratio, layout_plan)
-        prompt = verify_word_count(prompt)
+    except PromptGenerationError:
+        raise
     except Exception as exc:
-        layout_plan.validation_passed = True
-        prompt = fallback(candidates, context, location_details, photo_ratio, layout_plan)
-        prompt.gemini_selections.setdefault("error", str(exc))
+        raise PromptGenerationError("Gemini couldn’t generate a usable prompt.") from exc
 
     save_recent(prompt)
     return prompt
 
 
 def build_menu(candidates, context, location_details, photo_ratio, location, recent, layout_plan=None) -> str:
-    """
-    Format pre-built pieces into a structured menu for Gemini.
-
-    Variety is enforced STRUCTURALLY, not just hinted: metaphors, domains and
-    layouts used in recent runs are removed from the menu outright (as long as
-    alternatives remain), so an identical metaphor+domain+layout combo cannot
-    recur on consecutive runs of the same quote.
-    """
-    pool = _filter_recent_metaphors(candidates.pool, recent)
+    """Format the shortlist and scene context for Gemini."""
     domains = _filter_recent(list(DOMAIN_PROFILES), {r.get("domain") for r in recent[-4:]}, keep_min=2)
     layouts = _filter_recent(list(LAYOUT_PROFILES), {r.get("layout") for r in recent[-4:]}, keep_min=3)
 
     recent_avoid = "; ".join(
         f'{r.get("metaphor")}({r.get("domain")},{r.get("layout")})' for r in recent[-10:]
     ) if recent else "None"
-
-    quote_native = [c for c in pool if c.quote_native]
-    supplementary = [c for c in pool if not c.quote_native]
 
     # Landmark context for Gemini
     lm_sel = context.landmark_selection
@@ -104,7 +93,7 @@ def build_menu(candidates, context, location_details, photo_ratio, location, rec
   Photo ratio: {photo_ratio}
   Location: {location['name']}
 {lm_context}
-  Recent (avoid): {recent_avoid}
+  Recent choices (prefer variety when options fit equally well): {recent_avoid}
 """
     if layout_plan:
         menu += "\n=== LAYOUT GEOMETRY (pre-computed, do NOT change) ===\n"
@@ -113,31 +102,17 @@ def build_menu(candidates, context, location_details, photo_ratio, location, rec
         menu += ("  SACRED SUBJECT RULE: If the scene includes a deity, temple spire, dome,\n"
                  "  sacred fire, or other sacred element, report its approximate position\n"
                  "  in the 'sacred_subjects' field so we can protect it from text overlay.\n")
-    if quote_native:
-        menu += "\n=== QUOTE-NATIVE VISUALS ===\n"
-        menu += "These come from the quote's own words. They are the PRIMARY subject.\n"
-        for c in quote_native:
-            menu += f'\n[{c.id}] "{c.name}" [{c.domain}]\n'
-            menu += f'  Subject text: "{c.subject_text}"\n'
-            menu += f'  Scene text: "{c.scene_text}"\n'
-            menu += f'  Visual phrases: {c.visual_phrases}\n'
-
-    menu += "\n=== SUPPLEMENTARY CANDIDATES ===\n"
-    if quote_native:
-        menu += "These add atmosphere. Do NOT use as main subject if quote-native visuals exist.\n"
-    else:
-        menu += "Pick 1-2. Each has pre-written text — use ONLY these words.\n"
-    for c in supplementary:
-        menu += f"""
-[{c.id}] "{c.name}" [{c.domain}]
-  Groundable: {c.groundable} | Cultural: {c.cultural} | Chains: {c.chain_sources}
-  Entity type: {c.entity_type}
-  Subject text: "{c.subject_text}"
-  Scene text: "{c.scene_text}"
-  Weather: {c.weather_context}
-  Visual phrases: {c.visual_phrases}
-  Verb type: {c.verb_type}
-"""
+    menu += "\n=== SUBJECT CANDIDATES ===\n"
+    for candidate in candidates.pool:
+        sources = ", ".join(candidate.chain_sources)
+        reason = candidate.selection_context
+        details = ", ".join(candidate.visual_phrases[:3])
+        menu += f"[{candidate.id}] {candidate.name} ({sources})"
+        if reason:
+            menu += f" | {reason}"
+        if details:
+            menu += f" | Visual details: {details}"
+        menu += "\n"
 
     menu += "\n=== DOMAINS ===\nPick 1. Use its style_text and avoid_text.\n"
     for name in domains:
@@ -171,7 +146,7 @@ def build_menu(candidates, context, location_details, photo_ratio, location, rec
 def call_gemini(menu: str) -> dict:
     """Call Gemini with system prompt + menu. Returns parsed JSON."""
     if not GEMINI_API_KEY:
-        raise RuntimeError("No LLM API key configured (VIBZEE_LLM_API_KEY).")
+        raise PromptGenerationError("Gemini is unavailable. Set VIBZEE_LLM_API_KEY before retrying.")
 
     # Prefer the current unified SDK.
     try:
@@ -247,8 +222,18 @@ def build_master_prompt(selections, candidates, location_details, photo_ratio, l
     # Subject from selected metaphor ids
     cand_by_id = {c.id: c for c in candidates.pool}
     chosen_ids = selections.get("selected_metaphor_ids", [])
-    subject_parts = [cand_by_id[cid].subject_text for cid in chosen_ids if cid in cand_by_id and cand_by_id[cid].subject_text]
-    subject = ", blended with ".join(subject_parts)
+    subjects = {cid: c.name or c.subject_text for cid, c in cand_by_id.items()}
+    if "original" in chosen_ids:
+        original = selections.get("original_subject")
+        if (
+            not isinstance(original, str) or not original.strip()
+            or chosen_ids.count("original") != 1 or len(chosen_ids) > 2
+            or any(cid != "original" and cid not in cand_by_id for cid in chosen_ids)
+            or any("user_override" in c.chain_sources for c in candidates.pool)
+        ):
+            raise PromptGenerationError("Gemini returned an invalid original subject.")
+        subjects["original"] = original.strip()
+    subject = ", blended with ".join(subjects[cid] for cid in chosen_ids if subjects.get(cid))
 
     # Scene from first available metaphor
     scene = ""
@@ -256,7 +241,7 @@ def build_master_prompt(selections, candidates, location_details, photo_ratio, l
         if cid in cand_by_id and cand_by_id[cid].scene_text:
             scene = cand_by_id[cid].scene_text
             break
-    if not scene and candidates.pool:
+    if not scene and candidates.pool and "original" not in chosen_ids:
         scene = candidates.pool[0].scene_text
 
     # Location details
@@ -279,83 +264,11 @@ def build_master_prompt(selections, candidates, location_details, photo_ratio, l
         photo_ratio=photo_ratio,
         photo_approach=approach,
         visual_domain=domain,
-        metaphor_used=str(chosen_ids),
+        metaphor_used=str([subjects[cid] if cid == "original" else cid for cid in chosen_ids]),
         full_prompt=selections.get("full_prompt", "").strip(),
         gemini_selections=selections,
         layout_plan=layout_plan,
     )
-
-
-def verify_word_count(prompt: MasterPrompt) -> MasterPrompt:
-    """No-op — word count limit removed (DALL-E 3 via ChatGPT handles long prompts)."""
-    return prompt
-
-
-def fallback(candidates, context, location_details, photo_ratio, layout_plan=None) -> MasterPrompt:
-    """Rule-based fallback when Gemini is down. Picks diverse candidates & styles."""
-    pool = candidates.pool if candidates.pool else []
-    recent = load_recent()
-    filtered_pool = _filter_recent_metaphors(pool, recent) if pool else []
-    candidate_pool = filtered_pool or pool
-    candidate = random.choice(candidate_pool) if candidate_pool else None
-
-    details = random.sample(location_details, min(3, len(location_details))) if location_details else []
-    detail_text = ", ".join(d["text"] for d in details)
-
-    available_domains = _filter_recent(list(DOMAIN_PROFILES), {r.get("domain") for r in recent[-4:]}, keep_min=2)
-    domain = candidate.domain if (candidate and candidate.domain in DOMAIN_PROFILES) else random.choice(available_domains)
-    layout = layout_plan.layout_id if layout_plan else random.choice(
-        _filter_recent(list(LAYOUT_PROFILES), {r.get("layout") for r in recent[-4:]}, keep_min=3))
-    approach = str(random.randint(1, 4))
-
-    subject = candidate.subject_text if candidate else ""
-    scene = candidate.scene_text if candidate else ""
-
-    # Inject landmark visual description into scene if available
-    lm_sel = context.landmark_selection if hasattr(context, "landmark_selection") else None
-    if lm_sel:
-        lm_vis = lm_sel["landmark"].get("visual_description", "")
-        if lm_vis:
-            scene = f"{lm_vis}, {scene}" if scene else lm_vis
-
-    parts = [
-        f"{photo_ratio} portrait image, high resolution.",
-        f"{subject}." if subject else "",
-        f"{scene}." if scene else "",
-        f"{detail_text}." if detail_text else "",
-        f"{DOMAIN_PROFILES[domain]['style_text']}.",
-        f"No text, no watermarks. {DOMAIN_PROFILES[domain]['avoid_text']}",
-    ]
-    full_prompt = " ".join(p for p in parts if p)
-
-    return MasterPrompt(
-        image_type_format="4:5 portrait image, high resolution",
-        subject=subject,
-        scene=scene,
-        style=DOMAIN_PROFILES[domain]["style_text"],
-        composition=LAYOUT_PROFILES[layout]["gemini_guidance"],
-        empty_space=APPROACH_TEMPLATES.get(approach, APPROACH_TEMPLATES["1"])["gemini_guidance"],
-        details=detail_text,
-        avoid=DOMAIN_PROFILES[domain]["avoid_text"],
-        quote_used=candidates.quote,
-        full_prompt=full_prompt,
-        layout_id=layout,
-        visual_domain=domain,
-        photo_approach=approach,
-        photo_ratio=photo_ratio,
-        metaphor_used=candidate.name if candidate else "",
-        gemini_selections={"fallback": True, "reasoning": "Gemini unavailable"},
-        layout_plan=layout_plan,
-    )
-
-
-# ── helpers ─────────────────────────────────────────
-
-def _filter_recent_metaphors(pool, recent, lookback=6):
-    """Drop candidates whose id was used in recent runs, unless nothing would remain."""
-    used = " ".join(str(r.get("metaphor", "")) for r in recent[-lookback:])
-    fresh = [c for c in pool if c.id not in used]
-    return fresh if fresh else pool
 
 
 def _filter_recent(options, used, keep_min):

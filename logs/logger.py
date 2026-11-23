@@ -39,10 +39,7 @@ def _get_upstash_creds():
 UPSTASH_URL, UPSTASH_TOKEN = _get_upstash_creds()
 
 
-# ─────────────────────────────────────────────────────────────
-# 1. UPSTASH REST CLIENT (Lightweight, No extra pip dependencies)
-# ─────────────────────────────────────────────────────────────
-
+# Upstash REST client operations
 def _redis_cmd(*args) -> any:
     """Execute any Redis command via Upstash REST API using plain requests."""
     url, token = _get_upstash_creds()
@@ -77,11 +74,7 @@ def _redis_post(cmd: list) -> any:
     return None
 
 
-# ─────────────────────────────────────────────────────────────
-# 2. LOGGING (Local File + Upstash Cloud)
-# ─────────────────────────────────────────────────────────────
-
-
+# Local file and Upstash cloud logging
 def get_next_run_id() -> int:
     """Determine the next incremental run number (checks local file first, then Redis)."""
     LOGS_DIR.mkdir(parents=True, exist_ok=True)
@@ -179,9 +172,11 @@ def build_run_log(quote, location, ratio, time_of_day, ctx, candidates, loc_deta
     for c in candidates.pool:
         lines.append(
             f'  [{c.id}] "{c.name}" domain={c.domain} '
-            f"groundable={c.groundable} cultural={c.cultural} "
+            f"cultural={c.cultural} "
             f"chains={c.chain_sources}"
         )
+        if c.selection_context:
+            lines.append(f"    why offered: {c.selection_context}")
         lines.append(f'    subject: "{c.subject_text}"')
         lines.append(f'    scene: "{c.scene_text}"')
         lines.append(f"    visual_phrases: {c.visual_phrases}")
@@ -200,12 +195,11 @@ def build_run_log(quote, location, ratio, time_of_day, ctx, candidates, loc_deta
         "STAGE 3: GEMINI LLM SELECTIONS",
         sep,
         f"Selected Metaphor IDs: {sel.get('selected_metaphor_ids', 'N/A')}",
+        f"Original Subject: {sel.get('original_subject') or 'N/A'}",
         f"Selected Domain: {sel.get('selected_domain', 'N/A')}",
         f"Selected Layout: {sel.get('selected_layout', 'N/A')}",
         f"Selected Approach: {sel.get('selected_approach', 'N/A')}",
         f"Selected Details: {sel.get('selected_details', 'N/A')}",
-        f"Fallback Used: {sel.get('fallback', False)}",
-        f"Error: {sel.get('error', 'None')}",
         "",
         "[Reasoning]",
         f"  {sel.get('reasoning', 'N/A')}",
@@ -247,10 +241,7 @@ def build_run_log(quote, location, ratio, time_of_day, ctx, candidates, loc_deta
     return "\n".join(lines)
 
 
-# ─────────────────────────────────────────────────────────────
-# 4. RECENT RUNS (Shared across Vercel & Local)
-# ─────────────────────────────────────────────────────────────
-
+# Shared recent runs across cloud and local
 def cloud_load_recent() -> list:
     """Load recent runs from Upstash Redis, or fallback to empty list."""
     res = _redis_cmd("get", "vibzee:recent_runs")
@@ -270,10 +261,7 @@ def cloud_save_recent(entry: dict):
     _redis_post(["set", "vibzee:recent_runs", json.dumps(recent, ensure_ascii=False)])
 
 
-# ─────────────────────────────────────────────────────────────
-# 4. CACHE (Shared across Vercel & Local)
-# ─────────────────────────────────────────────────────────────
-
+# Shared remote cache on Redis
 def cloud_load_cache(key: str):
     """Fetch cached data from Upstash Redis."""
     res = _redis_cmd("get", f"vibzee:cache:{key}")
@@ -291,34 +279,22 @@ def cloud_save_cache(key: str, data, ttl_seconds: int = 86400):
     _redis_post(["setex", f"vibzee:cache:{key}", ttl_seconds, payload])
 
 
-# ─────────────────────────────────────────────────────────────
-# 5. SYNC COMMAND: Pull all Vercel logs into your local file
-# ─────────────────────────────────────────────────────────────
-
-def pull_logs_from_cloud():
-    """
-    Downloads all run logs stored in Upstash Redis and writes them to
-    your local logs/all_runs.log file.
-    """
-    logs = _redis_post(["lrange", "vibzee:all_runs", 0, -1])
-    if not logs or not isinstance(logs, list):
-        print("No remote logs found in Upstash Redis.")
-        return
-
-    LOGS_DIR.mkdir(parents=True, exist_ok=True)
-    with open(ALL_RUNS_FILE, "w", encoding="utf-8") as f:
-        for entry in logs:
-            f.write(entry)
-    print(f"✓ Successfully synced {len(logs)} run logs into: {ALL_RUNS_FILE}")
-
-
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(description="Vibzee Logger & Cloud Sync")
     parser.add_argument("--sync", action="store_true", help="Pull logs from Upstash Redis to local file")
     args = parser.parse_args()
 
+    # Pull run logs from Upstash Redis to local file
     if args.sync:
-        pull_logs_from_cloud()
+        logs = _redis_post(["lrange", "vibzee:all_runs", 0, -1])
+        if not logs or not isinstance(logs, list):
+            print("No remote logs found in Upstash Redis.")
+        else:
+            LOGS_DIR.mkdir(parents=True, exist_ok=True)
+            with open(ALL_RUNS_FILE, "w", encoding="utf-8") as f:
+                for entry in logs:
+                    f.write(entry)
+            print(f"Successfully synced {len(logs)} run logs into: {ALL_RUNS_FILE}")
     else:
         print("Vibzee Logger loaded. Run with --sync to pull logs from Vercel/Upstash.")

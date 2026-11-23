@@ -23,9 +23,7 @@ from typing import Dict, Any, List, Optional, Tuple
 
 from specs import PANCHANG_PATH
 
-# ═════════════════════════════════════════════════════════════════════
 # 1. CONSTANTS, VEDIC CATALOGS & ASTRONOMICAL ALGORITHMS (Meeus Ephemeris)
-# ═════════════════════════════════════════════════════════════════════
 
 VAARA_NAMES_EN = [
     "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"
@@ -535,9 +533,7 @@ def calculate_muhurats(
     }
 
 
-# ═════════════════════════════════════════════════════════════════════
 # 2. REGIONAL CALENDAR PROFILES & RESOLUTION
-# ═════════════════════════════════════════════════════════════════════
 
 def get_samvatsara_name(shaka_year: int) -> str:
     idx = (shaka_year + 11) % 60
@@ -983,9 +979,7 @@ def resolve_regional_profile(
     return profile
 
 
-# ═════════════════════════════════════════════════════════════════════
 # 3. BRANCH 1: DYNAMIC PANCHANG CALCULATION ENGINE
-# ═════════════════════════════════════════════════════════════════════
 
 class DynamicPanchangEngine:
     """
@@ -1207,9 +1201,7 @@ class DynamicPanchangEngine:
         }
 
 
-# ═════════════════════════════════════════════════════════════════════
 # 4. ASTRONOMICAL FESTIVAL RULE EVALUATOR
-# ═════════════════════════════════════════════════════════════════════
 
 class FestivalRuleEvaluator:
     @staticmethod
@@ -1501,9 +1493,7 @@ class FestivalRuleEvaluator:
         }
 
 
-# ═════════════════════════════════════════════════════════════════════
 # 5. BRANCH 2: PRESERVED FESTIVAL AND REGIONAL OBSERVANCE PROCESSOR
-# ═════════════════════════════════════════════════════════════════════
 
 CAT_GREGORIAN_FIXED = "GREGORIAN_FIXED"
 CAT_ISLAMIC_LUNAR = "ISLAMIC_LUNAR"
@@ -1674,9 +1664,7 @@ class FestivalProcessor:
         return result
 
 
-# ═════════════════════════════════════════════════════════════════════
 # 6. NON-DESTRUCTIVE MERGER & VALIDATION
-# ═════════════════════════════════════════════════════════════════════
 
 class PanchangMerger:
     @staticmethod
@@ -1764,9 +1752,7 @@ class PanchangMerger:
         }
 
 
-# ═════════════════════════════════════════════════════════════════════
 # 7. PARALLEL EXECUTION COORDINATOR & CONVENIENCE API
-# ═════════════════════════════════════════════════════════════════════
 
 class PanchangCoordinator:
     """
