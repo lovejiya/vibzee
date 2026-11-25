@@ -11,10 +11,9 @@ Consolidates all components into a single, cohesive, self-contained engine:
   6. Branch 2: Preserved Festival Processor (loads & preserves panchang_2026.json)
   7. Astronomical Festival Rule Evaluator & Discrepancy Detector
   8. Non-Destructive Panchang Merger
-  9. Parallel Execution Orchestrator (Asyncio & ThreadPool concurrency)
+  9. Coordinator with synchronous and asynchronous entry points
 """
 import asyncio
-from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, date, time, timedelta
 import json
 import math
@@ -22,6 +21,7 @@ from pathlib import Path
 from typing import Dict, Any, List, Optional, Tuple
 
 from specs import PANCHANG_PATH
+from daily_resolver import DailyResolver, amanta_month_on
 
 # 1. CONSTANTS, VEDIC CATALOGS & ASTRONOMICAL ALGORITHMS (Meeus Ephemeris)
 
@@ -391,12 +391,11 @@ def get_karana_at_jd(jd: float) -> Tuple[int, str]:
     moon_lon = moon_apparent_longitude(jd)
     elongation = (moon_lon - sun_lon) % 360.0
     karana_num = int(elongation / 6.0) + 1
-    if karana_num in FIXED_KARANAS:
-        name = FIXED_KARANAS[karana_num]
-    else:
-        movable_index = (karana_num - 2) % 7
-        name = MOVABLE_KARANAS[movable_index]
-    return karana_num, name
+    return karana_num, karana_name_at_index(karana_num)
+
+
+def karana_name_at_index(karana_num: int) -> str:
+    return FIXED_KARANAS.get(karana_num) or MOVABLE_KARANAS[(karana_num - 2) % 7]
 
 
 def get_solar_rashi_at_jd(jd: float) -> Tuple[int, str, float]:
@@ -981,11 +980,15 @@ def resolve_regional_profile(
 
 # 3. BRANCH 1: DYNAMIC PANCHANG CALCULATION ENGINE
 
+def is_mumbai_location(lat: float, lon: float) -> bool:
+    return 18.89 <= lat <= 19.31 and 72.75 <= lon <= 73.00
+
+
 class DynamicPanchangEngine:
-    """
-    Branch 1: Dynamic Panchang Calculation Engine.
-    Zero dependency on existing static JSON files.
-    """
+    """Calculate astronomy and format the requested regional calendar."""
+
+    def __init__(self, calendar_metadata: Optional[dict] = None):
+        self.calendar_metadata = calendar_metadata or {}
 
     def calculate(
         self,
@@ -1031,7 +1034,7 @@ class DynamicPanchangEngine:
             jd_eval = julian_day(target_date.year, target_date.month, target_date.day, 12.0 - tz_offset)
 
         udaya_tithi_num, udaya_tithi_name, udaya_paksha, udaya_tithi_frac = get_tithi_at_jd(jd_sunrise)
-        running_tithi_num, running_tithi_name, running_paksha, running_tithi_frac = get_tithi_at_jd(jd_eval)
+        _, running_tithi_name, running_paksha, _ = get_tithi_at_jd(jd_eval)
 
         rem_tithi_hrs = (1.0 - udaya_tithi_frac) * 24.0
         tithi_end_time_h = (sunrise.hour + sunrise.minute / 60.0) + rem_tithi_hrs
@@ -1040,7 +1043,7 @@ class DynamicPanchangEngine:
         tithi_end_str = f"{tithi_end_h:02d}:{tithi_end_m:02d}"
 
         udaya_nak_num, udaya_nak_name, udaya_nak_frac = get_nakshatra_at_jd(jd_sunrise)
-        running_nak_num, running_nak_name, _ = get_nakshatra_at_jd(jd_eval)
+        _, running_nak_name, _ = get_nakshatra_at_jd(jd_eval)
 
         rem_nak_hrs = (1.0 - udaya_nak_frac) * 24.2
         nak_end_time_h = (sunrise.hour + sunrise.minute / 60.0) + rem_nak_hrs
@@ -1050,12 +1053,29 @@ class DynamicPanchangEngine:
 
         yoga_num, yoga_name, _ = get_yoga_at_jd(jd_eval)
         karana_num, karana_name = get_karana_at_jd(jd_eval)
-        next_karana_num, next_karana_name = get_karana_at_jd(jd_eval + 0.25)
+        next_karana_name = karana_name_at_index(karana_num % 60 + 1)
 
         rashi_num, solar_rashi_san, deg_in_rashi = get_solar_rashi_at_jd(jd_eval)
         sankranti_info = find_sankranti_on_date(target_date, tz_offset)
 
         amanta_month_idx = (rashi_num % 12) + 1
+        month_source = "solar_rashi_estimate"
+        chaitra_start = date(target_date.year, 3, 19)
+        intervals = self.calendar_metadata.get(f"amanta_months_{target_date.year}") or []
+        if intervals and is_mumbai_location(lat, lon):
+            civil_month = amanta_month_on(target_date, intervals)
+            if civil_month:
+                # The civil observance can start later than sunrise on a new-moon day.
+                if udaya_tithi_name == "Amavasya":
+                    civil_month = amanta_month_on(target_date - timedelta(days=1), intervals) or civil_month
+                lookup_key = {"shravan": "shravana", "ashwin": "ashvina", "kartik": "kartika"}.get(civil_month, civil_month)
+                amanta_month_idx = LUNAR_MONTHS_SAN.index(lookup_key.capitalize()) + 1
+                month_source = "mumbai_civil_calendar"
+            chaitra = next((row.get("start") for row in intervals
+                            if isinstance(row, dict) and row.get("month_key") == "chaitra"), None)
+            if chaitra:
+                chaitra_start = date.fromisoformat(chaitra)
+
         amanta_month_san = LUNAR_MONTHS_SAN[amanta_month_idx - 1]
 
         if udaya_paksha == "Krishna":
@@ -1067,7 +1087,7 @@ class DynamicPanchangEngine:
         cal_sys = profile.get("calendar_system", "lunar_amanta")
         g_year = target_date.year
 
-        is_post_chaitra = (target_date >= date(g_year, 3, 19))
+        is_post_chaitra = target_date >= chaitra_start
         is_post_bestu = (target_date >= date(g_year, 11, 10))
         is_post_mesha = (target_date >= date(g_year, 4, 14))
         is_post_chingam = (target_date >= date(g_year, 8, 17))
@@ -1141,7 +1161,8 @@ class DynamicPanchangEngine:
         return {
             "source": "Dynamic Vedic Ephemeris Engine (Meeus/Lahiri)",
             "calculation_methodology": "Drik Siddhanta (Astronomical Sidereal)",
-            "date": target_date.strftime("%Y-%m-%d"),
+            "date": target_date.isoformat(),
+            "evaluated_at": (eval_time or time(12)).strftime("%H:%M"),
             "vaara": {
                 "english": vaara_en,
                 "sanskrit": vaara_san,
@@ -1150,6 +1171,7 @@ class DynamicPanchangEngine:
             "tithi": {
                 "udaya_tithi": udaya_tithi_name,
                 "running_tithi": running_tithi_name,
+                "running_paksha": running_paksha,
                 "tithi_number": udaya_tithi_num,
                 "paksha": udaya_paksha,
                 "paksha_regional": profile.get("paksha_names", {}).get(udaya_paksha, udaya_paksha),
@@ -1171,7 +1193,10 @@ class DynamicPanchangEngine:
                 "degree_in_rashi": round(deg_in_rashi, 2),
                 "sankranti_today": sankranti_info,
             },
-            "lunar_month": {"amanta": amanta_month_san, "purnimanta": purnimanta_month_san, "is_adhika_masa": False},
+            "lunar_month": {
+                "amanta": amanta_month_san, "purnimanta": purnimanta_month_san,
+                "is_adhika_masa": False, "source": month_source,
+            },
             "regional_calendar": {
                 "profile_id": profile["id"],
                 "profile_display": profile["display_name"],
@@ -1752,15 +1777,14 @@ class PanchangMerger:
         }
 
 
-# 7. PARALLEL EXECUTION COORDINATOR & CONVENIENCE API
+# 7. COORDINATOR & CONVENIENCE API
 
 class PanchangCoordinator:
-    """
-    Coordinates concurrent execution of the Dynamic Panchang Engine and Festival Processor.
-    """
+    """Combine astronomy, festival evidence and local devotional context."""
 
     def __init__(self):
-        self.engine = DynamicPanchangEngine()
+        self.daily_resolver = DailyResolver()
+        self.engine = DynamicPanchangEngine(self.daily_resolver.deities.get("meta"))
         self.festival_processor = FestivalProcessor()
         self.merger = PanchangMerger()
 
@@ -1776,53 +1800,9 @@ class PanchangCoordinator:
         eval_time: Optional[time] = None,
         elevation_m: float = 0.0,
     ) -> Dict[str, Any]:
-        profile = resolve_regional_profile(
-            explicit_profile=regional_profile_id,
-            location_name=location_name,
-            language_name=language,
-        )
-        resolved_prof_id = profile["id"]
-
-        loop = asyncio.get_running_loop()
-
-        task_panchang = loop.run_in_executor(
-            None,
-            self.engine.calculate,
-            target_date,
-            lat,
-            lon,
-            5.5,
-            elevation_m,
-            resolved_prof_id,
-            location_name,
-            language,
-            eval_time,
-        )
-
-        task_festival = loop.run_in_executor(
-            None,
-            self.festival_processor.process_date,
-            target_date,
-            resolved_prof_id,
-            tradition,
-            None,
-        )
-
-        panchang_data, _ = await asyncio.gather(task_panchang, task_festival)
-
-        refined_festival_data = self.festival_processor.process_date(
-            target_date=target_date,
-            regional_profile_id=resolved_prof_id,
-            tradition=tradition,
-            panchang_results=panchang_data,
-        )
-
-        return self.merger.merge(
-            panchang_data=panchang_data,
-            festival_data=refined_festival_data,
-            profile=profile,
-            tradition=tradition,
-            language=language,
+        return await asyncio.to_thread(
+            self.calculate_panchang, target_date, lat, lon, location_name,
+            regional_profile_id, language, tradition, eval_time, elevation_m,
         )
 
     def calculate_panchang(
@@ -1837,61 +1817,34 @@ class PanchangCoordinator:
         eval_time: Optional[time] = None,
         elevation_m: float = 0.0,
     ) -> Dict[str, Any]:
-        try:
-            loop = asyncio.get_running_loop()
-        except RuntimeError:
-            loop = None
-
-        if loop and loop.is_running():
-            with ThreadPoolExecutor(max_workers=2) as executor:
-                profile = resolve_regional_profile(
-                    explicit_profile=regional_profile_id,
-                    location_name=location_name,
-                    language_name=language,
-                )
-                resolved_prof_id = profile["id"]
-
-                f_panchang = executor.submit(
-                    self.engine.calculate,
-                    target_date, lat, lon, 5.5, elevation_m,
-                    resolved_prof_id, location_name, language, eval_time
-                )
-                f_festival = executor.submit(
-                    self.festival_processor.process_date,
-                    target_date, resolved_prof_id, tradition, None
-                )
-
-                panchang_data = f_panchang.result()
-                _ = f_festival.result()
-
-                refined_festival_data = self.festival_processor.process_date(
-                    target_date=target_date,
-                    regional_profile_id=resolved_prof_id,
-                    tradition=tradition,
-                    panchang_results=panchang_data,
-                )
-
-                return self.merger.merge(
-                    panchang_data=panchang_data,
-                    festival_data=refined_festival_data,
-                    profile=profile,
-                    tradition=tradition,
-                    language=language,
-                )
-        else:
-            return asyncio.run(
-                self.calculate_panchang_async(
-                    target_date=target_date,
-                    lat=lat,
-                    lon=lon,
-                    location_name=location_name,
-                    regional_profile_id=regional_profile_id,
-                    language=language,
-                    tradition=tradition,
-                    eval_time=eval_time,
-                    elevation_m=elevation_m,
-                )
-            )
+        in_mumbai = is_mumbai_location(lat, lon)
+        if in_mumbai and not location_name:
+            location_name = "Mumbai"
+        profile = resolve_regional_profile(
+            explicit_profile=regional_profile_id,
+            location_name=location_name,
+            language_name=language,
+        )
+        panchang = self.engine.calculate(
+            target_date, lat, lon, elevation_m=elevation_m,
+            regional_profile_id=profile["id"], location_name=location_name,
+            language_name=language, eval_time=eval_time,
+        )
+        festivals = self.festival_processor.process_date(
+            target_date, profile["id"], tradition, panchang_results=panchang,
+        )
+        result = self.merger.merge(panchang, festivals, profile, tradition, language)
+        if in_mumbai:
+            devotion = self.daily_resolver.resolve(target_date, result)
+            result["devotion"] = devotion
+            primary = devotion["primary"]
+            if primary["type"] not in ("weekday", "month", "tithi"):
+                result["festival_intelligence"]["resolved_observance"] = {
+                    "name": primary["theme"],
+                    "source": primary["source"],
+                    "date_status": primary.get("date_status"),
+                }
+        return result
 
     def get_festival_string(
         self,
@@ -1913,7 +1866,8 @@ class PanchangCoordinator:
             tradition=tradition,
         )
 
-        fest = res["festival_intelligence"]["active_festival"]
+        intelligence = res["festival_intelligence"]
+        fest = (intelligence.get("resolved_observance") or {}).get("name") or intelligence["active_festival"]
         tithi_dict = res["astronomical_panchang"]["tithi"]
         udaya_tithi = tithi_dict.get("udaya_tithi")
         paksha = tithi_dict.get("paksha")

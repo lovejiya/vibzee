@@ -2,16 +2,23 @@
 app.py — Vibzee Image Prompt Generator UI.
 Built with Flask (zero external GUI setup needed). Run directly with: python3 app.py
 """
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 import json
-from flask import Flask, request, render_template_string, jsonify
+import math
+from flask import Flask, Response, jsonify, render_template_string, request, stream_with_context
 
-from specs import LOCATIONS, QUOTES, MasterPrompt
+from specs import APPROACH_TEMPLATES, LOCATIONS, QUOTES
 from panchange_engine import REGIONAL_PROFILES, get_coordinator
 import sources
 import generator
 
 app = Flask(__name__)
+STAGES = {
+    "context": "Context", "shortlist": "Shortlist", "gemini": "Gemini response",
+    "layout": "Layout checks", "final": "Final prompt",
+}
+STREAM_TYPE = "application/x-ndjson"
+INDIA_TIMEZONE = timezone(timedelta(hours=5, minutes=30), "IST")
 
 
 def classify_time(hour: int) -> str:
@@ -38,6 +45,18 @@ def run_pipeline(
     custom_keywords: list[str] = None, custom_candidates: list[str] = None
 ):
     """Run the full generation pipeline and log the result."""
+    results = dict(pipeline_stages(
+        quote_input, location, date, time_of_day, photo_ratio, language,
+        regional_profile, custom_keywords, custom_candidates,
+    ))
+    candidates, loc_details, _ = results["shortlist"]
+    return results["context"], candidates, loc_details, results["final"]
+
+
+def pipeline_stages(
+    quote_input, location, date, time_of_day, photo_ratio,
+    language, regional_profile, custom_keywords, custom_candidates,
+):
     translated_en_quote = ""
     if not custom_keywords and language.lower() not in ("english", "en"):
         translated_en_quote = generator.translate_quote_to_english(quote_input, language)
@@ -52,6 +71,7 @@ def run_pipeline(
         regional_profile=regional_profile,
         custom_keywords=custom_keywords,
     )
+    yield "context", ctx
 
     # Landmark selection — runs after context enrichment so we have theme + emotion
     lm_sel = sources.select_landmark(
@@ -69,14 +89,13 @@ def run_pipeline(
         custom_candidates=custom_candidates,
     )
     loc_details = sources.discover_location_details(location, landmark_selection=lm_sel)
+    yield "shortlist", (candidates, loc_details, lm_sel)
 
-    prompt = generator.generate(
-        candidates=candidates,
-        context=ctx,
-        location_details=loc_details,
-        photo_ratio=photo_ratio,
-        location=location,
-    )
+    for stage, value in generator.generation_stages(candidates, ctx, loc_details, photo_ratio, location):
+        if stage == "final":
+            prompt = value
+        else:
+            yield stage, value
 
     try:
         from logs.logger import get_next_run_id, record_run_log, build_run_log
@@ -89,234 +108,448 @@ def run_pipeline(
     except Exception:
         pass
 
-    return ctx, candidates, loc_details, prompt
+    yield "final", prompt
 
 
-HTML_TEMPLATE = """
-<!DOCTYPE html>
+HTML_TEMPLATE = r"""
+{%- macro facts(items) %}
+  <dl class="facts">
+    {% for label, value in items if value is defined and value is not none and value != '' %}
+      <div><dt>{{ label }}</dt><dd>{{ value }}</dd></div>
+    {% endfor %}
+  </dl>
+{% endmacro -%}
+
+{% macro badge(kind, id, selected) %}
+  <span class="selection" data-choice="{{ kind }}" data-id="{{ id }}"{% if id not in selected %} hidden{% endif %}>Selected</span>
+{% endmacro -%}
+
+{% macro subjects(options, chosen) %}
+  <ul class="options">
+    {% for option in options %}
+      <li class="option">
+        <strong>{{ option.name }}</strong>{{ badge(0, option.id, chosen) }}
+        {% if option.selection_context %}<small>{{ option.selection_context }}</small>{% endif %}
+        {% if option.chain_sources %}<small>{{ option.chain_sources|join(', ')|replace('_', ' ') }}</small>{% endif %}
+      </li>
+    {% endfor %}
+  </ul>
+{% endmacro -%}
+
+{% macro box(area) %}
+  {% if area %}x {{ '%.2f'|format(area.x) }} · y {{ '%.2f'|format(area.y) }} · w {{ '%.2f'|format(area.w) }} · h {{ '%.2f'|format(area.h) }}{% endif %}
+{% endmacro -%}
+
+{% macro content(stage, results, inputs) %}
+  {% set gemini = results.get('gemini', {}) %}
+  {% set chosen = gemini.get('selected_metaphor_ids') %}
+  {% set chosen = chosen if chosen is sequence and chosen is not string and chosen is not mapping else [] %}
+  {% set chosen_details = gemini.get('selected_details') %}
+  {% set chosen_details = chosen_details if chosen_details is sequence and chosen_details is not string and chosen_details is not mapping else [] %}
+
+  {% if stage == 'context' %}
+    {% set ctx = results.context %}
+    {% set calendar = ctx.panchang_details or {} %}
+    {% set profile = calendar.regional_profile or {} %}
+    <blockquote>{{ inputs.quote_input }}</blockquote>
+    {{ facts([
+      ('Location', inputs.active_location_name), ('Date', inputs.selected_date),
+      ('Time', inputs.selected_time ~ ' · ' ~ inputs.time_of_day|capitalize),
+      ('Photo ratio', inputs.selected_ratio), ('Language', inputs.selected_lang),
+      ('Regional profile', profile.display_name|default(inputs.profile_label, true)),
+      ('Overrides active', ([('Location' if inputs.is_custom_loc else ''), ('Keywords' if inputs.is_custom_kw else ''), ('Subjects' if inputs.is_custom_cand else '')]|reject('equalto', '')|join(', ')))
+    ]) }}
+    <details>
+      <summary>Quote analysis, weather and Panchang</summary>
+      {{ facts([
+        ('Analyzed text', ctx.quote_analysis.text if ctx.quote_analysis.text != ctx.quote else ''),
+        ('Keywords', ctx.en_keywords|join(', ')), ('Theme', ctx.quote_analysis.theme),
+        ('Emotion', ctx.emotion.primary), ('Sentiment', ctx.emotion.sentiment),
+        ('Negated nouns', ctx.quote_analysis.negated_nouns|join(', ')),
+        ('Visual imagery', ctx.visual_imagery|map(attribute='english')|join(', ')),
+        ('Weather', ctx.weather.condition), ('Temperature', ctx.weather.temp ~ '°C' if ctx.weather.temp is defined and ctx.weather.temp is not none else ''),
+        ('Humidity', ctx.weather.humidity ~ '%' if ctx.weather.humidity is defined and ctx.weather.humidity is not none else ''),
+        ('Festival or tithi', ctx.festival or 'None')
+      ]) }}
+      {% if calendar %}
+        {% set astro = calendar.astronomical_panchang or {} %}
+        {% set intelligence = calendar.festival_intelligence or {} %}
+        {% set resolved = intelligence.resolved_observance or {} %}
+        {{ facts([
+          ('Regional date', (astro.regional_calendar or {}).regional_date_string),
+          ('Amanta month at sunrise', (astro.lunar_month or {}).amanta),
+          ('Tithi at sunrise', (astro.tithi or {}).udaya_tithi),
+          ('Tithi at ' ~ astro.evaluated_at ~ ' IST', (astro.tithi or {}).running_tithi),
+          ('Nakshatra at sunrise', (astro.nakshatra or {}).udaya_nakshatra),
+          ('Nakshatra at selected time', (astro.nakshatra or {}).running_nakshatra),
+          ('Yoga', (astro.yoga or {}).yoga_name), ('Karana', (astro.karana or {}).current_karana),
+          ('Sunrise', (astro.sun_moon_timings or {}).sunrise), ('Sunset', (astro.sun_moon_timings or {}).sunset),
+          ('Rahu Kaal', (astro.muhurats or {}).rahu_kalam), ('Abhijit', (astro.muhurats or {}).abhijit_muhurta),
+          ('Resolved observance', resolved.name),
+          ('Observance date status', resolved.date_status|default('', true)|replace('_', ' ')),
+          ('2026 reference observance', intelligence.active_festival),
+          ('2026 reference classification', intelligence.classification if intelligence.active_festival else '')
+        ]) }}
+      {% else %}<p class="muted">Panchang details unavailable.</p>{% endif %}
+    </details>
+
+  {% elif stage == 'shortlist' %}
+    {% set candidates, details, landmark = results.shortlist %}
+    <div class="shortlist-grid">
+      <div class="group">
+        <h3>Top 5 landmarks</h3>
+        {% if landmark %}
+          {% set ranks = landmark.top_5|default(landmark.top_3) %}
+          <p class="muted">Weighted selection from the top {{ [ranks|length, 3]|min }}.</p>
+          <table aria-label="Ranked landmarks">
+            <thead><tr><th scope="col">Rank</th><th scope="col">Landmark</th><th scope="col">Score</th></tr></thead>
+            <tbody>
+              {% for option in ranks %}
+                {% set selected = option.selected|default(option.name == landmark.landmark.name) %}
+                <tr{% if selected %} class="selected"{% endif %}>
+                  <td>{{ loop.index }}</td><td>{{ option.name }} {% if selected %}<span class="selection">Selected</span>{% endif %}</td><td>{{ option.score }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          <details>
+            <summary>Landmark details</summary>
+            {{ facts([('Type', landmark.landmark.type), ('Track', landmark.track), ('Category', landmark.category),
+              ('Contrast probability', '%.0f%%'|format(landmark.contrast_probability * 100) if landmark.contrast_probability is defined else ''),
+              ('Visual description', landmark.landmark.visual_description)]) }}
+          </details>
+        {% else %}<p class="muted">No ranked landmarks for this run.</p>{% endif %}
+      </div>
+      <div class="group">
+        <h3>Subjects offered <small>{{ candidates.pool|length }}</small></h3>
+        <p class="muted">{{ 'User-supplied subjects' if inputs.is_custom_cand else 'In the order sent to Gemini' }}</p>
+        {{ subjects(candidates.pool[:5], chosen) }}
+        {% if candidates.pool|length > 5 %}
+          <details><summary>Show all {{ candidates.pool|length }} subjects</summary>{{ subjects(candidates.pool[5:], chosen) }}</details>
+        {% endif %}
+      </div>
+    </div>
+    {% if details %}
+      <details>
+        <summary>Location details offered <span class="muted">{{ details|length }}</span></summary>
+        <ul class="options">
+          {% for detail in details %}
+            <li class="option"><strong>{{ detail.id }} · {{ detail.source }}</strong>{{ badge(1, detail.id, chosen_details) }}<small>{{ detail.text }}</small></li>
+          {% endfor %}
+        </ul>
+      </details>
+    {% endif %}
+
+  {% elif stage == 'gemini' %}
+    {% set names = {'original': gemini.original_subject} %}
+    {% for candidate in results.shortlist[0].pool %}{% set _ = names.update({candidate.id: candidate.name}) %}{% endfor %}
+    {% set main = chosen[0] if chosen and chosen[0] is string else '' %}
+    {% set supporting = chosen[1] if chosen|length > 1 and chosen[1] is string else '' %}
+    {% set approach = gemini.selected_approach|default('1')|string %}
+    {{ facts([
+      ('Main subject', names.get(main, main)), ('Supporting subject', names.get(supporting, supporting)),
+      ('Original subject', gemini.original_subject),
+      ('Style', gemini.selected_domain|default('PHOTOREALISTIC')|capitalize),
+      ('Photo approach', inputs.approaches.get(approach, inputs.approaches['1']).name|capitalize)
+    ]) }}
+    {% if gemini.reasoning %}<blockquote>{{ gemini.reasoning }}</blockquote>{% endif %}
+    <details><summary>View response JSON</summary><pre>{{ gemini|tojson(indent=2) }}</pre></details>
+
+  {% elif stage == 'layout' %}
+    {% set plan = results.layout %}
+    {{ facts([('Layout', plan.layout_id), ('Validation', 'Valid' if plan.validation_passed else 'Failed'),
+      ('Visual weight', plan.visual_weight_zone), ('Repair', plan.repair_reason if plan.repair_applied else '')]) }}
+    <details>
+      <summary>Quote, photo and protected regions</summary>
+      {{ facts([('Quote area', box(plan.quote_box)), ('Photo area', box(plan.photo_box))]) }}
+      {% if plan.protected_regions %}
+        <ul class="options">{% for region in plan.protected_regions %}<li class="option">{{ region.label|replace('_', ' ') }} · {{ region.rule|replace('_', ' ') }}<small>{{ box(region.box) }}</small></li>{% endfor %}</ul>
+      {% else %}<p class="muted">No protected regions.</p>{% endif %}
+    </details>
+
+  {% elif stage == 'final' %}
+    {% set prompt = results.final.full_prompt %}
+    <pre id="output-prompt" tabindex="0">{{ prompt }}</pre>
+    <div class="prompt-actions"><small>{{ prompt.split()|length }} words</small><button type="button" id="copy-btn">Copy prompt</button></div>
+    <p id="copy-feedback" class="muted" role="status"></p>
+  {% endif %}
+{% endmacro -%}
+{% macro select_field(name, label, options, selected, attribute='', auto=false) %}
+  <label>{{ label }}
+    <select name="{{ name }}">
+      {% if auto %}<option value=""{% if not selected %} selected{% endif %}>Auto</option>{% endif %}
+      {% for option in options %}
+        {% set key, value = (option, option) if option is string else option %}
+        <option value="{{ key }}"{% if key == selected %} selected{% endif %}>{{ value[attribute] if attribute else value }}</option>
+      {% endfor %}
+    </select>
+  </label>
+{% endmacro %}
+{%- if fragment is defined -%}
+  {{ content(fragment, results, inputs) }}
+{%- else -%}
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Vibzee Prompt Generator</title>
   <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f8fafc; color: #1e293b; margin: 0; padding: 24px; }
-    .container { max-width: 760px; margin: 0 auto; background: #fff; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.06); padding: 28px 36px; }
-    h1 { margin-top: 0; color: #0f172a; font-size: 24px; }
-    .stage { border-left: 4px solid #6366f1; padding: 12px 18px; margin: 20px 0; background: #f1f5f9; border-radius: 0 8px 8px 0; }
-    .stage h2 { margin: 0 0 10px 0; font-size: 16px; color: #4338ca; text-transform: uppercase; letter-spacing: 0.5px; }
-    label { font-weight: 600; display: block; margin: 10px 0 4px; font-size: 14px; }
-    select, input, textarea { width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; font-size: 14px; }
-    button { background: #4f46e5; color: #fff; border: none; padding: 10px 18px; border-radius: 6px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 14px; }
-    button:hover { background: #4338ca; }
-    .generation-error { color: #9f1239; font-size: 14px; margin: 12px 0 0; }
-    .retry-btn { margin: 0 0 0 8px; padding: 4px 8px; font-size: 12px; }
-    .copy-btn { background: #10b981; float: right; margin-top: -6px; padding: 6px 12px; font-size: 13px; }
-    .copy-btn:hover { background: #059669; }
-    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-    pre { background: #0f172a; color: #f8fafc; padding: 16px; border-radius: 8px; white-space: pre-wrap; word-break: break-word; font-size: 14px; line-height: 1.5; }
-    .badge { display: inline-block; background: #e0e7ff; color: #3730a3; padding: 3px 8px; border-radius: 4px; font-size: 12px; margin-right: 6px; }
-    blockquote { border-left: 3px solid #cbd5e1; margin: 0; padding-left: 12px; color: #475569; font-style: italic; }
+    :root {
+      color-scheme: dark;
+      --page: #141318;
+      --panel: #1d1c23;
+      --field: #17161c;
+      --line: #44404e;
+      --text: #f4f0f5;
+      --muted: #b9b1c2;
+      --accent: #d1b5f6;
+      --selected: #342943;
+      --error: #ffb9bb;
+      --gutter: clamp(.625rem, 2.6vw, 2rem);
+      --space: clamp(.625rem, 1.6vh, 1.1rem);
+      --gap: clamp(.6rem, 1.25vh, .85rem);
+      --rail: clamp(1.5rem, 2.4vw, 2rem);
+      font: 15px/1.5 system-ui, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    body { margin: 0; background: var(--page); color: var(--text); overflow-wrap: anywhere; }
+    main { width: min(100% - 2 * var(--gutter), 96rem); margin: 0 auto; padding: var(--space) 0 calc(2.5 * var(--space)); }
+    h1, h2, h3, p { margin: 0; }
+    .masthead, .stage-heading, .prompt-actions, .run-error {
+      display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .65rem;
+    }
+    .masthead { margin-bottom: var(--space); }
+    h1 { font-size: 1.5rem; font-weight: 550; line-height: 1.25; }
+    h1 strong { font-size: 1.8rem; letter-spacing: -.035em; }
+    h1 span { margin-left: .55rem; padding-left: .75rem; border-left: 1px solid var(--line); }
+    .panel { min-width: 0; border: 1px solid var(--line); border-radius: .65rem; background: var(--panel); }
+    form { padding: var(--space); }
+    .form-grid, .quote-grid, .shortlist-grid { display: grid; gap: var(--gap); }
+    .form-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 10rem), 1fr)); align-items: end; }
+    .quote-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr) auto; margin-top: var(--gap); align-items: end; }
+    .overrides-grid { margin-top: var(--gap); align-items: start; }
+    label { display: grid; gap: .3rem; min-width: 0; font-weight: 600; }
+    input, select, textarea, button { font: inherit; }
+    input, select, textarea {
+      display: block; width: 100%; min-width: 0; min-height: 2.6rem; padding: .48rem .6rem;
+      border: 1px solid #615969; border-radius: .4rem; background: var(--field); color: var(--text);
+    }
+    textarea { resize: vertical; }
+    button {
+      min-height: 2.6rem; padding: .48rem .95rem; border: 1px solid transparent; border-radius: .4rem;
+      background: var(--accent); color: #201827; font-weight: 700; cursor: pointer;
+    }
+    button:hover:not(:disabled) { background: #e2cdfb; }
+    button:disabled { opacity: .65; cursor: progress; }
+    :is(button, input, select, textarea, summary, pre):focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+    details { margin-top: .7rem; }
+    summary { width: fit-content; color: var(--accent); font-weight: 600; cursor: pointer; }
+    .run-error { margin-top: .8rem; color: var(--error); }
+    #run-status, .stage-status { color: var(--muted); font-size: .86rem; }
+    .timeline { display: grid; gap: var(--gap); margin: var(--space) 0 0; padding: 0 0 0 var(--rail); list-style: none; }
+    .stage { position: relative; padding: var(--gap) clamp(.65rem, 1.55vw, 1rem); }
+    .stage:not(:last-child)::before {
+      position: absolute; top: 1rem; bottom: calc(-1rem - var(--gap)); left: calc(.625rem - var(--rail));
+      width: 1px; background: var(--line); content: '';
+    }
+    .marker {
+      position: absolute; top: .85rem; left: calc(-1 * var(--rail)); width: 1.25rem; height: 1.25rem; display: grid; place-items: center;
+      border: 1px solid var(--line); border-radius: 50%; background: var(--page); font-size: .8rem; font-weight: 750;
+    }
+    .stage[data-state="complete"] .marker { background: var(--accent); color: var(--page); border-color: var(--accent); }
+    .stage[data-state="complete"] .marker::before { content: '✓'; }
+    .stage[data-state="active"] { border-color: var(--accent); }
+    .stage[data-state="active"] :is(.marker, .stage-status) { border-color: var(--accent); color: var(--accent); }
+    .stage[data-state="active"] .marker::before { content: '•'; }
+    .stage[data-state="failed"] :is(.marker, .stage-status) { border-color: var(--error); color: var(--error); }
+    .stage[data-state="failed"] .marker::before { content: '!'; }
+    .stage h2 { font-size: 1.2rem; }
+    .stage-content:not(:empty) { margin-top: .65rem; }
+    .facts { display: flex; flex-wrap: wrap; gap: .5rem 1.2rem; margin: .6rem 0 0; }
+    .facts div { min-width: 0; }
+    dt, small, .muted { color: var(--muted); font-size: .86rem; }
+    dd { margin: 0; }
+    blockquote, pre { margin: .5rem 0 0; padding: .65rem .8rem; border-radius: .4rem; background: var(--field); }
+    .shortlist-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr)); }
+    .group { min-width: 0; padding: .7rem .8rem; border: 1px solid var(--line); border-radius: .45rem; }
+    h3 { font-size: 1rem; }
+    table { width: 100%; margin-top: .4rem; border-collapse: collapse; }
+    th, td { padding: .35rem .45rem; border-bottom: 1px solid var(--line); text-align: left; }
+    th:first-child, td:first-child, th:last-child, td:last-child { width: 1%; white-space: nowrap; }
+    th:last-child, td:last-child { text-align: right; font-variant-numeric: tabular-nums; }
+    .options { margin: .35rem 0 0; padding: 0; list-style: none; }
+    .option { padding: .35rem .45rem; border-bottom: 1px solid var(--line); }
+    .option small { display: block; }
+    .selected, .option:has(.selection:not([hidden])) { background: var(--selected); }
+    .selection { display: inline-block; margin-left: .3rem; padding: .02rem .4rem; border-radius: .3rem; color: var(--accent); font-size: .8rem; font-weight: 700; }
+    pre { white-space: pre-wrap; overflow-wrap: anywhere; }
+    #output-prompt { font: inherit; }
+    .prompt-actions { margin-top: .65rem; }
+    @media (max-width: 40rem) {
+      .quote-grid { grid-template-columns: minmax(0, 1fr); }
+      h1 span { font-size: 1.05rem; }
+    }
+    @media (pointer: coarse) {
+      input, select, textarea, button { font-size: 16px; min-height: 2.95rem; }
+    }
   </style>
   <script>
-    function copyPrompt() {
-      const code = document.getElementById("output-prompt").innerText;
-      navigator.clipboard.writeText(code).then(() => {
-        const btn = document.getElementById("copy-btn");
-        btn.innerText = "✓ Copied!";
-        setTimeout(() => btn.innerText = "Copy Prompt", 2000);
+    document.addEventListener('DOMContentLoaded', () => {
+      const form = document.querySelector('#prompt-form');
+      const timeline = document.querySelector('.timeline');
+      const rows = [...timeline.children];
+      const status = document.querySelector('#run-status');
+      const runError = document.querySelector('#run-error');
+      const generate = document.querySelector('#generate');
+      const retry = document.querySelector('#retry');
+      const streamType = 'application/x-ndjson';
+
+      form.elements.preset_quote.addEventListener('change', (event) => {
+        form.elements.custom_quote.value = event.target.value;
       });
-    }
+      timeline.addEventListener('click', async (event) => {
+        if (event.target.id !== 'copy-btn') return;
+        const prompt = document.querySelector('#output-prompt');
+        const feedback = document.querySelector('#copy-feedback');
+        try {
+          await navigator.clipboard.writeText(prompt.textContent);
+          feedback.textContent = 'Prompt copied.';
+        } catch {
+          prompt.focus();
+          const range = document.createRange();
+          range.selectNodeContents(prompt);
+          const selection = window.getSelection();
+          selection.removeAllRanges();
+          selection.addRange(range);
+          feedback.textContent = 'Prompt selected. Use your device’s copy shortcut.';
+        }
+      });
+
+      if (!window.fetch || !window.ReadableStream || !window.TextDecoderStream) return;
+      function setState(row, state) {
+        row.dataset.state = state;
+        row.querySelector('.stage-status').textContent = state[0].toUpperCase() + state.slice(1);
+        if (state === 'active') row.setAttribute('aria-current', 'step');
+        else row.removeAttribute('aria-current');
+      }
+
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        if (generate.disabled) return;
+        const body = new URLSearchParams(new FormData(form));
+        generate.disabled = retry.disabled = true;
+        runError.hidden = true;
+        rows.forEach((row) => {
+          setState(row, 'waiting');
+          row.querySelector('.stage-content').replaceChildren();
+        });
+        let active = rows[0];
+        setState(active, 'active');
+        status.textContent = 'Running · Context';
+
+        let reader;
+        let pending = '';
+        const interrupted = 'The run was interrupted. Please retry.';
+        try {
+          const response = await fetch(form.action, {method: form.method, headers: {Accept: streamType}, body});
+          if (!response.headers.get('content-type')?.startsWith(streamType) || !response.body) throw new Error(interrupted);
+          reader = response.body.pipeThrough(new TextDecoderStream()).getReader();
+          while (active) {
+            const {value, done} = await reader.read();
+            if (done) throw new Error(interrupted);
+            const lines = (pending + value).split('\n');
+            pending = lines.pop();
+            for (const line of lines) {
+              if (!line) continue;
+              const update = JSON.parse(line);
+              if (update.stage === 'start') continue;
+              if (update.stage === 'error') throw new Error(update.message);
+              if (update.stage !== active.id) throw new Error(interrupted);
+              active.querySelector('.stage-content').innerHTML = update.html;
+              if (update.selected) {
+                for (const badge of timeline.querySelectorAll('[data-choice]')) {
+                  const ids = update.selected[badge.dataset.choice];
+                  badge.hidden = !Array.isArray(ids) || !ids.includes(badge.dataset.id);
+                }
+              }
+              setState(active, 'complete');
+              active = active.nextElementSibling;
+              if (!active) break;
+              setState(active, 'active');
+              status.textContent = `Running · ${active.querySelector('h2').textContent}`;
+            }
+          }
+          status.textContent = 'Complete';
+        } catch (error) {
+          if (active) setState(active, 'failed');
+          status.textContent = 'Run failed';
+          runError.hidden = false;
+          document.querySelector('#error-message').textContent = error.constructor === Error ? error.message : interrupted;
+        } finally {
+          if (reader) reader.cancel().catch(() => {});
+          generate.disabled = retry.disabled = false;
+        }
+      });
+    });
   </script>
 </head>
 <body>
-<div class="container">
-  <h1>✨ Vibzee Image Prompt Generator</h1>
+  <main>
+    <header class="masthead">
+      <h1><strong>Vibzee</strong> <span>Prompt Generator</span></h1>
+      <p id="run-status" role="status">{{ 'Run failed' if error else 'Complete' if results else 'Ready' }}</p>
+    </header>
 
-  <!-- STAGE 1: INPUT -->
-  <div class="stage">
-    <h2>Stage 1: Input Variables</h2>
-    <form method="POST" action="/">
-      <div class="grid">
-        <div>
-          <label>Location</label>
-          <select name="location_key">
-            {% for key, val in locations.items() %}
-              <option value="{{ key }}" {% if selected_loc == key %}selected{% endif %}>{{ val.name }}</option>
-            {% endfor %}
-          </select>
+    <form id="prompt-form" class="panel" method="post" action="/">
+      <div class="form-grid">
+        {{ select_field('location_key', 'Location', locations.items(), inputs.selected_loc, 'name') }}
+        {{ select_field('photo_ratio', 'Photo ratio', ['1:1', '2:3', '4:3', '9:16', '16:9'], inputs.selected_ratio) }}
+        <label>Date <input type="date" name="date" value="{{ inputs.selected_date }}"></label>
+        <label>Time <input type="time" name="time" value="{{ inputs.selected_time }}"></label>
+        {{ select_field('language', 'Quote language', ['English', 'Hindi', 'Sanskrit', 'Marathi', 'Gujarati', 'Bengali', 'Tamil', 'Telugu', 'Kannada', 'Punjabi', 'Spanish', 'French', 'Japanese'], inputs.selected_lang) }}
+        {{ select_field('regional_profile', 'Regional profile', regional_profiles.items(), inputs.selected_profile, 'display_name', auto=true) }}
+      </div>
+      <div class="quote-grid">
+        {{ select_field('preset_quote', 'Preset quote', quotes, inputs.quote_input) }}
+        <label>Custom quote <input type="text" id="custom_quote" name="custom_quote" value="{{ inputs.quote_input }}"></label>
+        <button id="generate" type="submit">Generate prompt</button>
+      </div>
+      <details class="overrides"{% if inputs.custom_location or inputs.custom_keywords or inputs.custom_candidates %} open{% endif %}>
+        <summary>Overrides</summary>
+        <div class="form-grid overrides-grid">
+          <label>Custom location <input type="text" name="custom_location" value="{{ inputs.custom_location }}" placeholder="e.g. Jaipur"></label>
+          <label>Custom keywords <input type="text" name="custom_keywords" value="{{ inputs.custom_keywords }}" placeholder="Comma-separated keywords"></label>
+          <label>Custom subjects <textarea name="custom_candidates" rows="2" placeholder="Separate subjects with commas or new lines">{{ inputs.custom_candidates }}</textarea></label>
         </div>
-        <div>
-          <label>Photo Ratio</label>
-          <select name="photo_ratio">
-            {% for r in ["1:1", "2:3", "4:3", "9:16", "16:9"] %}
-              <option value="{{ r }}" {% if selected_ratio == r %}selected{% endif %}>{{ r }}</option>
-            {% endfor %}
-          </select>
-        </div>
+      </details>
+      <div class="run-error" id="run-error"{% if not error %} hidden{% endif %}>
+        <span id="error-message" role="alert">{{ error or '' }}</span>
+        <button id="retry" type="submit">Retry</button>
       </div>
-
-      <div class="grid" style="margin-top: 10px;">
-        <div>
-          <label>Date</label>
-          <input type="date" name="date" value="{{ selected_date }}">
-        </div>
-        <div>
-          <label>Time</label>
-          <input type="time" name="time" value="{{ selected_time }}">
-        </div>
-      </div>
-
-      <div style="margin-top: 10px;">
-        <label>Quote Language</label>
-        <select name="language">
-          {% for lang in ["English", "Hindi", "Sanskrit", "Marathi", "Gujarati", "Bengali", "Tamil", "Telugu", "Kannada", "Punjabi", "Spanish", "French", "Japanese"] %}
-            <option value="{{ lang }}" {% if selected_lang == lang %}selected{% endif %}>{{ lang }}</option>
-          {% endfor %}
-        </select>
-      </div>
-
-      <div style="margin-top: 10px;">
-        <label>Regional Calendar Profile</label>
-        <select name="regional_profile">
-          <option value="" {% if not selected_profile %}selected{% endif %}>Auto (Inferred by Location/Language)</option>
-          {% for pid, prof in regional_profiles.items() %}
-            <option value="{{ pid }}" {% if selected_profile == pid %}selected{% endif %}>{{ prof.display_name }}</option>
-          {% endfor %}
-        </select>
-      </div>
-
-      <label>Choose Quote from Default Pool</label>
-      <select name="preset_quote" onchange="document.getElementById('custom_quote').value = this.value">
-        {% for q in quotes %}
-          <option value="{{ q }}" {% if quote_input == q %}selected{% endif %}>{{ q }}</option>
-        {% endfor %}
-      </select>
-
-      <label>Or Enter Custom Quote</label>
-      <input type="text" id="custom_quote" name="custom_quote" value="{{ quote_input }}">
-
-      <!-- DIRECT USER OVERRIDES -->
-      <div style="margin-top: 18px; padding: 14px 16px; background: #eef2ff; border: 1.5px dashed #6366f1; border-radius: 8px;">
-        <h3 style="margin: 0 0 6px 0; font-size: 13px; color: #4338ca; text-transform: uppercase; letter-spacing: 0.5px;">
-          ⚡ Direct Overrides (Optional — bypasses search & extraction functions)
-        </h3>
-        <p style="margin: 0 0 10px 0; font-size: 12px; color: #64748b;">
-          Values entered here directly override the corresponding automated steps and advance straight to the next stage.
-        </p>
-
-        <label style="margin-top: 6px;">Own Location (overrides dropdown & landmark discovery)</label>
-        <input type="text" name="custom_location" value="{{ custom_location }}" placeholder="e.g. Jaipur, Rishikesh, Kyoto, Ladakh">
-
-        <label style="margin-top: 10px;">Own Key Words (overrides quote NLP extraction & translation)</label>
-        <input type="text" name="custom_keywords" value="{{ custom_keywords }}" placeholder="e.g. earthen lamp, calm waters, dawn mist, serenity (comma-separated)">
-
-        <label style="margin-top: 10px;">Own Candidates / Visual Subjects (overrides automatic search)</label>
-        <textarea name="custom_candidates" rows="2" placeholder="e.g. An illuminated brass diya floating gently, Solitary monk meditating on sandstone ghat (comma-separated or one per line)">{{ custom_candidates }}</textarea>
-      </div>
-
-      <button type="submit">🚀 Generate Prompt</button>
-      {% if generation_error %}
-      <p class="generation-error">
-        <span role="alert">{{ generation_error }}</span>
-        <button type="submit" class="retry-btn">Retry</button>
-      </p>
-      {% endif %}
     </form>
-  </div>
 
-  {% if prompt %}
-  <!-- STAGE 2: PRINT CHOSEN VARIABLES -->
-  <div class="stage">
-    <h2>Stage 2: Variables Chosen</h2>
-    <p>
-      <span class="badge">Language: {{ selected_lang }}</span>
-      <span class="badge">Location: {{ active_location_name }}{% if is_custom_loc %} (User Override){% endif %}</span>
-      <span class="badge">Ratio: {{ selected_ratio }}</span>
-      <span class="badge">Date: {{ selected_date }}</span>
-      <span class="badge">Time: {{ selected_time }} ({{ time_of_day }})</span>
-      {% if is_custom_kw %}<span class="badge" style="background: #fef3c7; color: #92400e;">⚡ Custom Keywords Override</span>{% endif %}
-      {% if is_custom_cand %}<span class="badge" style="background: #fef3c7; color: #92400e;">⚡ Custom Candidates Override</span>{% endif %}
-    </p>
-    <p><strong>Quote Selected:</strong></p>
-    <blockquote>{{ quote_input }}</blockquote>
-    {% if is_custom_kw %}
-      <p style="margin: 8px 0 0 0; font-size: 13px; color: #4338ca;"><strong>Active Keywords (User Override):</strong> {{ custom_keywords }}</p>
-    {% endif %}
-  </div>
-
-  <!-- STAGE 3: INTERMEDIATE SELECTIONS -->
-  <div class="stage">
-    <h2>Stage 3: Context & Pipeline Decisions</h2>
-    <p>
-      <span class="badge">Domain: {{ prompt.visual_domain }}</span>
-      <span class="badge">Layout: {{ prompt.layout_id }}</span>
-      <span class="badge">Metaphor: {{ prompt.metaphor_used }}</span>
-    </p>
-    {% if is_custom_cand %}
-      <p style="margin: 4px 0 8px 0; color: #4338ca; font-size: 13px;"><strong>⚡ Knowledge Chains Bypassed:</strong> Generated prompt directly using {{ candidates.pool|length }} custom visual candidate(s).</p>
-    {% endif %}
-    <p><strong>Weather:</strong> {{ ctx.weather.condition }}, {{ ctx.weather.temp }}°C | <strong>Festival:</strong> {{ ctx.festival or 'None' }}</p>
-    {% if ctx.landmark_selection %}
-    <div style="margin: 10px 0; padding: 10px 14px; background: #fef3c7; border-radius: 6px; border: 1px solid #f59e0b; font-size: 0.9em; line-height: 1.5;">
-      <p style="margin: 0 0 4px 0;"><strong>📍 Landmark:</strong> {{ ctx.landmark_selection.landmark.name }} <span class="badge" style="background: #fde68a; color: #92400e;">{{ ctx.landmark_selection.landmark.type }}</span></p>
-      <p style="margin: 0 0 4px 0;"><strong>Score:</strong> {{ ctx.landmark_selection.score }} | <strong>Track:</strong> {{ ctx.landmark_selection.track }} ({{ ctx.landmark_selection.category }}) | <strong>Contrast prob:</strong> {{ "%.0f"|format(ctx.landmark_selection.contrast_probability * 100) }}%</p>
-      <p style="margin: 0 0 4px 0; color: #78350f;"><strong>Visual:</strong> {{ ctx.landmark_selection.landmark.visual_description[:150] }}{% if ctx.landmark_selection.landmark.visual_description|length > 150 %}…{% endif %}</p>
-      <p style="margin: 0; font-size: 0.85em; color: #92400e;"><strong>Top 3:</strong>
-        {% for t in ctx.landmark_selection.top_3 %}
-          {{ t.name }} ({{ t.score }}){% if not loop.last %} · {% endif %}
-        {% endfor %}
-      </p>
-    </div>
-    {% endif %}
-    {% if ctx.panchang_details %}
-    <div style="margin: 10px 0; padding: 10px 14px; background: #f8fafc; border-radius: 6px; border: 1px solid #e2e8f0; font-size: 0.9em; line-height: 1.5;">
-      <p style="margin: 0 0 4px 0;"><strong>🗓 Regional Calendar:</strong> {{ ctx.panchang_details.astronomical_panchang.regional_calendar.regional_date_string }}</p>
-      <p style="margin: 0 0 4px 0;"><strong>✨ Panchang:</strong> Tithi: {{ ctx.panchang_details.astronomical_panchang.tithi.udaya_tithi }} | Nakshatra: {{ ctx.panchang_details.astronomical_panchang.nakshatra.udaya_nakshatra }} | Yoga: {{ ctx.panchang_details.astronomical_panchang.yoga.yoga_name }} | Karana: {{ ctx.panchang_details.astronomical_panchang.karana.current_karana }}</p>
-      <p style="margin: 0 0 4px 0;"><strong>☀️ Sun & Timings:</strong> Sunrise: {{ ctx.panchang_details.astronomical_panchang.sun_moon_timings.sunrise }} | Sunset: {{ ctx.panchang_details.astronomical_panchang.sun_moon_timings.sunset }} | Rahu Kaal: {{ ctx.panchang_details.astronomical_panchang.muhurats.rahu_kalam }} | Abhijit: {{ ctx.panchang_details.astronomical_panchang.muhurats.abhijit_muhurta }}</p>
-      {% if ctx.panchang_details.festival_intelligence.active_festival %}
-        <p style="margin: 0; color: #b45309;"><strong>🎉 Observance:</strong> {{ ctx.panchang_details.festival_intelligence.active_festival }} ({{ ctx.panchang_details.festival_intelligence.classification }})</p>
-      {% endif %}
-    </div>
-    {% endif %}
-    <p><strong>Reasoning:</strong> {{ prompt.gemini_selections.reasoning or 'N/A' }}</p>
-    {% if prompt.layout_plan %}
-    <div style="margin: 10px 0; padding: 10px 14px; background: #ede9fe; border-radius: 6px; border: 1px solid #8b5cf6; font-size: 0.9em; line-height: 1.5;">
-      <p style="margin: 0 0 4px 0;"><strong>📐 Layout Plan:</strong> {{ prompt.layout_plan.layout_id }}
-        <span class="badge" style="background: #ddd6fe; color: #5b21b6;">{{ prompt.layout_plan.visual_weight_zone }}</span>
-        {% if prompt.layout_plan.validation_passed %}<span class="badge" style="background: #d1fae5; color: #065f46;">✓ Valid</span>{% else %}<span class="badge" style="background: #fee2e2; color: #991b1b;">✗ Failed</span>{% endif %}
-        {% if prompt.layout_plan.repair_applied %}<span class="badge" style="background: #fef3c7; color: #92400e;">Repaired: {{ prompt.layout_plan.repair_reason }}</span>{% endif %}
-      </p>
-      {% if prompt.layout_plan.quote_box %}
-      <p style="margin: 0 0 2px 0; font-size: 0.85em; color: #5b21b6;"><strong>Quote:</strong> x={{ "%.2f"|format(prompt.layout_plan.quote_box.x) }} y={{ "%.2f"|format(prompt.layout_plan.quote_box.y) }} w={{ "%.2f"|format(prompt.layout_plan.quote_box.w) }} h={{ "%.2f"|format(prompt.layout_plan.quote_box.h) }}</p>
-      {% endif %}
-      {% if prompt.layout_plan.photo_box %}
-      <p style="margin: 0 0 2px 0; font-size: 0.85em; color: #5b21b6;"><strong>Photo:</strong> x={{ "%.2f"|format(prompt.layout_plan.photo_box.x) }} y={{ "%.2f"|format(prompt.layout_plan.photo_box.y) }} w={{ "%.2f"|format(prompt.layout_plan.photo_box.w) }} h={{ "%.2f"|format(prompt.layout_plan.photo_box.h) }}</p>
-      {% endif %}
-      {% if prompt.layout_plan.protected_regions %}
-      <p style="margin: 0; font-size: 0.85em; color: #7c3aed;"><strong>Protected:</strong> {{ prompt.layout_plan.protected_regions|length }} sacred region(s)</p>
-      {% endif %}
-    </div>
-    {% endif %}
-  </div>
-
-  <!-- STAGE 4: OUTPUT PROMPT (COPYPASTABLE) -->
-  <div class="stage">
-    <h2>Stage 4: Output Prompt (Copypastable)
-      <button class="copy-btn" id="copy-btn" onclick="copyPrompt()">Copy Prompt</button>
-    </h2>
-    <pre id="output-prompt">{{ prompt.full_prompt }}</pre>
-    <small style="color: #64748b;">Word count: {{ prompt.full_prompt.split()|length }} words</small>
-  </div>
-  {% endif %}
-</div>
+    <ol class="timeline" aria-label="Generation stages">
+      {% for stage, title in stages.items() %}
+        {% set state = 'complete' if stage in results else 'failed' if stage == failed_stage else 'waiting' %}
+        <li class="panel stage" id="{{ stage }}" data-state="{{ state }}">
+          <span class="marker" aria-hidden="true"></span>
+          <div class="stage-heading"><h2>{{ title }}</h2><span class="stage-status">{{ state|capitalize }}</span></div>
+          <div class="stage-content">{{ content(stage, results, inputs) if stage in results else '' }}</div>
+        </li>
+      {% endfor %}
+    </ol>
+  </main>
 </body>
 </html>
+{%- endif %}
 """
 
 
 @app.route("/", methods=["GET", "POST"])
 def index():
-    now = datetime.now()
+    now = datetime.now(INDIA_TIMEZONE)
     selected_loc = "mumbai"
     selected_ratio = "1:1"
     selected_lang = "English"
@@ -324,10 +557,7 @@ def index():
     selected_date = now.strftime("%Y-%m-%d")
     selected_time = now.strftime("%H:%M")
     quote_input = QUOTES[0]
-    prompt = None
-    generation_error = None
-    ctx = None
-    candidates = None
+    results = {}
     time_of_day = classify_time(now.hour)
 
     custom_location = ""
@@ -381,24 +611,13 @@ def index():
             if cand_list:
                 parsed_candidates = cand_list
                 is_custom_cand = True
-        dt = datetime.strptime(f"{selected_date} {selected_time}", "%Y-%m-%d %H:%M")
-        time_of_day = classify_time(dt.hour)
-
         try:
-            ctx, candidates, loc_details, prompt = run_pipeline(
-                quote_input, location, dt, time_of_day, selected_ratio,
-                language=selected_lang, regional_profile=selected_profile or None,
-                custom_keywords=parsed_keywords,
-                custom_candidates=parsed_candidates,
-            )
-        except generator.PromptGenerationError as exc:
-            generation_error = str(exc)
+            dt = datetime.strptime(f"{selected_date} {selected_time}", "%Y-%m-%d %H:%M")
+            time_of_day = classify_time(dt.hour)
+        except ValueError:
+            results["error"] = ("Enter a valid date and time, then retry.", 400)
 
-    return render_template_string(
-        HTML_TEMPLATE,
-        locations=LOCATIONS,
-        quotes=QUOTES,
-        regional_profiles=REGIONAL_PROFILES,
+    inputs = dict(
         selected_loc=selected_loc,
         selected_ratio=selected_ratio,
         selected_lang=selected_lang,
@@ -407,10 +626,6 @@ def index():
         selected_time=selected_time,
         quote_input=quote_input,
         time_of_day=time_of_day,
-        prompt=prompt,
-        generation_error=generation_error,
-        ctx=ctx,
-        candidates=candidates,
         custom_location=custom_location,
         custom_keywords=custom_keywords,
         custom_candidates=custom_candidates,
@@ -418,7 +633,50 @@ def index():
         is_custom_kw=is_custom_kw,
         is_custom_cand=is_custom_cand,
         active_location_name=active_location_name,
-    ), 503 if generation_error else 200
+        profile_label=REGIONAL_PROFILES.get(selected_profile, {}).get("display_name", "Auto"),
+        approaches=APPROACH_TEMPLATES,
+    )
+
+    if request.method == "POST" and "error" not in results:
+        def updates():
+            try:
+                yield from pipeline_stages(
+                    quote_input, location, dt, time_of_day, selected_ratio, selected_lang,
+                    selected_profile or None, parsed_keywords, parsed_candidates,
+                )
+            except generator.PromptGenerationError as exc:
+                yield "error", (str(exc), 503)
+            except Exception:
+                app.logger.exception("Prompt pipeline failed")
+                yield "error", ("Something went wrong while generating the prompt. Please retry.", 500)
+
+        if request.headers.get("Accept") == STREAM_TYPE:
+            def stream():
+                yield '{"stage":"start"}\n'
+                template = app.jinja_env.from_string(HTML_TEMPLATE)
+                for stage, value in updates():
+                    results[stage] = value
+                    if stage == "error":
+                        yield json.dumps({"stage": stage, "message": value[0]}) + "\n"
+                        break
+                    html = template.render(fragment=stage, results=results, inputs=inputs).strip()
+                    event = {"stage": stage, "html": html}
+                    if stage == "gemini":
+                        event["selected"] = [value.get("selected_metaphor_ids"), value.get("selected_details")]
+                    yield json.dumps(event, ensure_ascii=False) + "\n"
+
+            return Response(stream_with_context(stream()), mimetype=STREAM_TYPE, headers={"Cache-Control": "no-store"})
+
+        results.update(updates())
+
+    error, status = results.get("error", (None, 200))
+    if error and request.headers.get("Accept") == STREAM_TYPE:
+        return Response(json.dumps({"stage": "error", "message": error}) + "\n", status, mimetype=STREAM_TYPE)
+    return render_template_string(
+        HTML_TEMPLATE, locations=LOCATIONS, quotes=QUOTES, regional_profiles=REGIONAL_PROFILES,
+        stages=STAGES, inputs=inputs, results=results, error=error,
+        failed_stage=next((stage for stage in STAGES if stage not in results), "final") if error else None,
+    ), status
 
 
 @app.route("/api/panchang", methods=["GET"])
@@ -427,38 +685,51 @@ def api_panchang():
     Direct JSON endpoint for querying dual-branch dynamic Panchang.
     Query parameters:
       - date: YYYY-MM-DD (defaults to today)
-      - location: location key (e.g. mumbai, varanasi) or lat/lon
+      - time: local time in HH:MM IST (defaults to noon)
+      - location: location key (e.g. mumbai, varanasi), or give lat and lon
       - profile: regional profile id (e.g. maharashtra, gujarat, tamil_nadu)
       - language: language name (e.g. English, Hindi, Marathi)
       - tradition: Smartha or Vaishnava
     """
-    date_str = request.args.get("date", datetime.now().strftime("%Y-%m-%d"))
+    date_str = request.args.get("date", datetime.now(INDIA_TIMEZONE).strftime("%Y-%m-%d"))
+    time_str = request.args.get("time", "12:00")
     loc_key = request.args.get("location", "mumbai").lower()
     profile_id = request.args.get("profile")
     language = request.args.get("language", "English")
     tradition = request.args.get("tradition", "Smartha")
 
-    loc = LOCATIONS.get(loc_key, LOCATIONS["mumbai"])
-    try:
-        lat = float(request.args.get("lat", loc["lat"]))
-        lon = float(request.args.get("lon", loc["lon"]))
-    except ValueError:
+    coordinates_given = "lat" in request.args or "lon" in request.args
+    location_name = None
+    if not coordinates_given:
+        loc = LOCATIONS.get(loc_key)
+        if not loc:
+            return jsonify(error="Unknown location key. Supply a supported location or both latitude and longitude."), 400
         lat, lon = loc["lat"], loc["lon"]
-
+        location_name = loc["name"]
+    else:
+        try:
+            lat, lon = float(request.args["lat"]), float(request.args["lon"])
+        except (KeyError, ValueError):
+            return jsonify(error="Supply numeric lat and lon together."), 400
+        if not (math.isfinite(lat) and math.isfinite(lon) and -90 <= lat <= 90 and -180 <= lon <= 180):
+            return jsonify(error="Latitude must be between -90 and 90 and longitude between -180 and 180."), 400
     try:
-        target_d = datetime.strptime(date_str, "%Y-%m-%d").date()
-    except Exception:
-        target_d = datetime.now().date()
+        target = datetime.strptime(f"{date_str} {time_str}", "%Y-%m-%d %H:%M")
+        if target.date() == datetime.max.date():
+            raise ValueError("Date exceeds supported calculation range.")
+    except ValueError:
+        return jsonify(error="Enter a valid date (YYYY-MM-DD) and time (HH:MM)."), 400
 
     coord = get_coordinator()
     res = coord.calculate_panchang(
-        target_date=target_d,
+        target_date=target.date(),
         lat=lat,
         lon=lon,
-        location_name=loc.get("name"),
+        location_name=location_name,
         regional_profile_id=profile_id,
         language=language,
         tradition=tradition,
+        eval_time=target.time(),
     )
     return jsonify(res)
 

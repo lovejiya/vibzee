@@ -1,0 +1,1547 @@
+{
+  "meta": {
+    "version": "1.1",
+    "purpose": "Deity lookup table for Vibzee Gods & Devotion candidate category",
+    "note": "visual_description and devotee_visual fields are image-prompt fragments for AI image generation. Weekday and lunar-month entries are devotional associations. The resolver supplies observance dates and cycle positions.",
+    "location": "Mumbai, Maharashtra, India",
+    "calendar_system": "lunar_amanta",
+    "amanta_months_2027": [
+      { "start": "2027-01-01", "end": "2027-01-07", "month_key": "margashirsha" },
+      { "start": "2027-01-08", "end": "2027-02-06", "month_key": "pausha" },
+      { "start": "2027-02-07", "end": "2027-03-08", "month_key": "magha" },
+      { "start": "2027-03-09", "end": "2027-04-06", "month_key": "phalguna" },
+      { "start": "2027-04-07", "end": "2027-05-06", "month_key": "chaitra" },
+      { "start": "2027-05-07", "end": "2027-06-04", "month_key": "vaishakha" },
+      { "start": "2027-06-05", "end": "2027-07-03", "month_key": "jyeshtha" },
+      { "start": "2027-07-04", "end": "2027-08-02", "month_key": "ashadha" },
+      { "start": "2027-08-03", "end": "2027-08-31", "month_key": "shravan" },
+      { "start": "2027-09-01", "end": "2027-09-29", "month_key": "bhadrapada" },
+      { "start": "2027-09-30", "end": "2027-10-29", "month_key": "ashwin" },
+      { "start": "2027-10-30", "end": "2027-11-28", "month_key": "kartik" },
+      { "start": "2027-11-29", "end": "2027-12-27", "month_key": "margashirsha" },
+      { "start": "2027-12-28", "end": "2027-12-31", "month_key": "pausha" }
+    ],
+    "month_range_note": "Inclusive Mumbai calendar dates within the civil year. January and December intervals end at the civil year boundaries. The sources are mumbai_lunar_year_1948 and mumbai_lunar_year_1949.",
+    "panchang_lookup": {
+      "weekday_field": "astronomical_panchang.vaara.english",
+      "tithi_field": "astronomical_panchang.tithi.udaya_tithi",
+      "month_field": "astronomical_panchang.lunar_month.amanta",
+      "paksha_field": "astronomical_panchang.tithi.paksha",
+      "tithi_keys": {
+        "Shukla Chaturthi": "chaturthi_shukla",
+        "Krishna Chaturthi": "chaturthi_krishna",
+        "Shukla Ekadashi": "ekadashi",
+        "Krishna Ekadashi": "ekadashi",
+        "Purnima": "purnima",
+        "Amavasya": "amavasya",
+        "Shukla Ashtami": "ashtami_shukla",
+        "Shukla Navami": "navami_shukla",
+        "Shukla Trayodashi": "trayodashi_shukla",
+        "Krishna Trayodashi": "trayodashi_krishna"
+      },
+      "month_aliases": {
+        "shravana": "shravan",
+        "ashvina": "ashwin",
+        "ashwina": "ashwin",
+        "kartika": "kartik"
+      },
+      "normalization": "Lowercase weekday, lunar month and paksha values. Apply month_aliases, then use a matching paksha-specific month entry when present.",
+      "timing": "Use udaya_tithi for general imagery. The observance calendar supplies Sankashti at moonrise and Pradosha at twilight.",
+      "festival_priority": "Prefer resolved observances for festival imagery. The current engine derives its Amanta month label from solar position, which can differ from the festival's Amanta month near a boundary."
+    },
+    "static_sequence_keys": {
+      "navratri_cycle": "navratri_sharad",
+      "jain_paryushana_cycle": "paryushana_jain",
+      "jain_das_lakshana_cycle": "das_lakshana_jain",
+      "ramadan_pattern": "ramadan",
+      "christian_lent_pattern": "lent",
+      "christian_advent_pattern": "advent",
+      "diwali_cycle": "diwali",
+      "ganpati_cycle": "ganpati_festival",
+      "parsi_observances.muktad": "muktad_parsi",
+      "pitru_paksha_pattern": "pitru_paksha"
+    },
+    "cycle_lookup": {
+      "navratri_cycle": "Read color_YEAR for the civil festival day. For 2027 use visual_description_2027 and devotee_visual_2027 beside the matching date_2027. The original fragments and color_2026 retain the 2026 palette.",
+      "jain_paryushana_cycle": "Use the Shvetambara calendar for the community's start date and Samvatsari.",
+      "jain_das_lakshana_cycle": "Use the Digambara calendar for the community's start date and virtue index.",
+      "diwali_cycle": "The day field is the one-based position in the Diwali sequence. Match by observance or lunar trigger for dates. Multiple observances can share a civil date.",
+      "ganpati_cycle": "Offsets are nominal positions from Sthapana. Use the locally resolved Anant Chaturdashi (Bhadrapada Shukla Chaturdashi) date for the final milestone. The 2026 Mumbai civil dates were September 14 for Sthapana and September 25 for Anant Chaturdashi. In 2027 use each milestone's date_2027. Household immersion follows the family's chosen duration."
+    },
+    "references": {
+      "mumbai_lunar_year_1948": "https://usapanchang.com/panchang/2026/Mumbai/Maharashtra/India/",
+      "mumbai_lunar_year_1949": "https://usapanchang.com/panchang/2027/Mumbai/Maharashtra/India/",
+      "ganga_dussehra_mumbai": "https://vedprashnavali.com/panchang/mumbai",
+      "tulsi_vivah_mumbai": "https://purohit.io/festivals/tulsi_vivah/2027?city=mumbai",
+      "siddhivinayak_darshan": "https://utsav.gov.in/public/view-darshan/shri-siddhivinayak-ganpati-darshan-mumbai-1",
+      "haji_ali_friday_prayers": "https://hajialidargah.in/hajiali_minaret12.html",
+      "mumbai_hindu_calendar": "https://www.drikpanchang.com/calendars/hindu/hinducalendar.html?geoname-id=1275339&year=2026",
+      "maharashtra_pitru_paksha": "https://www.drikpanchang.com/shraddha/pitru-paksha-shraddha-dates.html?geoname-id=1259229&year=2026",
+      "navadurga": "https://www.drikpanchang.com/hindu-goddesses/parvati/durga/navdurga.html",
+      "navratri_2026_colors": "https://www.drikpanchang.com/navratri/colors/navratri-nine-colors.html?year=2026",
+      "mumbai_navratri_2026_tithis": "https://www.mypanchang.com/sharadnavaratri/mumbai?yr=2026",
+      "mumbai_ganesh_utsav_2026": "https://www.lalbaugcharaja.com/en/lalbaugcha-raja-2026-darshan/",
+      "paryushana": "https://jaincenter.org/pdf/2025%20JCSC%20calender.pdf",
+      "das_lakshana": "https://www.jaina.org/page/DasLakshanaMahaParv",
+      "mumbai_lent": "https://www.archdioceseofbombay.org/post/official-lent-2025",
+      "mumbai_advent": "https://www.archdioceseofbombay.org/post/a-message-from-h-e-oswald-cardinal-gracias-on-advent-and-preparing-for-christmas",
+      "maharashtra_diwali": "https://maharashtratourism.gov.in/festivals/diwali/",
+      "muktad_pateti_navroze": "https://parsi-times.com/2018/07/understanding-the-essence-of-muktaad-how-to-truly-observe-the-muktaad-days/",
+      "mumbai_2027_vrats": "https://nidarshanavedh.com/festivals/mumbai/",
+      "ekadashi_2027": "https://vedicdrishti.in/ekadashi/2027/mumbai",
+      "purnima_2027": "https://vedicdrishti.in/purnima/2027/mumbai",
+      "amavasya_2027": "https://amavasya.org/amavasya/2027/mumbai/",
+      "pradosh_2027_alternate": "https://divyakaal.com/vrat-calendar/pradosh/mumbai/2027?lang=en",
+      "navratri_2027_colors": "https://www.drikpanchang.com/navratri/colors/navratri-nine-colors.html?year=2027",
+      "navratri_2027_mumbai": "https://www.mypanchang.com/sharadnavaratri/mumbai?yr=2027",
+      "ganesh_2027_mumbai": "https://www.drikpanchang.com/festivals/ganesh-chaturthi/ganesh-chaturthi-date-time.html?geoname-id=1275339&year=2027",
+      "pitru_2027_mumbai": "https://www.mypanchang.com/mahalaya-paksha-begins.php?locid=1275339&yr=2027",
+      "marathi_calendar_2027": "https://sanatanbodh.in/en/panchang/marathi-calendar/",
+      "shravan_2027_mumbai": "https://mumbaitempledarshan.com/guides/shravan-somvar-mumbai",
+      "jain_2027": "https://jain.nidarshanavedh.com/jain-festivals-2027/",
+      "jain_2027_samvatsari": "https://achalam.app/jain-panchang/september-2027/",
+      "parsi_2027": "https://www.indiadigital.org/parsi-calendar/",
+      "western_christian_2027": "https://www.usccb.org/resources/2027cal.pdf",
+      "indian_holidays_2027": "https://surveyofindia.gov.in/UserFiles/files/List%20of%20Holidays-2027.pdf",
+      "ramadan_indian_almanac": "https://packolkata.imd.gov.in/panchang/en/festivals",
+      "ramadan_2027_estimate": "https://www.solarc.app/ramadan/2027/india/mumbai",
+      "koli_community_reporting": "https://www.mid-day.com/lifestyle/culture/article/offering-coconuts-to-the-sea-eating-karanjis-and-decorating-boats-with-flowers-a-look-at-how-mumbais-koli-community-preserves-cultural-connection-to-the-sea-23376461",
+      "chaityabhoomi_reporting": "https://indianexpress.com/article/cities/mumbai/mahaparinirvan-diwas-a-sea-of-blue-and-white-for-ambedkar-sweeps-dadar-9056036/",
+      "parsi_well": "https://parsi-times.com/2025/03/bhikha-behram-well-300th-salgreh-mubarak/",
+      "monthly_panchang_2027": [
+        "https://www.realpanchang.in/en/panchang/mumbai/2027/01",
+        "https://www.realpanchang.in/en/panchang/mumbai/2027/02",
+        "https://www.realpanchang.in/en/panchang/mumbai/2027/03",
+        "https://www.realpanchang.in/en/panchang/mumbai/2027/04",
+        "https://www.realpanchang.in/en/panchang/mumbai/2027/05",
+        "https://www.realpanchang.in/en/panchang/mumbai/2027/06",
+        "https://www.realpanchang.in/en/panchang/mumbai/2027/07",
+        "https://www.realpanchang.in/en/panchang/mumbai/2027/08",
+        "https://www.realpanchang.in/en/panchang/mumbai/2027/09",
+        "https://www.realpanchang.in/en/panchang/mumbai/2027/10",
+        "https://www.realpanchang.in/en/panchang/mumbai/2027/11",
+        "https://www.realpanchang.in/en/panchang/mumbai/2027/12"
+      ],
+      "indian_holiday_schedule": "https://www.iirs.gov.in/holidaycalender/",
+      "bandra_shrine": "https://censusindia.gov.in/nada/index.php/catalog/806/download/2874/DH_2011_2722_PART_A_DCHB_MUMBAI_SUBURBAN.pdf"
+    },
+    "coverage_years": [
+      2026,
+      2027
+    ],
+    "timezone": "Asia/Kolkata",
+    "research_2027": {
+      "as_of": "2026-11-25",
+      "scope": "Civil dates in Mumbai. Dates beside cycle entries identify the local observance. Calendar dates and traditional scene suggestions do not imply a published 2027 venue or procession schedule.",
+      "source_keys": "source_2027 and sources fields refer to entries in meta.references."
+    }
+  },
+  "weekday": {
+    "monday": {
+      "hindu": [
+        {
+          "deity": "Shiva",
+          "aspect": "Mahadeva",
+          "visual_description": "Ash-smeared Shiva with a crescent in his matted hair, rudraksha beads and a raised trident, seated beside white Nandi in blue-grey temple light.",
+          "devotee_visual": "A devotee in a white dhoti pours water and milk over the black Shivalinga at Babulnath, with bilva leaves and amber lamps around its base.",
+          "settings": ["temple", "home_shrine", "riverbank"],
+          "mumbai_locations": ["Babulnath Temple, Girgaon", "Walkeshwar Temple, Malabar Hill"],
+          "worship_items": ["bilva_leaves", "milk", "water", "rudraksha"],
+          "mantra_reference": "Om Namah Shivaya"
+        },
+        {
+          "deity": "Parvati",
+          "aspect": "Gauri, beside Shiva",
+          "visual_description": "Serene Gauri in a vermilion silk sari, with a lotus and a raised blessing palm, seated beside Shiva amid cream jasmine and warm gold lamps.",
+          "devotee_visual": "A woman in a green sari lays jasmine and a pinch of kumkum before a small Shiva-Parvati shrine in Walkeshwar, with shaded stone behind her.",
+          "settings": ["temple", "home_shrine"],
+          "mumbai_locations": ["Babulnath Temple, Girgaon", "Walkeshwar Temple, Malabar Hill"],
+          "worship_items": ["jasmine", "kumkum", "coconut", "oil_lamp"],
+          "mantra_reference": "Om Uma Devyai Namah"
+        }
+      ],
+      "islamic": null,
+      "christian": null,
+      "jain": null,
+      "sikh": null,
+      "buddhist": null
+    },
+    "tuesday": {
+      "hindu": [
+        {
+          "deity": "Hanuman",
+          "aspect": "Maruti, devotee of Rama",
+          "visual_description": "Vermilion Hanuman murti with folded palms, a golden gada set beside his feet, and orange marigolds against dark stone in a Prabhadevi shrine.",
+          "devotee_visual": "A devotee in a cotton kurta holds a marigold garland near the Hanuman shrine by Siddhivinayak while commuters pass Prabhadevi's flower stalls in early light.",
+          "settings": ["temple", "home_shrine"],
+          "mumbai_locations": ["Hanuman shrine near Siddhivinayak Temple, Prabhadevi"],
+          "worship_items": ["sindoor", "jasmine_oil", "marigolds", "coconut"],
+          "mantra_reference": "Hanuman Chalisa"
+        },
+        {
+          "deity": "Kartikeya",
+          "aspect": "Murugan, bearer of the vel",
+          "visual_description": "Youthful Murugan holding a tall silver vel, with a regal peacock beside him and red hibiscus against gold pillars in a Tamil temple alcove.",
+          "devotee_visual": "A family with jasmine in their hair brings fruit and flowers to the Murugan shrine in Chembur, where a brass lamp catches the morning light.",
+          "settings": ["temple", "home_shrine"],
+          "mumbai_locations": ["Shri Subramania Samaj Temple, Chheda Nagar, Chembur"],
+          "worship_items": ["red_flowers", "fruit", "coconut", "oil_lamp"],
+          "mantra_reference": "Om Saravanabhavaya Namah"
+        },
+        {
+          "deity": "Mangala",
+          "aspect": "Mangal Graha, associated with Mars",
+          "visual_description": "A copper-toned Mangala image in red garments with a mace and ram in the carving, framed by crimson flowers and low brass lamplight.",
+          "devotee_visual": "At a Mumbai home shrine, a devotee in a red cotton shawl sets a copper bowl of red lentils beside hibiscus and lights a diya.",
+          "settings": ["temple", "home_shrine"],
+          "mumbai_locations": ["Navagraha shrine at Shri Subramania Samaj Temple, Chheda Nagar, Chembur"],
+          "worship_items": ["red_lentils", "red_flowers", "copper_vessel", "oil_lamp"],
+          "mantra_reference": "Om Mangalaya Namah"
+        }
+      ],
+      "islamic": null,
+      "christian": null,
+      "jain": null,
+      "sikh": null,
+      "buddhist": null
+    },
+    "wednesday": {
+      "hindu": [
+        {
+          "deity": "Ganesha",
+          "aspect": "Ganapati, remover of obstacles",
+          "visual_description": "Elephant-headed Ganapati seated with one broken tusk, a bowl of modaks and a small mouse below his pedestal, lit by gold and vermilion lamplight.",
+          "devotee_visual": "A family stops at Prabhadevi with durva, red flowers and a box of modaks, palms joined as a brass bell sounds beyond the carved doorway.",
+          "settings": ["temple", "home_shrine"],
+          "mumbai_locations": ["Shree Siddhivinayak Ganapati Mandir, Prabhadevi"],
+          "worship_items": ["durva_grass", "modak", "red_hibiscus", "coconut"],
+          "mantra_reference": "Om Gam Ganapataye Namah"
+        },
+        {
+          "deity": "Krishna",
+          "aspect": "Murlidhar, the flute bearer",
+          "visual_description": "Blue Krishna in saffron-yellow silk holds a flute to his lips, peacock feather tilted above his crown, framed by white jasmine garlands and emerald textiles.",
+          "devotee_visual": "Devotees in plain cotton sit across the marble floor at ISKCON Juhu, keeping time on small hand cymbals as a priest carries a lamp past.",
+          "settings": ["temple", "home_shrine"],
+          "mumbai_locations": ["Sri Sri Radha Rasabihari Temple, Juhu", "ISKCON Chowpatty, Girgaon"],
+          "worship_items": ["tulsi_leaves", "flowers", "butter", "ghee_lamp"],
+          "mantra_reference": "Hare Krishna Maha Mantra"
+        },
+        {
+          "deity": "Vitthal",
+          "aspect": "Vithoba, standing on a brick",
+          "visual_description": "A dark stone Vitthal stands on a brick with hands on hips, a tall crown and tulsi garlands bright against a deep indigo backdrop.",
+          "devotee_visual": "Warkari devotees in white Gandhi caps sing abhangs at Vitthal Mandir in Wadala, hand cymbals shining in the lamplight as a saffron flag rests nearby.",
+          "settings": ["temple", "home_shrine"],
+          "mumbai_locations": ["Vitthal Mandir, Wadala"],
+          "worship_items": ["tulsi_garland", "flowers", "hand_cymbals", "oil_lamp"],
+          "mantra_reference": "Vitthal Vitthal Jai Hari Vitthal"
+        }
+      ],
+      "islamic": null,
+      "christian": null,
+      "jain": null,
+      "sikh": null,
+      "buddhist": null
+    },
+    "thursday": {
+      "hindu": [
+        {
+          "deity": "Vishnu",
+          "aspect": "Narayana, preserver",
+          "visual_description": "Four-armed Vishnu in yellow silk holds a conch, discus, mace and lotus, with Garuda kneeling below a carved arch in emerald and gold.",
+          "devotee_visual": "A devotee in pale cotton places tulsi leaves and yellow flowers before Vishnu at a Girgaon home shrine, next to polished brass glowing in window light.",
+          "settings": ["temple", "home_shrine"],
+          "mumbai_locations": ["Shri Ramji Balaji Mandir, Bhuleshwar"],
+          "worship_items": ["tulsi_leaves", "yellow_flowers", "fruit", "ghee_lamp"],
+          "mantra_reference": "Om Namo Narayanaya"
+        },
+        {
+          "deity": "Sai Baba of Shirdi",
+          "aspect": "Seated saint and spiritual teacher",
+          "visual_description": "A serene white marble Sai Baba in a headcloth and long kafni, right leg crossed over the left, with roses glowing in amber aarti light.",
+          "devotee_visual": "At a Mumbai Sai shrine, a woman carrying a rose garland joins office workers in aarti, the folds of her cotton dupatta lit by brass lamps.",
+          "settings": ["temple", "home_shrine"],
+          "mumbai_locations": ["Sai Dham Mandir, Kandivali East"],
+          "worship_items": ["rose_garland", "udi", "fruit", "oil_lamp"],
+          "mantra_reference": "Om Sai Ram"
+        },
+        {
+          "deity": "Dattatreya",
+          "aspect": "Datta Guru",
+          "visual_description": "Three-faced Dattatreya stands beneath a broad fig tree with a rosary and water pot, a white cow and four dogs gathered in muted ochre light.",
+          "devotee_visual": "A family at a Mumbai household shrine arranges flowers around silver padukas, reading from a cloth-covered Guru Charitra while a brass diya lights their hands.",
+          "settings": ["temple", "home_shrine"],
+          "mumbai_locations": ["Shree Datta Mandir, Vakola", "Shree Dattatreya Durgambika Devasthana, Ghatkopar West"],
+          "worship_items": ["padukas", "flowers", "guru_charitra", "oil_lamp"],
+          "mantra_reference": "Digambara Digambara Shripad Vallabh Digambara"
+        },
+        {
+          "deity": "Brihaspati",
+          "aspect": "Guru, teacher of the Devas",
+          "visual_description": "The sage Brihaspati wears yellow robes and holds prayer beads and a water pot, seated on a low carved pedestal in honey-coloured lamplight.",
+          "devotee_visual": "A devotee in a yellow cotton kurta sets chickpeas, turmeric and a banana cluster beside a Thursday vrat book at a compact Mumbai home altar.",
+          "settings": ["temple", "home_shrine"],
+          "mumbai_locations": ["Navagraha shrine at Shri Subramania Samaj Temple, Chheda Nagar, Chembur"],
+          "worship_items": ["turmeric", "chickpeas", "bananas", "yellow_flowers"],
+          "mantra_reference": "Om Brihaspataye Namah"
+        }
+      ],
+      "islamic": null,
+      "christian": null,
+      "jain": null,
+      "sikh": {
+        "deity": "Guru Granth Sahib",
+        "aspect": "Sikh Guru reverence and congregation",
+        "visual_description": "The Guru Granth Sahib rests beneath an embroidered canopy, with a white chaur sahib above the dais and musicians seated with tabla and harmonium.",
+        "devotee_visual": "Families with covered heads sit cross-legged on the carpet at Khalsa Sabha in Matunga, listening to kirtan before volunteers set out steel plates for langar.",
+        "settings": ["gurudwara"],
+        "mumbai_locations": ["Gurudwara Khalsa Sabha, Matunga"],
+        "worship_items": ["rumala_sahib", "chaur_sahib", "harmonium", "karah_prasad"],
+        "mantra_reference": "Waheguru Simran"
+      },
+      "buddhist": null
+    },
+    "friday": {
+      "hindu": [
+        {
+          "deity": "Lakshmi",
+          "aspect": "Mahalakshmi, giver of prosperity",
+          "visual_description": "Four-armed Lakshmi in a crimson sari sits on a pink lotus with lotuses in her upper hands, framed by gold lamps and soft ivory garlands.",
+          "devotee_visual": "At Mahalaxmi Temple, a woman with a silk sari and bangles carries a lotus and coconut on a brass plate through the evening flower stalls.",
+          "settings": ["temple", "home_shrine"],
+          "mumbai_locations": ["Shree Mahalaxmi Temple, Breach Candy"],
+          "worship_items": ["lotus", "coconut", "kumkum", "ghee_lamp"],
+          "mantra_reference": "Om Shreem Mahalakshmyai Namah"
+        },
+        {
+          "deity": "Santoshi Maa",
+          "aspect": "Mother of contentment",
+          "visual_description": "Santoshi Maa in a red sari sits on a lotus with a raised blessing hand, a trident and sword visible in a gold-framed devotional print.",
+          "devotee_visual": "A woman in a plain red dupatta sets roasted chickpeas and jaggery beside an oil lamp, reading the Friday vrat katha on a Mumbai apartment floor.",
+          "settings": ["home_shrine", "temple"],
+          "mumbai_locations": ["Santoshi Mata Mandir, Malad East", "Santoshi Mata Mandir, Mulund West"],
+          "worship_items": ["roasted_chickpeas", "jaggery", "flowers", "oil_lamp"],
+          "mantra_reference": "Santoshi Mata Vrat Katha"
+        }
+      ],
+      "islamic": {
+        "deity": null,
+        "aspect": "Jummah, Friday congregational prayer",
+        "visual_description": "Parallel rows of worshippers in white caps and muted cotton kurtas fill a mosque prayer hall, daylight pooling across the prayer carpet beneath geometric arches.",
+        "devotee_visual": "Men in white topis and cotton kurtas walk past the shops near Minara Masjid after midday, slippers in hand as they approach the mosque entrance.",
+        "settings": ["mosque"],
+        "mumbai_locations": ["Jama Masjid, Kalbadevi", "Minara Masjid, Mohammed Ali Road", "Haji Ali Dargah mosque, Worli coast"],
+        "worship_items": ["prayer_mat", "topi", "quran"],
+        "mantra_reference": "Jummah khutbah and salah"
+      },
+      "christian": null,
+      "jain": null,
+      "sikh": null,
+      "buddhist": null
+    },
+    "saturday": {
+      "hindu": [
+        {
+          "deity": "Shani Dev",
+          "aspect": "Shanaishchara, deity associated with Saturn",
+          "visual_description": "Dark stone Shani in indigo robes, holding a staff with a crow at the pedestal, surrounded by pinpoints of flame reflected in sesame oil.",
+          "devotee_visual": "A worshipper at a Mumbai neighbourhood shrine offers black sesame and pours a thin stream of oil into a shallow metal lamp in the late afternoon.",
+          "settings": ["temple", "home_shrine"],
+          "mumbai_locations": ["Navagraha shrine at Shri Subramania Samaj Temple, Chheda Nagar, Chembur"],
+          "worship_items": ["sesame_oil", "black_sesame", "blue_flowers", "oil_lamp"],
+          "mantra_reference": "Om Sham Shanicharaya Namah"
+        },
+        {
+          "deity": "Hanuman",
+          "aspect": "Sankat Mochan, protector in adversity",
+          "visual_description": "An upright Hanuman murti with vermilion pigment and a gold gada, one hand raised in blessing as orange marigolds catch the edge of the light.",
+          "devotee_visual": "A group at the Hanuman shrine near Siddhivinayak reads the Chalisa from small booklets, lamps and jasmine flowers clustered along a worn stone sill.",
+          "settings": ["temple", "home_shrine"],
+          "mumbai_locations": ["Hanuman shrine near Siddhivinayak Temple, Prabhadevi"],
+          "worship_items": ["sindoor", "jasmine_oil", "marigolds", "chalisa_booklet"],
+          "mantra_reference": "Hanuman Chalisa"
+        },
+        {
+          "deity": "Kali",
+          "aspect": "Dakshina Kali, protective mother",
+          "visual_description": "A dark blue Kali murti with flowing hair, a necklace of stylized skulls and a curved ritual sword, framed by hibiscus and deep red fabric.",
+          "devotee_visual": "A devotee in a red-bordered sari places a hibiscus beside an earthen lamp at Chembur Kalibari, with smoke rising against the blue-black evening.",
+          "settings": ["temple", "home_shrine"],
+          "mumbai_locations": ["Chembur Kalibari, Chembur"],
+          "worship_items": ["red_hibiscus", "incense", "oil_lamp"],
+          "mantra_reference": "Om Krim Kalikayai Namah"
+        }
+      ],
+      "islamic": null,
+      "christian": null,
+      "jain": null,
+      "sikh": null,
+      "buddhist": null
+    },
+    "sunday": {
+      "hindu": [
+        {
+          "deity": "Surya Dev",
+          "aspect": "Aditya, solar deity",
+          "visual_description": "A radiant Surya with lotuses in both hands rides a chariot drawn by seven horses, rings of copper and saffron spreading across the dawn sky.",
+          "devotee_visual": "A devotee on a Mumbai terrace raises a copper lota toward the first sun, letting a bright stream fall into a tray of red petals.",
+          "settings": ["home_shrine", "temple", "riverbank"],
+          "mumbai_locations": ["Banganga Tank, Walkeshwar"],
+          "worship_items": ["copper_lota", "water", "red_flowers"],
+          "mantra_reference": "Om Suryaya Namah"
+        },
+        {
+          "deity": "Rama",
+          "aspect": "Shri Ram, prince of Ayodhya",
+          "visual_description": "Crowned Rama holds a long bow beside Sita and Lakshmana, with Hanuman kneeling at their feet and amber lamps reflected in jade and saffron fabric.",
+          "devotee_visual": "A family with a folded Ramayana rests a garland on the steps of a Wadala temple, afternoon sun falling across their joined hands and brass thali.",
+          "settings": ["temple", "home_shrine"],
+          "mumbai_locations": ["Shree Ram Mandir, Wadala"],
+          "worship_items": ["tulsi_leaves", "flowers", "ramayana", "ghee_lamp"],
+          "mantra_reference": "Shri Ram Jai Ram Jai Jai Ram"
+        }
+      ],
+      "islamic": null,
+      "christian": {
+        "deity": "Jesus Christ",
+        "aspect": "Sunday Mass and worship",
+        "visual_description": "An altar crucifix above white linen and candles in a Mumbai church, with stained-glass blues across the nave and choir members waiting near the lectern.",
+        "devotee_visual": "Families in pressed shirts and Sunday dresses walk up the steps of Mount Mary Basilica in Bandra, sunlight catching rosary beads as church bells ring.",
+        "settings": ["church"],
+        "mumbai_locations": ["Mount Mary Basilica, Bandra", "St. Thomas Cathedral, Fort", "Afghan Church, Colaba", "Holy Name Cathedral, Colaba"],
+        "worship_items": ["lectionary", "altar_candles", "crucifix", "rosary"],
+        "mantra_reference": "The Lord's Prayer"
+      },
+      "jain": null,
+      "sikh": null,
+      "buddhist": null
+    }
+  },
+  "tithi": {
+    "chaturthi_shukla": {
+      "deity": "Ganesha",
+      "visual_description": "Elephant-headed Ganapati in red and gold with a lotus and a bowl of modaks, mouse at his feet, framed by fresh durva and brass lamps.",
+      "devotee_visual": "A young family sets red hibiscus and a neat bundle of durva beside a small Ganesha murti, with midday light crossing a Prabhadevi apartment floor.",
+      "significance": "Vinayaka Chaturthi, the waxing-fortnight Ganesha vrat for wisdom and removal of obstacles.",
+      "worship_items": ["modak", "durva_grass", "red_hibiscus", "coconut"],
+      "mumbai_note": "Use a home shrine or Shree Siddhivinayak Ganapati Mandir in Prabhadevi as the scene.",
+      "sunrise_dates_2027": ["2027-01-12", "2027-02-10", "2027-03-12", "2027-04-10", "2027-05-10", "2027-06-08", "2027-07-07", "2027-08-05", "2027-09-04", "2027-10-03", "2027-11-02", "2027-12-02"],
+      "source_2027": "monthly_panchang_2027",
+      "date_basis_2027": "Waxing tithi present at Mumbai sunrise. A festival with a specific ritual window uses its own observance date."
+    },
+    "chaturthi_krishna": {
+      "deity": "Ganesha",
+      "visual_description": "A small terracotta Ganapati with modaks on a brass plate, red hibiscus across the altar, and a waning moon rising beyond Mumbai apartment rooftops.",
+      "devotee_visual": "A fasting devotee on a Mumbai balcony lifts a brass lota at moonrise, then returns to the warmly lit shrine where the family has set prasad.",
+      "significance": "Sankashti Chaturthi, a Ganesha fast traditionally broken after moonrise. A Tuesday observance is called Angaraki Sankashti.",
+      "worship_items": ["durva_grass", "modak", "water", "red_hibiscus", "oil_lamp"],
+      "mumbai_note": "Prabhadevi's Siddhivinayak Temple draws large crowds on Sankashti, especially Angaraki.",
+      "named_dates_2027": {
+        "2027-01-25": "Lambodara Sankashti Chaturthi",
+        "2027-02-24": "Dwijapriya Sankashti Chaturthi",
+        "2027-03-25": "Bhalachandra Sankashti Chaturthi",
+        "2027-04-24": "Vikata Sankashti Chaturthi",
+        "2027-05-23": "Ekadanta Sankashti Chaturthi",
+        "2027-06-22": "Krishnapingala Sankashti Chaturthi",
+        "2027-07-22": "Gajanana Sankashti Chaturthi",
+        "2027-08-20": "Heramba Sankashti Chaturthi",
+        "2027-09-19": "Vighnaraja Sankashti Chaturthi",
+        "2027-10-18": "Vakratunda Sankashti Chaturthi",
+        "2027-11-17": "Ganadhipa Sankashti Chaturthi",
+        "2027-12-16": "Akhuratha Sankashti Chaturthi"
+      },
+      "source_2027": "mumbai_2027_vrats"
+    },
+    "ekadashi": {
+      "deity": "Vishnu",
+      "visual_description": "Blue Vishnu in yellow silk, conch and discus raised above a tulsi garland, with a lotus and mace gleaming softly in the gold-lit shrine.",
+      "devotee_visual": "A devotee with a vertical tilak threads fresh tulsi, while Warkaris in white caps sing abhangs at Wadala's Vitthal Mandir in a stream of morning light.",
+      "significance": "Both fortnights' Ekadashis are associated with Vishnu worship, fasting and devotional recitation.",
+      "worship_items": ["tulsi_leaves", "flowers", "fruit", "ghee_lamp"],
+      "mumbai_note": "Vitthal Mandir in Wadala is a local Warkari setting, especially for Ashadhi Ekadashi.",
+      "named_dates_2027": {
+        "2027-01-03": "Saphala Ekadashi",
+        "2027-01-19": "Pausha Putrada Ekadashi",
+        "2027-02-02": "Shattila Ekadashi",
+        "2027-02-17": "Jaya Ekadashi",
+        "2027-03-03": "Vijaya Ekadashi",
+        "2027-03-18": "Amalaki Ekadashi",
+        "2027-04-02": "Papamochani Ekadashi",
+        "2027-04-17": "Kamada Ekadashi",
+        "2027-05-02": "Varuthini Ekadashi",
+        "2027-05-16": "Mohini Ekadashi",
+        "2027-06-01": "Apara Ekadashi",
+        "2027-06-14": "Nirjala Ekadashi",
+        "2027-06-30": "Yogini Ekadashi",
+        "2027-07-14": "Devshayani Ekadashi",
+        "2027-07-29": "Kamika Ekadashi",
+        "2027-08-12": "Shravana Putrada Ekadashi",
+        "2027-08-28": "Aja Ekadashi",
+        "2027-09-11": "Parivartini Ekadashi",
+        "2027-09-26": "Indira Ekadashi",
+        "2027-10-11": "Papankusha Ekadashi",
+        "2027-10-25": "Rama Ekadashi",
+        "2027-11-10": "Devutthana (Prabodhini) Ekadashi",
+        "2027-11-24": "Utpanna Ekadashi",
+        "2027-12-09": "Mokshada Ekadashi",
+        "2027-12-23": "Saphala Ekadashi"
+      },
+      "source_2027": "ekadashi_2027",
+      "date_basis_2027": "Smarta dates in the cited Mumbai almanac. Vaishnava fasts can move to the following day."
+    },
+    "purnima": {
+      "deity": "Vishnu as Satyanarayan",
+      "visual_description": "A framed four-armed Satyanarayan behind a brass kalash and banana leaves, a low tray of sheera lit by warm diyas and cool full-moon light.",
+      "devotee_visual": "Relatives sit cross-legged in a Mumbai flat as the eldest reads the Satyanarayan katha and children wait beside small bowls of banana and sheera prasad.",
+      "significance": "Full moon observances vary by month. Satyanarayan Puja is a common household scene.",
+      "worship_items": ["tulsi_leaves", "kalash", "banana_leaves", "sheera", "ghee_lamp"],
+      "mumbai_note": "A living-room puja in a Dadar apartment makes an intimate alternative to the temple scene.",
+      "dates_2027": ["2027-01-22", "2027-02-20", "2027-03-22", "2027-04-20", "2027-05-20", "2027-06-18", "2027-07-18", "2027-08-17", "2027-09-15", "2027-10-15", "2027-11-14", "2027-12-13"],
+      "source_2027": "purnima_2027",
+      "date_basis_2027": "Sunrise tithi dates, with the start date for a tithi that spans no sunrise. Evening worship such as Kojagiri uses the evening observance date."
+    },
+    "amavasya": {
+      "deity": "Pitru (ancestors), with Kali or Shani in some traditions",
+      "visual_description": "A garlanded ancestor portrait beside brass water vessels and a single oil flame, black sesame on pale stone and dark blue night beyond a Mumbai window.",
+      "devotee_visual": "A devotee in a simple dhoti pours water and black sesame at Banganga Tank, where pale clouds reflect in the still water beside the steps.",
+      "significance": "The new moon is a time for ancestor remembrance in many households. Kali and Shani have distinct observances in some traditions.",
+      "worship_items": ["black_sesame", "water", "kusha_grass", "rice_pinda", "oil_lamp"],
+      "mumbai_note": "Use Banganga's stone steps for tarpan or an intimate home shrine for family remembrance.",
+      "dates_2027": ["2027-01-07", "2027-02-06", "2027-03-08", "2027-04-06", "2027-05-06", "2027-06-04", "2027-07-04", "2027-08-02", "2027-08-31", "2027-09-30", "2027-10-29", "2027-11-28", "2027-12-27"],
+      "source_2027": "amavasya_2027",
+      "date_basis_2027": "Local sunrise tithi. For shraddha use the afternoon observance given in pitru_paksha_pattern."
+    },
+    "ashtami_shukla": {
+      "deity": "Durga, with Bhairava in some Shakta traditions",
+      "visual_description": "A many-armed Durga on a lion lifts a trident under a gold arch, with a smaller dark stone Bhairava shrine to one side in amber light.",
+      "devotee_visual": "At a Mumbai Devi shrine, women in red-bordered saris set hibiscus and coconuts beside the lamps, passing a small brass thali forward with joined hands.",
+      "significance": "The waxing month's Durga Ashtami honours the Goddess. The Ashwin observance is Maha Ashtami during Sharad Navratri.",
+      "worship_items": ["red_hibiscus", "coconut", "red_cloth", "ghee_lamp"],
+      "mumbai_note": "For a Navratri scene use a Mumbai Devi shrine or neighbourhood pandal, with Bhairava only where the tradition includes him.",
+      "sunrise_dates_2027": ["2027-01-16", "2027-02-14", "2027-03-16", "2027-04-14", "2027-05-13", "2027-06-11", "2027-07-11", "2027-08-09", "2027-09-08", "2027-10-07", "2027-11-06", "2027-12-06"],
+      "source_2027": "monthly_panchang_2027",
+      "date_basis_2027": "Waxing tithi present at Mumbai sunrise. A festival with a specific ritual window uses its own observance date."
+    },
+    "navami_shukla": {
+      "deity": "Rama",
+      "visual_description": "Rama with bow and quiver stands beside Sita and Lakshmana, a kneeling Hanuman below, framed by jasmine strands and midday light on carved wooden doors.",
+      "devotee_visual": "At Shri Ram Mandir in Wadala, families in cotton kurtas and bright saris hold flower trays while a priest waves a lit aarti at the altar.",
+      "significance": "Rama Navami celebrates Rama's birth specifically on Chaitra Shukla Navami. Other waxing Navamis can have their own observances.",
+      "worship_items": ["tulsi_leaves", "flowers", "panakam", "ghee_lamp"],
+      "mumbai_note": "Shree Ram Mandir in Wadala is a local Rama Navami setting.",
+      "sunrise_dates_2027": ["2027-01-17", "2027-02-15", "2027-04-15", "2027-05-14", "2027-06-12", "2027-07-12", "2027-08-10", "2027-09-09", "2027-10-08", "2027-10-09", "2027-11-07", "2027-12-07"],
+      "source_2027": "monthly_panchang_2027",
+      "date_basis_2027": "Waxing tithi present at Mumbai sunrise. A festival with a specific ritual window uses its own observance date."
+    },
+    "trayodashi_shukla": {
+      "deity": "Shiva",
+      "visual_description": "A black Shivalinga under a suspended copper vessel, wet bilva leaves and white flowers on its base, with Nandi facing it in amber dusk.",
+      "devotee_visual": "At Babulnath, a devotee in a white kurta offers a brass plate with bilva and an oil lamp as fading light settles over the temple steps.",
+      "significance": "Shukla Pradosha Vrat honours Shiva and Parvati when Trayodashi prevails during the evening worship window.",
+      "worship_items": ["bilva_leaves", "water", "white_flowers", "oil_lamp"],
+      "mumbai_note": "Babulnath and Walkeshwar are suitable Shiva temple settings at twilight.",
+      "dates_2027": ["2027-01-20", "2027-02-18", "2027-03-20", "2027-04-18", "2027-05-17", "2027-06-16", "2027-07-15", "2027-08-14", "2027-09-13", "2027-10-12", "2027-11-11", "2027-12-11"],
+      "source_2027": "mumbai_2027_vrats"
+    },
+    "trayodashi_krishna": {
+      "deity": "Shiva",
+      "visual_description": "An oil-lit Shiva shrine at blue hour, with ripples of reflected gold on a polished black lingam, wet bilva leaves, and Nandi in silhouette.",
+      "devotee_visual": "Babulnath devotees carrying copper lotas gather beneath the dusk-dark arch, passing a plate of white flowers as a priest draws water over the stone.",
+      "significance": "Krishna Pradosha Vrat is the waning-fortnight twilight observance of Shiva and Parvati.",
+      "worship_items": ["bilva_leaves", "water", "milk", "white_flowers", "oil_lamp"],
+      "mumbai_note": "Use blue-hour light around Babulnath or the stone precinct at Walkeshwar.",
+      "dates_2027": ["2027-01-04", "2027-02-03", "2027-03-05", "2027-04-04", "2027-05-03", "2027-06-02", "2027-07-01", "2027-07-31", "2027-08-29", "2027-09-27", "2027-10-27", "2027-11-25", "2027-12-25"],
+      "source_2027": "mumbai_2027_vrats",
+      "calendar_variation_2027": {
+        "alternative_date": "2027-01-05",
+        "catalog_date": "2027-01-04",
+        "source": "pradosh_2027_alternate",
+        "note": "Published Mumbai calendars differ on this sunset boundary. Use the schedule of the temple being depicted."
+      }
+    }
+  },
+  "month_deity": {
+    "chaitra": {
+      "primary_deity": "Rama",
+      "visual_description": "A bow-bearing Rama stands beside Sita and Lakshmana at a spring altar, flowers in saffron and white, with a silk-topped gudi visible on a Dadar balcony.",
+      "significance": "Gudi Padwa marks Nav Samvatsar, the start of the Marathi lunar year in Chaitra. Rama Navami follows in the same month.",
+      "intensified_days": "shukla_pratipada_and_shukla_navami",
+      "mumbai_note": "Use a Gudi Padwa gudi with a garland and inverted metal vessel at home, or Rama Navami at Shree Ram Mandir, Wadala."
+    },
+    "vaishakha": {
+      "primary_deity": "Gautama Buddha",
+      "visual_description": "A seated Buddha image with hands in meditation rests against a plain stone alcove, with white blossoms, saffron robes and soft daylight in a Mumbai vihara.",
+      "significance": "Buddha Purnima commemorates the Buddha. Akshaya Tritiya is a distinct Hindu and Jain observance earlier in the month.",
+      "intensified_days": "shukla_tritiya_and_purnima",
+      "mumbai_note": "For Buddha Purnima, use white-clad visitors at Chaityabhoomi in Dadar or the golden Global Vipassana Pagoda exterior at Gorai."
+    },
+    "jyeshtha": {
+      "ganga_dussehra_2027": "2027-06-13",
+      "source_2027": "ganga_dussehra_mumbai",
+      "primary_deity": "Ganga",
+      "visual_description": "A luminous white-clad Ganga holds a water vessel beside her makara mount, silver water cascading past pale blue stone and white blossoms in soft daylight.",
+      "significance": "Ganga Dussehra on Shukla Dashami commemorates the sacred river's descent in Hindu tradition.",
+      "intensified_days": "shukla_dashami",
+      "mumbai_note": "For a local water-side devotional scene, place devotees on the steps of Banganga Tank in Walkeshwar."
+    },
+    "ashadha": {
+      "primary_deity": "Vishnu as Vitthal",
+      "visual_description": "Vitthal stands hands on hips on a brick, his dark stone form draped in green tulsi and white jasmine with saffron flags behind him.",
+      "significance": "Ashadhi Ekadashi is central to Warkari devotion. It is also Devshayani Ekadashi, linked to Vishnu's repose and the beginning of Chaturmas.",
+      "intensified_days": "shukla_ekadashi",
+      "mumbai_note": "Use Wadala's Prati Pandharpur, where white-capped devotees carry tulsi and sing abhangs."
+    },
+    "shravan": {
+      "primary_deity": "Shiva",
+      "visual_description": "A black Shivalinga with fresh green bilva leaves and jasmine, a narrow stream of water from a copper vessel, rain-dark Babulnath stone glowing with amber lamps.",
+      "significance": "Shravana is sacred to Shiva, with special Monday observances. Kanwar Yatra is observed in some regions during this month.",
+      "intensified_days": "every_monday",
+      "mumbai_note": "Show monsoon umbrellas on Babulnath steps, devotees queuing with brass vessels and bilva, and lamps reflected in the rain.",
+      "start_date_2027": "2027-08-03",
+      "end_date_2027": "2027-08-31",
+      "mondays_2027": ["2027-08-09", "2027-08-16", "2027-08-23", "2027-08-30"],
+      "source_2027": "shravan_2027_mumbai"
+    },
+    "bhadrapada": {
+      "primary_deity": "Ganesha",
+      "visual_description": "A towering elephant-headed Ganapati sits on an ornate throne under crimson silk and marigold garlands, with brass lamps warming the crowded Lalbaug pandal.",
+      "significance": "Ganeshotsav centres on the waxing fortnight. Pitru Paksha follows in the waning fortnight of Maharashtra's Amanta month.",
+      "intensified_days": "shukla_chaturthi_through_anant_chaturdashi",
+      "mumbai_note": "Use Lalbaug's darshan queues during Ganeshotsav and Banganga's steps for the ancestor rites that follow.",
+      "krishna": {
+        "primary_deity": "Pitru (ancestors)",
+        "visual_description": "A devotee in a white dhoti sits on the steps of Banganga with a brass lota and black sesame, the tank reflecting a grey sky.",
+        "significance": "Pitru Paksha in Maharashtra's Amanta calendar, beginning around Bhadrapada Purnima and culminating at Sarva Pitru Amavasya.",
+        "intensified_days": "sarva_pitru_amavasya",
+        "mumbai_note": "Use quiet tarpan or shraddha at Banganga Tank, Walkeshwar."
+      }
+    },
+    "ashwin": {
+      "primary_deity": "Durga",
+      "visual_description": "Durga in crimson and gold rides a lion beneath a brass halo, with pots of sprouting grain and flickering lamps at a Mumbai Navratri altar.",
+      "significance": "Sharad Navratri falls in Ashwin Shukla. In the Amanta calendar, Ashwin Krishna leads into Dhantrayodashi, Narak Chaturdashi and Lakshmi Puja.",
+      "intensified_days": "sharad_navratri",
+      "mumbai_note": "Use a neighbourhood garba courtyard in the waxing fortnight and flower stalls and housefront diyas near Diwali.",
+      "shukla": {
+        "primary_deity": "Durga",
+        "visual_description": "A many-armed Durga with a lion and trident at a neighbourhood pandal, surrounded by red marigolds, lit earthen lamps and the sweeping skirts of garba dancers.",
+        "significance": "Sharad Navratri honours the Devi and leads into Vijayadashami.",
+        "intensified_days": "sharad_navratri",
+        "mumbai_note": "A Ghatkopar or Borivali garba courtyard gives the scene a Mumbai neighbourhood setting."
+      },
+      "krishna": {
+        "primary_deity": "Lakshmi and Ganesha",
+        "visual_description": "Lakshmi and Ganesha share a crimson-clothed altar with lotus blooms, silver coins and rows of amber diyas, with apartment balconies twinkling beyond the window.",
+        "significance": "The late-Ashwin Diwali observances in the Amanta calendar culminate in Lakshmi Puja on Amavasya.",
+        "intensified_days": "dhantrayodashi_through_amavasya",
+        "mumbai_note": "Use evening Zaveri Bazaar shopfronts or an apartment shrine with lamps across the balcony rail."
+      }
+    },
+    "kartik": {
+      "devutthana_ekadashi_2027": "2027-11-10",
+      "tulsi_vivah_dwadashi_2027": "2027-11-11",
+      "sources": ["ekadashi_2027", "tulsi_vivah_mumbai"],
+      "primary_deity": "Vishnu and Tulsi",
+      "visual_description": "A dark Shaligram stone with tulsi leaves rests beside a decorated tulsi planter, its wedding canopy of sugarcane and flowers glowing in rows of small lamps.",
+      "significance": "Kartik begins with Bali Pratipada and the closing Diwali observances. Devutthana Ekadashi marks Vishnu's awakening, with Tulsi Vivah observed soon after according to local custom.",
+      "intensified_days": "devutthana_ekadashi_through_tulsi_vivah",
+      "mumbai_note": "Use a Tulsi Vivah in a Mumbai housing society courtyard, or rows of lamps around Banganga for Kartik deepdaan."
+    },
+    "margashirsha": {
+      "gita_jayanti_2027": "2027-12-09",
+      "dattatreya_jayanti_2027": "2027-12-13",
+      "sources": ["ekadashi_2027", "mumbai_lunar_year_1949"],
+      "primary_deity": "Krishna and Dattatreya",
+      "visual_description": "A painted scene of Krishna guiding Arjuna on a chariot with a gilt Bhagavad Gita beneath it, rich indigo fabric and amber lamps at the altar.",
+      "significance": "Gita Jayanti honours Krishna's teaching on Shukla Ekadashi. Dattatreya Jayanti honours Datta Guru around Margashirsha Purnima.",
+      "intensified_days": "shukla_ekadashi_and_purnima",
+      "mumbai_note": "Use Bhagavad Gita readings at ISKCON Juhu or a flower-draped Datta Guru shrine at Shree Datta Mandir, Vakola."
+    },
+    "pausha": {
+      "primary_deity": "Surya Dev",
+      "visual_description": "Copper-gold Surya holds two lotuses above a seven-horse chariot, with red flowers and a low dawn sun warming pale rooftops across a winter Mumbai skyline.",
+      "significance": "Surya and winter sun worship are the seasonal association. Makar Sankranti is keyed to the Sun's ingress into Makara.",
+      "intensified_days": "makar_sankranti_solar_ingress",
+      "mumbai_note": "Use amber dawn on a Mumbai terrace, with a copper lota and tilgul sweets for a Sankranti scene."
+    },
+    "magha": {
+      "vasant_panchami_2027": "2027-02-11",
+      "source_2027": "monthly_panchang_2027",
+      "primary_deity": "Saraswati",
+      "visual_description": "Saraswati in a white sari holds a veena and palm-leaf book beside a swan, ivory blossoms and mustard-yellow fabric bright in clear morning light.",
+      "significance": "Vasant Panchami honours Saraswati, associated with knowledge, music and learning.",
+      "intensified_days": "shukla_panchami",
+      "mumbai_note": "Use yellow-clad students placing notebooks and instruments before a Saraswati image in a Mumbai home or school hall."
+    },
+    "phalguna": {
+      "primary_deity": "Krishna and Radha",
+      "visual_description": "Flute-bearing Krishna with a peacock feather beside Radha in pink and saffron silk, clouds of gulal lifting through a sunlit temple courtyard in Juhu.",
+      "significance": "Holika Dahan and Holi mark the close of the month, with Radha and Krishna associated with the devotional play of colours.",
+      "intensified_days": "holika_dahan_and_holi",
+      "mumbai_note": "Use ISKCON Juhu for a devotional Holi setting or a neighbourhood courtyard for a family scene with dry gulal."
+    }
+  },
+  "navratri_cycle": [
+    {
+      "day": 1,
+      "devi": "Shailaputri",
+      "meaning": "Daughter of the mountain",
+      "color_2026": "Orange",
+      "iconography": "Rides the bull Nandi and carries a trident and a lotus.",
+      "visual_description": "Shailaputri on white Nandi holds a trident and a pink lotus above an earthen kalash, orange marigolds and cool stone catching first light.",
+      "devotee_visual": "Women in orange saris place a coconut atop a brass kalash beside freshly sown barley at a Dadar home altar, with a ghee lamp burning.",
+      "worship_items": ["ghee", "jasmine", "kalash", "barley_seeds", "coconut"],
+      "date_2027": "2027-09-30",
+      "source_2027": "navratri_2027_colors",
+      "color_2027": "Yellow",
+      "devotee_visual_2027": "Women in turmeric-yellow saris press barley seeds into damp soil beside a copper kalash, a coconut and mango leaves on a low Dadar windowsill.",
+      "visual_description_2027": "At a Mumbai Navratri mandap, Shailaputri appears before yellow marigolds and a row of oil lamps. Rides the bull Nandi and carries a trident and a lotus."
+    },
+    {
+      "day": 2,
+      "devi": "Brahmacharini",
+      "meaning": "She who follows the path of spiritual discipline",
+      "color_2026": "White",
+      "iconography": "Walks barefoot with a rudraksha mala and a kamandalu water vessel.",
+      "visual_description": "Barefoot Brahmacharini in plain white cloth walks with a rosary and water pot, outlined in ivory and silver against a quiet, blue-grey stone backdrop.",
+      "devotee_visual": "A woman in a white kurta turns her prayer beads beside a Mumbai window, with a small sugar offering and jasmine arranged near the diya.",
+      "worship_items": ["rudraksha_mala", "rock_sugar", "white_flowers", "oil_lamp"],
+      "date_2027": "2027-10-01",
+      "source_2027": "navratri_2027_colors",
+      "color_2027": "Green",
+      "devotee_visual_2027": "A woman in a leaf-green kurta counts her mala beside a white-robed Brahmacharini print, pausing to straighten the wick of the small brass lamp.",
+      "visual_description_2027": "At a Mumbai Navratri mandap, Brahmacharini appears before green mango leaves and a row of oil lamps. Walks barefoot with a rudraksha mala and a kamandalu water vessel."
+    },
+    {
+      "day": 3,
+      "devi": "Chandraghanta",
+      "meaning": "She who wears the bell-shaped moon",
+      "color_2026": "Red",
+      "iconography": "Rides a tiger, has ten arms and wears a bell-shaped crescent on her forehead.",
+      "visual_description": "Ten-armed Chandraghanta on a striped tiger wears a silver crescent above her brow, with ritual weapons, lotus petals and red silk glowing in lamplight.",
+      "devotee_visual": "Women in red saris bring a bowl of kheer and hibiscus to a Girgaon pandal, with a brass bell and arched fabric canopy above.",
+      "worship_items": ["kheer", "red_hibiscus", "red_cloth", "brass_bell"],
+      "date_2027": "2027-10-02",
+      "source_2027": "navratri_2027_colors",
+      "color_2027": "Grey",
+      "devotee_visual_2027": "Two sisters in grey silk raise a thali of kheer toward Chandraghanta, the crescent above the tiger framed by garlands in a Girgaon pandal.",
+      "visual_description_2027": "At a Mumbai Navratri mandap, Chandraghanta appears before grey linen and a row of oil lamps. Rides a tiger, has ten arms and wears a bell-shaped crescent on her forehead."
+    },
+    {
+      "day": 4,
+      "devi": "Kushmanda",
+      "meaning": "She who created the cosmic egg",
+      "color_2026": "Royal Blue",
+      "iconography": "Eight-armed creator riding a lion, with a rosary, lotus, ritual vessel and other divine attributes.",
+      "visual_description": "Eight-armed Kushmanda sits on a lion before a round gold sunburst, raising a lotus and holding a rosary, with royal blue banners around the shrine.",
+      "devotee_visual": "A woman in royal blue carries malpua to a small Mumbai mandap, where an older devotee holds a camphor lamp against deep blue fabric.",
+      "worship_items": ["malpua", "flowers", "camphor", "oil_lamp"],
+      "date_2027": "2027-10-03",
+      "source_2027": "navratri_2027_colors",
+      "color_2027": "Orange",
+      "devotee_visual_2027": "A woman in an orange Paithani carries malpua into a Borivali courtyard, her orange pleats picking up the gold reflections from Kushmanda’s lamps.",
+      "visual_description_2027": "At a Mumbai Navratri mandap, Kushmanda appears before orange brocade and a row of oil lamps. Eight-armed creator riding a lion, with a rosary, lotus, ritual vessel and other divine attributes."
+    },
+    {
+      "day": 5,
+      "devi": "Skandamata",
+      "meaning": "Mother of Skanda",
+      "color_2026": "Yellow",
+      "iconography": "Rides a lion and holds infant Skanda on her lap, with lotuses in her upper hands.",
+      "visual_description": "Skandamata cradles infant Skanda with a lion beneath her lotus seat, pale pink lotuses reaching upward against yellow silk and honey-coloured temple light.",
+      "devotee_visual": "A mother and daughter in yellow cotton set bananas and marigolds before the Devi at their Chembur home, with lamplight falling on the child's hands.",
+      "worship_items": ["bananas", "lotus", "marigolds", "ghee_lamp"],
+      "date_2027": "2027-10-04",
+      "source_2027": "navratri_2027_colors",
+      "color_2027": "White",
+      "devotee_visual_2027": "White cotton sleeves and jasmine braid garlands frame the hands of a Chembur family offering bananas before an image of Skandamata with infant Skanda.",
+      "visual_description_2027": "At a Mumbai Navratri mandap, Skandamata appears before white jasmine and a row of oil lamps. Rides a lion and holds infant Skanda on her lap, with lotuses in her upper hands."
+    },
+    {
+      "day": 6,
+      "devi": "Katyayani",
+      "meaning": "Daughter of the sage Katyayana",
+      "color_2026": "Green",
+      "iconography": "Four-armed Devi on a lion, with a sword, lotus and hands in blessing and protection.",
+      "visual_description": "Four-armed Katyayani rides a lion, silver sword and pink lotus lifted on either side of her crown, with emerald silk and a ring of ochre lamps.",
+      "devotee_visual": "Women in green lehengas offer flowers before a Ghatkopar garba gathering, placing rose petals on an aarti tray as dancers form a circle in the courtyard.",
+      "worship_items": ["honey", "lotus", "flowers", "oil_lamp"],
+      "date_2027": "2027-10-05",
+      "source_2027": "navratri_2027_colors",
+      "color_2027": "Red",
+      "devotee_visual_2027": "Women in red chaniya cholis pause before garba to offer rose petals at Katyayani’s shrine, their mirrored borders catching flashes from a circling lamp.",
+      "visual_description_2027": "At a Mumbai Navratri mandap, Katyayani appears before red silk and a row of oil lamps. Four-armed Devi on a lion, with a sword, lotus and hands in blessing and protection."
+    },
+    {
+      "day": 7,
+      "devi": "Kalaratri",
+      "meaning": "Dark night",
+      "color_2026": "Grey",
+      "iconography": "Dark-complexioned, wild-haired Devi rides a donkey, bearing an iron hook and blade, with hands of blessing and protection.",
+      "visual_description": "Wild-haired Kalaratri rides a donkey through a charcoal-grey backdrop, her iron hook catching the firelight as her open palm signals protection above dark red flowers.",
+      "devotee_visual": "A grey-sari devotee sets jaggery on a brass dish at a subdued Devi shrine in Mumbai, with hibiscus and a row of warm lamps at dusk.",
+      "worship_items": ["jaggery", "red_hibiscus", "oil_lamp"],
+      "date_2027": "2027-10-06",
+      "source_2027": "navratri_2027_colors",
+      "color_2027": "Royal Blue",
+      "devotee_visual_2027": "A devotee in royal blue sets a piece of jaggery beside Kalaratri’s lamp, the donkey mount visible in silhouette beyond the brass dish.",
+      "visual_description_2027": "At a Mumbai Navratri mandap, Kalaratri appears before royal blue cloth and a row of oil lamps. Dark-complexioned, wild-haired Devi rides a donkey, bearing an iron hook and blade, with hands of blessing and protection."
+    },
+    {
+      "day": 8,
+      "devi": "Mahagauri",
+      "meaning": "The radiant Gauri",
+      "color_2026": "Purple",
+      "iconography": "Radiant white-clad Devi on a white bull, carrying a trident and damaru.",
+      "visual_description": "White-clad Mahagauri sits on a pale bull with a trident and small damaru, a pearl-white halo set against purple cloth and warm temple lamps.",
+      "devotee_visual": "Women in purple saris set plates of halwa, puri and chana for children at a Mumbai household kanya puja, with a coconut beside the lamp.",
+      "worship_items": ["coconut", "white_flowers", "halwa", "puri", "chickpeas"],
+      "date_2027": "2027-10-07",
+      "source_2027": "navratri_2027_colors",
+      "color_2027": "Pink",
+      "devotee_visual_2027": "A woman in a pink sari serves warm puris to girls seated on floor mats, with Mahagauri’s white bull visible on the household altar.",
+      "visual_description_2027": "At a Mumbai Navratri mandap, Mahagauri appears before pink rose garlands and a row of oil lamps. Radiant white-clad Devi on a white bull, carrying a trident and damaru."
+    },
+    {
+      "day": 9,
+      "devi": "Siddhidatri",
+      "meaning": "Giver of spiritual attainments",
+      "color_2026": "Peacock Green",
+      "iconography": "Four-armed Devi with lotus, discus, conch and mace, seated on a lotus with a lion mount in some depictions.",
+      "visual_description": "Siddhidatri on a pink lotus with a lion beside her holds conch, discus, mace and lotus, framed by peacock-green silk and soft golden aarti light.",
+      "devotee_visual": "Women in peacock-green saris place flowers beside a Navami havan at a Mumbai pandal, with brass vessels and quiet faces gathered around the amber fire.",
+      "worship_items": ["sesame_seeds", "flowers", "ghee", "havan_samagri"],
+      "date_2027": "2027-10-08",
+      "source_2027": "navratri_2027_colors",
+      "color_2027": "Purple",
+      "devotee_visual_2027": "Women wearing purple gather around a small Navami havan in a Mumbai courtyard, passing a ghee spoon as firelight catches the folds of their saris.",
+      "visual_description_2027": "At a Mumbai Navratri mandap, Siddhidatri appears before purple velvet and a row of oil lamps. Four-armed Devi with lotus, discus, conch and mace, seated on a lotus with a lion mount in some depictions."
+    }
+  ],
+  "jain_paryushana_cycle": [
+    {
+      "day_number": 1,
+      "name": null,
+      "theme": "Beginning of austerity and reflection",
+      "visual_description": "White cotton mats line a Walkeshwar derasar hall, a pale marble Jina image at the far end and shaded window light on the floor.",
+      "devotee_visual": "A family arrives in plain cotton, slips off its footwear and sits with devotional books as an elder explains the opening day's vows.",
+      "date_2027": "2027-08-28",
+      "source_2027": "jain_2027"
+    },
+    {
+      "day_number": 2,
+      "name": null,
+      "theme": "Fasting and attentive listening",
+      "visual_description": "Rows of listeners sit on white floor cloth in a Ghatkopar Jain hall, a low reading stand centred between marble columns in soft daylight.",
+      "devotee_visual": "A woman in a plain white sari turns a page of a small prayer book while an elder listens to the discourse with folded hands.",
+      "date_2027": "2027-08-29",
+      "source_2027": "jain_2027"
+    },
+    {
+      "day_number": 3,
+      "name": null,
+      "theme": "Scriptural study and self-examination",
+      "visual_description": "An open Jain scripture rests on a low wooden stand in a Mulund meeting hall, surrounded by cotton mats and calm cream-coloured walls.",
+      "devotee_visual": "A young devotee follows the reader in a small study circle, pencil resting on a closed notebook as filtered light crosses the group's plain clothes.",
+      "date_2027": "2027-08-30",
+      "source_2027": "jain_2027"
+    },
+    {
+      "day_number": 4,
+      "name": null,
+      "theme": "Austerity, scripture and pratikraman",
+      "visual_description": "A cloth-wrapped Kalpa Sutra rests on a raised stand at a Malabar Hill derasar, with evening light across a circle of worshippers in white.",
+      "devotee_visual": "Worshippers sit quietly with joined hands for evening pratikraman, a row of folded shawls and devotional booklets arranged along the wall behind them.",
+      "date_2027": "2027-08-31",
+      "source_2027": "jain_2027"
+    },
+    {
+      "day_number": 5,
+      "name": "Mahavir Janma Vanchan",
+      "theme": "Kalpa Sutra reading on Mahavira's birth",
+      "visual_description": "A Kalpa Sutra reading in a Ghatkopar derasar, with a small ceremonial cradle and embroidered panels of auspicious dreams beside the raised bookstand.",
+      "devotee_visual": "White-clad families gather before the reading stand, children looking toward the decorated cradle while elders follow the story of Mahavira's birth in their booklets.",
+      "date_2027": "2027-09-01",
+      "source_2027": "jain_2027"
+    },
+    {
+      "day_number": 6,
+      "name": null,
+      "theme": "Continued scripture reading and disciplined fasting",
+      "visual_description": "Under cool daylight in a Mulund Jain hall, white-clad listeners face a raised bookstand, with a plain cloth backdrop and a row of quiet faces.",
+      "devotee_visual": "A fasting elder sits upright beside younger family members, each following the scripture on a separate folded cloth while the reader continues the discourse.",
+      "date_2027": "2027-09-02",
+      "source_2027": "jain_2027"
+    },
+    {
+      "day_number": 7,
+      "name": null,
+      "theme": "Sustained austerity and preparation to seek forgiveness",
+      "visual_description": "Evening readers at a Walkeshwar derasar sit in a sparse hall, their white shawls catching the last light between pale pillars and a low altar.",
+      "devotee_visual": "Two relatives in simple white clothes sit side by side after pratikraman, joined hands and lowered eyes as they prepare to ask forgiveness the next day.",
+      "date_2027": "2027-09-03",
+      "source_2027": "jain_2027"
+    },
+    {
+      "day_number": 8,
+      "name": "Samvatsari",
+      "theme": "Universal forgiveness and Samvatsari pratikraman",
+      "visual_description": "Families in white greet each other with folded hands outside the Babu Amichand Panalal Jain Derasar in Walkeshwar, marble steps lit by gentle afternoon sun.",
+      "devotee_visual": "Grandparents and children say Micchami Dukkadam with folded hands, pausing before they continue to visit neighbours after the community's evening pratikraman.",
+      "date_2027": "2027-09-04",
+      "source_2027": "jain_2027",
+      "alternate_2027": {
+        "date": "2027-09-05",
+        "tradition": "Panchami Samvatsari. Follow the local sangh's calendar for the eight-day cycle."
+      }
+    }
+  ],
+  "jain_das_lakshana_cycle": [
+    {
+      "day_number": 1,
+      "virtue_sanskrit": "Uttam Kshama",
+      "virtue_english": "Supreme Forgiveness",
+      "visual_description": "Two worshippers in plain white face each other with joined palms in a Mumbai Digambara temple courtyard, their faces relaxed in gentle morning light.",
+      "devotee_visual": "A young man in a cotton kurta bows to an elder to ask forgiveness, both standing quietly beside the temple steps with footwear set aside.",
+      "date_2027": "2027-09-05",
+      "source_2027": "jain_2027"
+    },
+    {
+      "day_number": 2,
+      "virtue_sanskrit": "Uttam Mardav",
+      "virtue_english": "Supreme Humility",
+      "visual_description": "A devotee bows low before a seated Jina in a quiet marble temple hall, with a pale floor and soft light filling the space.",
+      "devotee_visual": "A Mumbai volunteer in plain cotton kneels to arrange mats for older worshippers, placing each one flat before taking a seat at the back.",
+      "date_2027": "2027-09-06",
+      "source_2027": "jain_2027"
+    },
+    {
+      "day_number": 3,
+      "virtue_sanskrit": "Uttam Arjav",
+      "virtue_english": "Supreme Straightforwardness",
+      "visual_description": "A straight aisle between white columns leads to a Jina image, with two plain-clothed devotees speaking openly beside one pillar in clear daylight.",
+      "devotee_visual": "In a quiet Mumbai temple meeting room, a devotee sits face to face with an elder, hands resting open while speaking plainly about the day's conduct.",
+      "date_2027": "2027-09-07",
+      "source_2027": "jain_2027"
+    },
+    {
+      "day_number": 4,
+      "virtue_sanskrit": "Uttam Shauch",
+      "virtue_english": "Supreme Purity",
+      "visual_description": "Clear water in a plain vessel reflects a white marble Jina image, with spare cloth and cool light lending the temple alcove an uncluttered calm.",
+      "devotee_visual": "A woman in a simple white sari lays aside an ornate bag and sits with a small prayer book, her gaze lowered in quiet reflection.",
+      "date_2027": "2027-09-08",
+      "source_2027": "jain_2027"
+    },
+    {
+      "day_number": 5,
+      "virtue_sanskrit": "Uttam Satya",
+      "virtue_english": "Supreme Truth",
+      "visual_description": "A reader holds an open Jain text in a Mumbai temple study room, with two attentive listeners, square pillars and natural white window light.",
+      "devotee_visual": "A teenager in a white kurta looks up from scripture to speak to the study circle, one open hand visible as the group listens.",
+      "date_2027": "2027-09-09",
+      "source_2027": "jain_2027"
+    },
+    {
+      "day_number": 6,
+      "virtue_sanskrit": "Uttam Sanyam",
+      "virtue_english": "Supreme Self-restraint",
+      "visual_description": "A meditating figure sits upright on a plain cotton mat in a Mumbai temple alcove, with folded hands, quiet shadows and restrained blue-grey tones.",
+      "devotee_visual": "In a Mumbai home, a devotee puts away their phone and sits on a folded cotton mat, hands still and eyes gently closed.",
+      "date_2027": "2027-09-10",
+      "source_2027": "jain_2027"
+    },
+    {
+      "day_number": 7,
+      "virtue_sanskrit": "Uttam Tap",
+      "virtue_english": "Supreme Penance",
+      "visual_description": "A fasting lay devotee sits near an open scripture in a sparse temple room, with muted afternoon light on bare stone and white cotton.",
+      "devotee_visual": "A devotee in a plain shawl spends a quiet afternoon reading scripture and meditating at a Ghatkopar prayer hall, daylight shifting across the wall.",
+      "date_2027": "2027-09-11",
+      "source_2027": "jain_2027"
+    },
+    {
+      "day_number": 8,
+      "virtue_sanskrit": "Uttam Tyag",
+      "virtue_english": "Supreme Renunciation",
+      "visual_description": "Hands pass neatly folded cotton blankets across a Mumbai Jain community hall, plain clothing and warm afternoon light emphasising the simple act of giving.",
+      "devotee_visual": "A family carries folded blankets to a donation table and quietly helps the volunteers pack them, wearing everyday cotton and working shoulder to shoulder.",
+      "date_2027": "2027-09-12",
+      "source_2027": "jain_2027"
+    },
+    {
+      "day_number": 9,
+      "virtue_sanskrit": "Uttam Akinchanya",
+      "virtue_english": "Supreme Non-attachment",
+      "visual_description": "A nearly empty Mumbai room with a single straw mat, a closed scripture and a broad patch of morning light, rendered in cream and soft grey.",
+      "devotee_visual": "A devotee puts jewellery away and sits empty-handed on the mat, with morning light falling across their hands and the simple white cloth beneath them.",
+      "date_2027": "2027-09-13",
+      "source_2027": "jain_2027"
+    },
+    {
+      "day_number": 10,
+      "virtue_sanskrit": "Uttam Brahmacharya",
+      "virtue_english": "Supreme Celibacy",
+      "visual_description": "White-clad lay worshippers sit with downcast eyes before a meditating Jina image, with balanced lines of polished stone and cool dawn light in the hall.",
+      "devotee_visual": "A devotee in a plain white kurta sits in silent meditation, a folded scripture beside the mat and daylight crossing the Mumbai temple floor.",
+      "date_2027": "2027-09-14",
+      "source_2027": "jain_2027"
+    }
+  ],
+  "ramadan_pattern": {
+    "visual_description": "Amber lamps illuminate the arches of a Mumbai mosque after sunset as worshippers in cotton kurtas gather on patterned carpets, with dark blue sky beyond the windows.",
+    "devotee_visual": "A family near Minara Masjid sets out dates, water and sherbet for neighbours as evening falls, with embroidered sleeves and metal trays catching the shop lights.",
+    "daily_pattern": {
+      "sehri": {
+        "time": "pre_dawn",
+        "visual_description": "A family shares water, flatbread and fruit at a small Bhendi Bazaar kitchen table, a warm lamp above and blue pre-dawn minarets beyond the window."
+      },
+      "iftar": {
+        "time": "sunset",
+        "visual_description": "Near Minara Masjid, hands pass dates and water as the fast ends, with sherbet glasses and kebab-stall lights reflecting across the crowded Mohammed Ali Road pavement."
+      },
+      "taraweeh": {
+        "time": "night",
+        "visual_description": "Worshippers stand shoulder to shoulder on patterned mosque carpets for night prayer, white caps and cotton kurtas softly lit by warm chandeliers beneath geometric arches."
+      }
+    },
+    "last_10_nights": {
+      "significance": "The final nights are a time of increased worship and the search for Laylat al-Qadr, especially on the odd-numbered nights.",
+      "visual_description": "Late-night prayer at a Mumbai mosque, Qurans on wooden stands in the side aisle, worshippers sitting quietly between prayers in soft pools of amber light."
+    },
+    "night_27": {
+      "name": "Shab-e-Qadr / Laylat al-Qadr",
+      "significance": "Many communities gather on the twenty-seventh night to seek the Night of Power, described in the Quran as better than a thousand months.",
+      "visual_description": "Worshippers prostrate in orderly rows on deep green mosque carpets, open Qurans resting on wooden stands along the wall, with Mumbai minarets silhouetted beyond a window."
+    },
+    "eid_preparation_last_days": {
+      "visual_description": "Tailors work beneath warm shop lights in Bhendi Bazaar, with stacked packets of sevaiyan, embroidered kurtas on hangers and a henna artist working at the doorway."
+    },
+    "mumbai_locations": ["Mohammed Ali Road", "Minara Masjid, Mohammed Ali Road", "Bhendi Bazaar", "Jama Masjid, Kalbadevi", "Haji Ali Dargah, Worli coast", "Mahim Dargah, Mahim"],
+    "calendar_2027": {
+      "hijri_year": 1448,
+      "status": "provisional",
+      "first_fast_estimates": ["2027-02-08", "2027-02-09"],
+      "sources": ["ramadan_indian_almanac", "ramadan_2027_estimate"],
+      "local_rule": "The first fast follows the opening sunset. Count the last ten nights and night 27 from the community's confirmed first night. Eid begins with Shawwal after 29 or 30 days."
+    }
+  },
+  "christian_lent_pattern": {
+    "visual_description": "A wooden crucifix above a simple altar in a Bandra church, with violet Lenten cloth, low candlelight and soft shadows across the stone nave.",
+    "devotee_visual": "Parishioners in subdued cotton clothes hold prayer booklets while walking the Stations of the Cross, warm light from the church doors falling across the back pews.",
+    "ash_wednesday": {
+      "visual_description": "At a Bandra parish church, a priest marks a worshipper's forehead with ashes, with violet altar fabric and stained-glass daylight behind the quietly waiting line.",
+      "date_2027": "2027-02-10",
+      "source_2027": "western_christian_2027"
+    },
+    "friday_abstinence": {
+      "significance": "Meat abstinence is a Lenten penitential practice among Catholics. Fish or a vegetarian meal can be served.",
+      "visual_description": "A Catholic family in Bandra sits down to a simple Friday supper of rice, fish and vegetables, with late-afternoon light over the modest table and folded hands.",
+      "dates_2027": ["2027-02-12", "2027-02-19", "2027-02-26", "2027-03-05", "2027-03-12", "2027-03-19", "2027-03-26"]
+    },
+    "palm_sunday": {
+      "visual_description": "Parishioners with green palm fronds walk along Hill Road toward St. Andrew's Church, children carrying smaller fronds as the congregation comes together in morning sunlight.",
+      "date_2027": "2027-03-21",
+      "source_2027": "western_christian_2027"
+    },
+    "good_friday": {
+      "visual_description": "A solemn Good Friday procession pauses at a Station of the Cross outside a Bandra parish, with a wooden cross, plain dark clothes and muted afternoon light.",
+      "date_2027": "2027-03-26",
+      "source_2027": "western_christian_2027"
+    },
+    "easter_sunday": {
+      "visual_description": "White lilies and candles brighten the altar at a Bandra Easter Sunday service, with families in colourful spring clothes entering the nave as morning light gathers.",
+      "date_2027": "2027-03-28",
+      "source_2027": "western_christian_2027"
+    },
+    "mumbai_locations": ["Mount Mary Basilica, Bandra", "St. Andrew's Church, Bandra", "St. Michael's Church, Mahim", "Holy Name Cathedral, Colaba", "Afghan Church, Colaba", "Gloria Church, Byculla"]
+  },
+  "christian_advent_pattern": [
+    {
+      "week": 1,
+      "theme": "Hope",
+      "candle": "purple",
+      "candles_lit": 1,
+      "visual_description": "A single purple candle glows in an evergreen Advent wreath beside the altar, with a reader in silhouette and cool morning light in a Bandra church.",
+      "date_2027": "2027-11-28",
+      "source_2027": "western_christian_2027"
+    },
+    {
+      "week": 2,
+      "theme": "Peace",
+      "candle": "purple",
+      "candles_lit": 2,
+      "visual_description": "Two purple Advent candles burn beside evergreen branches while volunteers carefully assemble a wooden Nativity stable in a Mumbai parish courtyard, surrounded by soft evening light.",
+      "date_2027": "2027-12-05",
+      "source_2027": "western_christian_2027"
+    },
+    {
+      "week": 3,
+      "theme": "Joy",
+      "candle": "rose/pink",
+      "candles_lit": 3,
+      "visual_description": "Two purple candles and one rose candle glow for Gaudete Sunday, as a choir sings near the altar beneath paper stars in a Bandra church.",
+      "date_2027": "2027-12-12",
+      "source_2027": "western_christian_2027"
+    },
+    {
+      "week": 4,
+      "theme": "Love",
+      "candle": "purple",
+      "candles_lit": 4,
+      "visual_description": "Three purple candles and one rose candle illuminate an Advent wreath, with families pausing at the parish doorway and large paper stars glowing along Bandra lanes.",
+      "date_2027": "2027-12-19",
+      "source_2027": "western_christian_2027"
+    }
+  ],
+  "diwali_cycle": [
+    {
+      "day": 1,
+      "name": "Dhanteras / Dhantrayodashi",
+      "deity": "Dhanvantari and Lakshmi",
+      "theme": "Well-being, prosperity and auspicious purchases",
+      "visual_description": "A gold-framed Dhanvantari holds a nectar vessel beside a small lotus-seated Lakshmi, with brass lamps and red roses in the warm glow of a Zaveri Bazaar shop.",
+      "devotee_visual": "A family carrying orange marigolds from Dadar flower market examines a small silver coin at a Zaveri Bazaar counter, with warm displays reflected in the glass.",
+      "worship_items": ["brass_vessel", "silver_coin", "marigolds", "oil_lamp"],
+      "date_2027": "2027-10-27",
+      "source_2027": "mumbai_2027_vrats"
+    },
+    {
+      "day": 2,
+      "name": "Narak Chaturdashi / Chhoti Diwali",
+      "deity": "Krishna",
+      "theme": "Victory over Narakasura and the dawn abhyanga snan",
+      "visual_description": "A peacock-crowned Krishna with discus in a small shrine print catches amber lamp light, beside a copper water pot, pale ubtan and marigolds before dawn.",
+      "devotee_visual": "In a Mumbai apartment before sunrise, an elder applies fragrant ubtan to a child's arms while a brass oil bowl and folded festive clothes wait nearby.",
+      "worship_items": ["scented_oil", "ubtan", "copper_lota", "oil_lamp"],
+      "date_2027": "2027-10-28",
+      "source_2027": "mumbai_2027_vrats"
+    },
+    {
+      "day": 3,
+      "name": "Lakshmi Puja / Main Diwali",
+      "deity": "Lakshmi and Ganesha",
+      "theme": "Light, prosperity and new beginnings",
+      "visual_description": "Lotus-seated Lakshmi and elephant-headed Ganesha share an altar of brass, pink lotus petals and silver coins, while Marine Drive gleams beyond the apartment balcony in blue dusk.",
+      "devotee_visual": "A family in jewel-toned clothes lights diyas around a rangoli and opens a fresh ledger beside the puja plate, with Marine Drive's curve glowing below.",
+      "worship_items": ["lotus", "silver_coins", "modak", "oil_lamps", "ledger"],
+      "date_2027": "2027-10-29",
+      "source_2027": "mumbai_2027_vrats"
+    },
+    {
+      "day": 4,
+      "name": "Govardhan Puja / Annakut",
+      "deity": "Krishna",
+      "theme": "Gratitude to nature and the mountain of food offerings",
+      "visual_description": "An image of Krishna lifting Govardhan above villagers and cattle overlooks a tiered spread of rice, fruit and sweets in a bright Bhuleshwar temple hall.",
+      "devotee_visual": "Volunteers in cotton kurtas place brass bowls on the stepped Annakut display, while families bring prasad to the Krishna shrine and light glints along the serving trays.",
+      "worship_items": ["rice", "fruit", "sweets", "tulsi_leaves", "ghee_lamp"],
+      "mumbai_note": "Annakut is observed at Shri Ramji Balaji Mandir in Bhuleshwar. Marathi households also observe Bali Pratipada or Diwali Padwa, honouring King Bali and celebrating family bonds.",
+      "date_2027": "2027-10-30",
+      "source_2027": "mumbai_2027_vrats"
+    },
+    {
+      "day": 5,
+      "name": "Bhai Dooj / Bhau Beej",
+      "deity": "Yama and Yamuna",
+      "theme": "The bond between sisters and brothers",
+      "visual_description": "A soft devotional painting of Yamuna welcoming Yama at her doorway, a lamp and sweets between them, with warm coral and amber tones in the room.",
+      "devotee_visual": "In a Dadar home, a sister applies tilak to her brother's forehead and circles a small aarti thali, with karanji and chakli set beside them.",
+      "worship_items": ["kumkum", "rice_grains", "oil_lamp", "sweets", "aarti_thali"],
+      "date_2027": "2027-10-31",
+      "source_2027": "mumbai_2027_vrats"
+    }
+  ],
+  "ganpati_cycle": [
+    {
+      "offset": 0,
+      "event_name": "Sthapana / Ganesh Chaturthi",
+      "scale": "setup",
+      "visual_description": "An elephant-headed Ganapati is carried into a Lalbaug pandal beneath mango leaves and marigolds, with the first brass aarti lamps glowing beside trays of modaks.",
+      "date_2027": "2027-09-04",
+      "source_2027": "ganesh_2027_mumbai"
+    },
+    {
+      "offset": 1,
+      "event_name": "One-and-a-half-day household visarjan",
+      "scale": "small",
+      "visual_description": "A family in cotton kurtas carries a small clay Ganapati to a Mumbai neighbourhood immersion tank, with cupped diyas and flower petals visible in dusk light.",
+      "date_2027": "2027-09-05",
+      "source_2027": "ganesh_2027_mumbai"
+    },
+    {
+      "offset": 2,
+      "event_name": "Third-day visarjan",
+      "scale": "medium",
+      "visual_description": "Neighbours escort a midsize Ganesha murti on a flower-decked tempo through Parel, small hand cymbals in motion and saffron bunting glowing above the evening lane.",
+      "date_2027": "2027-09-06",
+      "source_2027": "ganesh_2027_mumbai"
+    },
+    {
+      "offset": 4,
+      "event_name": "Fifth-day visarjan",
+      "scale": "medium_large",
+      "visual_description": "Families carry marigold-draped clay Ganapatis toward Juhu's immersion area after a final aarti, with monsoon clouds, copper lamps and wet sand catching the fading light.",
+      "date_2027": "2027-09-08",
+      "source_2027": "ganesh_2027_mumbai"
+    },
+    {
+      "offset": 6,
+      "event_name": "Seventh-day visarjan",
+      "scale": "large",
+      "visual_description": "A Mumbai mandal's seventh-day procession moves through Girgaon, with a tall Ganapati on a decorated truck, white-clad dhol-tasha drummers and saffron flags catching dusk light.",
+      "date_2027": "2027-09-10",
+      "source_2027": "ganesh_2027_mumbai"
+    },
+    {
+      "offset": 9,
+      "event_name": "Anant Chaturdashi / Grand final visarjan",
+      "scale": "massive",
+      "visual_description": "At Girgaon Chowpatty, a towering Ganapati from the Lalbaug procession approaches the surf on a flower-decked platform, with dhol-tasha players, amber streetlights and a dense shoreline crowd.",
+      "mumbai_note": "Lalbaugcha Raja and Chinchpoklicha Chintamani have distinct processions. Girgaon Chowpatty is a major immersion setting.",
+      "date_2027": "2027-09-14",
+      "source_2027": "ganesh_2027_mumbai"
+    }
+  ],
+  "parsi_observances": {
+    "navroze": {
+      "name": "Navroze / Parsi New Year",
+      "significance": "Shahenshahi New Year on Hormuzd Roj in Fravardin Mah.",
+      "visual_description": "In Dadar Parsi Colony, white chalk designs border a doorway with a leaf toran, while fried fish and bowls of ravo steam on a sunlit table.",
+      "devotee_visual": "A Parsi family in festive clothes welcomes relatives at the doorway, an elder's white sudreh and kusti visible as guests gather around the New Year meal.",
+      "mumbai_locations": ["Dadar Parsi Colony", "Cusrow Baug, Colaba"],
+      "date_2027": "2027-08-15",
+      "source_2027": "parsi_2027"
+    },
+    "pateti": {
+      "name": "Pateti",
+      "significance": "The last day of the outgoing Shahenshahi year, associated with reflection and repentance through the Patet prayer.",
+      "visual_description": "A white-capped worshipper carrying a folded prayer book approaches a Colaba fire temple doorway, with quiet faces and soft morning light on the grey stone.",
+      "devotee_visual": "A family in subdued clothes pauses for a quiet prayer before a temple visit, seated near a chalk-decorated threshold in their Dadar Parsi Colony home.",
+      "mumbai_locations": ["Dadar Parsi Colony", "Seth Jejeebhoy Dadabhoy Agiary, Colaba"],
+      "date_2027": "2027-08-14",
+      "source_2027": "parsi_2027"
+    },
+    "khordad_sal": {
+      "name": "Khordad Sal",
+      "significance": "Celebrates the birth of the prophet Zarathushtra on Khordad Roj in Fravardin Mah.",
+      "visual_description": "White-robed Parsi priests sit around a small ceremonial fire at a community jashan, with silver vessels, flowers and sandalwood glowing in warm daylight.",
+      "devotee_visual": "At a Mumbai community hall, families with covered heads sit behind the priests during jashan, flowers and fruit on trays catching the late-morning light.",
+      "mumbai_locations": ["Dadar Parsi Colony", "Godrej Baug, Malabar Hill"],
+      "date_2027": "2027-08-20",
+      "source_2027": "parsi_2027"
+    },
+    "muktad": {
+      "name": "Muktad / Fravardigan",
+      "duration_days": 10,
+      "significance": "Ten days of prayers and remembrance for the departed in common Parsi observance, concluding with the Gatha days.",
+      "visual_description": "Fresh white and yellow flowers stand in polished vases along a covered remembrance table, while a silver tray and chalk threshold designs catch low morning light.",
+      "devotee_visual": "At a Cusrow Baug home, relatives replace wilted stems with fresh flowers, then gather in quiet prayer before visiting the fire temple to remember the departed.",
+      "mumbai_locations": ["Cusrow Baug, Colaba", "Dadar Parsi Colony", "Godrej Baug, Malabar Hill"],
+      "start_date_2027": "2027-08-05",
+      "end_date_2027": "2027-08-14",
+      "source_2027": "parsi_2027"
+    },
+    "jamshedi_navroze": {
+      "name": "Jamshedi Navroze",
+      "significance": "Spring New Year observance associated with the vernal equinox and commonly celebrated on 21 March.",
+      "visual_description": "A spring gathering in a Mumbai Parsi housing colony, fresh flowers beside a mirror and fruit on the table, with afternoon light over shared platters.",
+      "devotee_visual": "Parents and children arrive at a Dadar Parsi Colony gathering in fresh festive clothes and share ravo, fish and sweets around a table covered in white.",
+      "mumbai_locations": ["Dadar Parsi Colony", "Cusrow Baug, Colaba", "Godrej Baug, Malabar Hill"],
+      "date_2027": "2027-03-21",
+      "source_2027": "parsi_2027"
+    }
+  },
+  "pitru_paksha_pattern": {
+    "duration_days": 16,
+    "mood": "solemn",
+    "significance": "The customary span includes Bhadrapada Purnima and the waning fortnight in Maharashtra's Amanta calendar. Families often perform shraddha on the tithi corresponding to an ancestor's death.",
+    "last_day": {
+      "name": "Sarva Pitru Amavasya",
+      "significance": "A day to remember all ancestors, including those whose death tithi is unknown.",
+      "visual_description": "At Banganga Tank, a devotee facing south pours water and black sesame from a brass lota beside rice pinda, with crows on the steps beneath an overcast sky.",
+      "date_2027": "2027-09-29"
+    },
+    "daily_visual": "A devotee in a plain dhoti performs shraddha at a Mumbai home, with a garlanded family portrait, rice offerings on a banana leaf, black sesame and kusha grass in subdued daylight.",
+    "restrictions": "Families observing the mourning fortnight may defer weddings, auspicious ceremonies, major purchases and new ventures according to household custom.",
+    "mumbai_location": "Banganga Tank, Walkeshwar",
+    "purnima_shraddha_2027": "2027-09-15",
+    "pratipada_shraddha_2027": "2027-09-16",
+    "source_2027": "pitru_2027_mumbai"
+  },
+  "mumbai_observances_2027": [
+    {
+      "date": "2027-01-15",
+      "name": "Makar Sankranti",
+      "aliases": ["Makar Sankranti / Pongal"],
+      "tradition": "hindu",
+      "figure": "Surya",
+      "sources": ["mumbai_2027_vrats"],
+      "visual_description": "From a Dadar balcony a woman pours a shining thread of water toward the winter sun, with sesame laddus and a small bowl of haldi-kumkum on the sill."
+    },
+    {
+      "date": "2027-03-06",
+      "name": "Maha Shivaratri",
+      "aliases": ["Maha Shivratri"],
+      "tradition": "hindu",
+      "figure": "Shiva",
+      "sources": ["marathi_calendar_2027"],
+      "visual_description": "At Babulnath a thin stream of water falls onto the polished lingam while devotees cup bilva sprigs in their hands, waiting in lamplight for the night vigil."
+    },
+    {
+      "date": "2027-03-10",
+      "name": "Eid al-Fitr",
+      "observance_id": "eid_fitr",
+      "tradition": "islamic",
+      "figure": null,
+      "sources": ["indian_holiday_schedule"],
+      "visual_description": "After morning congregational prayers, relatives exchange greetings outside the Jama Masjid before returning to a Bhendi Bazaar flat where bowls of sheer khurma wait on the table.",
+      "date_status": "Projected Indian holiday date, subject to local lunar sighting."
+    },
+    {
+      "date": "2027-03-21",
+      "name": "Holika Dahan",
+      "aliases": ["Holika Dahan / Chhoti Holi"],
+      "tradition": "hindu",
+      "figure": "Prahlada and Vishnu",
+      "sources": ["marathi_calendar_2027"],
+      "visual_description": "Families circle a small ceremonial bonfire in a Mumbai housing courtyard, their trays of coconut and grain catching the orange glow against the deep blue evening."
+    },
+    {
+      "date": "2027-03-22",
+      "name": "Dhulivandan",
+      "aliases": ["Holi (Dhulandi)"],
+      "tradition": "hindu",
+      "figure": "Radha and Krishna",
+      "sources": ["marathi_calendar_2027"],
+      "visual_description": "Friends exchange gentle dabs of pink gulal beside a Radha-Krishna home shrine, with bowls of dry colour lining the windowsill and spring sunlight on their faces."
+    },
+    {
+      "date": "2027-03-22",
+      "name": "Avan Ardvisur Jashan",
+      "tradition": "parsi",
+      "figure": "Ardvisur Anahita",
+      "sources": ["parsi_2027", "parsi_well"],
+      "visual_description": "At the Bhikha Behram Well near Churchgate, worshippers with covered heads pause beside the stone parapet, small flowers and daylight reflected in the well water."
+    },
+    {
+      "date": "2027-04-07",
+      "name": "Gudi Padwa",
+      "sequence": "navaratri_chaitra",
+      "aliases": ["Chaitra Navratri Begins (Ugadi / Gudi Padwa)"],
+      "tradition": "hindu",
+      "figure": "Marathi New Year",
+      "sources": ["marathi_calendar_2027"],
+      "visual_description": "At a Girgaon window a family hoists a bamboo gudi wrapped in silk, a metal vessel inverted above neem leaves and sugar garlands against the morning sky."
+    },
+    {
+      "date": "2027-04-14",
+      "name": "Vaisakhi",
+      "aliases": ["Baisakhi / Solar New Year"],
+      "tradition": "sikh",
+      "figure": "The Khalsa",
+      "sources": ["indian_holidays_2027"],
+      "visual_description": "At a Matunga gurdwara, volunteers roll rotis for langar while a family with covered heads listens to kirtan, yellow cloth and steel utensils bright in the kitchen light."
+    },
+    {
+      "date": "2027-04-15",
+      "name": "Rama Navami",
+      "sequence": "navaratri_chaitra",
+      "tradition": "hindu",
+      "figure": "Rama",
+      "sources": ["marathi_calendar_2027"],
+      "visual_description": "At Wadala’s Ram Mandir, a worshipper draws a flower garland around a small ceremonial cradle as the congregation gathers beneath a canopy for the midday aarti."
+    },
+    {
+      "date": "2027-04-18",
+      "name": "Mahavir Janma Kalyanak",
+      "observance_id": "mahavir_jayanti",
+      "tradition": "jain",
+      "figure": "Mahavira",
+      "sources": ["jain_2027", "indian_holiday_schedule"],
+      "visual_description": "In a Walkeshwar derasar a family listens to the account of Mahavira’s birth, with folded hands beside an embroidered cradle and a seated Jina image.",
+      "date_note": "The cited Jain calendar gives April 18 for the community observance. The cited government schedule lists the public holiday on April 19."
+    },
+    {
+      "date": "2027-04-20",
+      "name": "Hanuman Jayanti",
+      "tradition": "hindu",
+      "figure": "Hanuman",
+      "sources": ["marathi_calendar_2027"],
+      "visual_description": "At the Hanuman shrine in Prabhadevi, morning light catches the sindoor on Maruti’s shoulders while a devotee holds a garland above the polished brass gada."
+    },
+    {
+      "date": "2027-05-09",
+      "name": "Akshaya Tritiya",
+      "tradition": "hindu",
+      "figure": "Vishnu",
+      "sources": ["marathi_calendar_2027"],
+      "visual_description": "A family places a tulsi leaf and yellow flowers before a small Vishnu image, while a new silver coin catches the daylight on a Zaveri Bazaar shop altar."
+    },
+    {
+      "date": "2027-05-17",
+      "name": "Eid al-Adha",
+      "observance_id": "eid_adha",
+      "tradition": "islamic",
+      "figure": null,
+      "sources": ["indian_holiday_schedule"],
+      "visual_description": "Families returning from prayer in clean festive clothes portion food into covered dishes for neighbours, with sunlight crossing the threshold of a home in Mahim.",
+      "date_status": "Projected Indian holiday date, subject to local lunar sighting."
+    },
+    {
+      "date": "2027-05-20",
+      "name": "Buddha Purnima",
+      "observance_id": "buddha_purnima",
+      "tradition": "buddhist",
+      "figure": "Gautama Buddha",
+      "sources": ["indian_holiday_schedule"],
+      "visual_description": "A white-clad family sits in meditation before a seated Buddha in a Mumbai vihara, hands resting in their laps and white blossoms arranged at the pedestal."
+    },
+    {
+      "date": "2027-06-16",
+      "name": "Ashura",
+      "mood": "solemn",
+      "observance_id": "ashura",
+      "tradition": "islamic",
+      "figure": "Remembrance of Imam Husayn",
+      "sources": ["indian_holiday_schedule"],
+      "visual_description": "At a Mumbai imambargah, mourners in black listen to a majlis, with a ceremonial alam beside the speaker and cups of water set out for visitors.",
+      "date_status": "Projected Indian holiday date, subject to local lunar sighting."
+    },
+    {
+      "date": "2027-06-18",
+      "name": "Vat Purnima",
+      "tradition": "hindu",
+      "figure": "Savitri and Satyavan",
+      "sources": ["marathi_calendar_2027"],
+      "visual_description": "Women circle a banyan in a Mumbai courtyard, winding cotton thread around the broad trunk while leaves throw moving patches of sunlight across their puja plates."
+    },
+    {
+      "date": "2027-07-14",
+      "name": "Ashadhi Ekadashi",
+      "tradition": "hindu",
+      "figure": "Vitthal",
+      "sources": ["marathi_calendar_2027"],
+      "visual_description": "Outside Wadala’s Vitthal Mandir a Warkari taps small brass cymbals to an abhang, flanked by white caps and a saffron flag darkened by the monsoon rain."
+    },
+    {
+      "date": "2027-07-18",
+      "name": "Guru Purnima",
+      "tradition": "hindu",
+      "figure": "Guru reverence",
+      "sources": ["marathi_calendar_2027"],
+      "visual_description": "A student lays flowers beside a teacher’s padukas at a Mumbai home shrine while an elder holds the aarti plate steady in the warm light."
+    },
+    {
+      "date": "2027-08-06",
+      "name": "Nag Panchami",
+      "tradition": "hindu",
+      "figure": "Nagas",
+      "sources": ["marathi_calendar_2027"],
+      "visual_description": "A painted pair of hooded serpents adorns a Mumbai household altar, with turmeric, white flowers and a small brass lamp arranged on an earthen tray."
+    },
+    {
+      "date": "2027-08-17",
+      "name": "Narali Purnima",
+      "tradition": "hindu",
+      "figure": "Varuna",
+      "sources": ["marathi_calendar_2027", "koli_community_reporting"],
+      "visual_description": "At Worli Koliwada a fishing family carries a coconut to the water, marigold strings swinging from a painted boat as grey monsoon light settles over the jetty."
+    },
+    {
+      "date": "2027-08-17",
+      "name": "Raksha Bandhan",
+      "tradition": "hindu",
+      "figure": "Sibling blessing",
+      "sources": ["indian_holidays_2027"],
+      "visual_description": "A sister ties a woven rakhi around her brother’s wrist in a Mumbai living room, with rice grains on a kumkum plate and sweets ready to share."
+    },
+    {
+      "date": "2027-08-25",
+      "name": "Krishna Janmashtami",
+      "tradition": "hindu",
+      "figure": "Krishna",
+      "sources": ["shravan_2027_mumbai"],
+      "visual_description": "Jasmine hangs over a small cradle at a Juhu Krishna shrine, where devotees take turns rocking the infant image as a midnight lamp lights their faces."
+    },
+    {
+      "date": "2027-08-26",
+      "name": "Gopalkala / Dahi Handi",
+      "tradition": "hindu",
+      "figure": "Krishna",
+      "sources": ["shravan_2027_mumbai"],
+      "visual_description": "A flower-wrapped clay handi hangs above a Mumbai lane as a Govinda pathak gathers below, matching shirts and wet paving stones bright beneath apartment balconies."
+    },
+    {
+      "date": "2027-09-07",
+      "name": "Gauri Avahan",
+      "tradition": "hindu",
+      "figure": "Gauri",
+      "sources": ["marathi_calendar_2027"],
+      "visual_description": "In a Dadar home two dressed Gauri figures stand beside Ganapati, with sari pleats carefully pinned, green bangles at their wrists and jasmine around their crowns."
+    },
+    {
+      "date": "2027-09-08",
+      "name": "Nativity of Mary",
+      "observance_id": "nativity_of_mary",
+      "tradition": "christian",
+      "figure": "Mary",
+      "sources": ["bandra_shrine"],
+      "visual_description": "Pilgrims climb Mount Mary’s steps in Bandra carrying slender candles and small wax offerings, the pale basilica rising above the trees in the September light."
+    },
+    {
+      "date": "2027-10-09",
+      "name": "Dasara / Vijayadashami",
+      "aliases": ["Dussehra (Vijayadashami)"],
+      "tradition": "hindu",
+      "figure": "Durga and Rama",
+      "sources": ["marathi_calendar_2027"],
+      "visual_description": "Relatives exchange small apta leaves at a Mumbai doorway hung with marigolds, while a child sets schoolbooks beside the lamp after the family’s Dasara puja."
+    },
+    {
+      "date": "2027-10-14",
+      "name": "Kojagiri Purnima",
+      "tradition": "hindu",
+      "figure": "Lakshmi",
+      "sources": ["marathi_calendar_2027"],
+      "visual_description": "On a Mumbai terrace a family stirs saffron milk in a steel pot, the full moon rising behind water tanks and reflecting in waiting cups."
+    },
+    {
+      "date": "2027-11-04",
+      "name": "Chhath Puja, evening arghya",
+      "sequence": "chhath_puja",
+      "aliases": ["Chhath Puja (Surya Shashthi Sandhya Arghya)"],
+      "tradition": "hindu",
+      "figure": "Surya and Chhathi Maiya",
+      "sources": ["indian_holidays_2027", "mumbai_2027_vrats"],
+      "visual_description": "At Juhu beach worshippers face the setting sun with bamboo baskets of fruit and thekua, sugarcane stalks rising above bright saris at the water’s edge."
+    },
+    {
+      "date": "2027-11-14",
+      "name": "Guru Nanak Gurpurab",
+      "tradition": "sikh",
+      "figure": "Guru Nanak",
+      "sources": ["indian_holiday_schedule"],
+      "visual_description": "Musicians sing shabads beside the canopied Guru Granth Sahib in a Mumbai gurdwara, while volunteers carry steaming dal to rows of seated langar guests."
+    },
+    {
+      "date": "2027-12-06",
+      "name": "Mahaparinirvan Diwas",
+      "observance_id": "mahaparinirvan_diwas",
+      "tradition": "buddhist",
+      "figure": "Dr. B. R. Ambedkar",
+      "sources": ["chaityabhoomi_reporting"],
+      "visual_description": "Visitors in white and blue approach Chaityabhoomi at Dadar with flowers and books, pausing in quiet tribute as the grey Arabian Sea opens beyond the memorial."
+    },
+    {
+      "date": "2027-12-25",
+      "name": "Christmas",
+      "sequence": "christmas_week",
+      "tradition": "christian",
+      "figure": "Jesus Christ",
+      "sources": ["indian_holiday_schedule"],
+      "visual_description": "Families gather beside a parish crib in Bandra, where a small infant figure rests on straw beneath paper stars and warm candlelight spills onto the courtyard."
+    }
+  ]
+}

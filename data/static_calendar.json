@@ -1,0 +1,2031 @@
+{
+  "meta": {
+    "version": "1.0",
+    "year_specific_dates_for": 2027,
+    "notes": "Fixed dates recur annually. Year-specific dates use the YYYY-MM-DD format. Sequence offsets are civil days from their anchor, or nominal offsets for lunar fallbacks. Local published calendars supply date overrides.",
+    "festival_sequence_aliases": {"dhanteras_dhantrayodashi": "diwali", "narak_chaturdashi_choti_diwali": "diwali", "diwali_deepawali_lakshmi_puja": "diwali", "govardhan_puja_annakut": "diwali", "bhai_dooj_yama_dwitiya": "diwali", "ganesh_chaturthi_vinayaka_chavithi": "ganpati_festival", "ganesh_chaturthi": "ganpati_festival", "chaitra_navratri_begins_ugadi_gudi_padwa": "navaratri_chaitra", "rama_navami": "navaratri_chaitra", "sharad_navratri_begins_ghatasthapana": "navratri_sharad", "maha_ashtami_durga_ashtami": "navratri_sharad", "chhath_puja_surya_shashthi_sandhya_arghya": "chhath_puja", "chhath_puja_usha_arghya": "chhath_puja"}
+  },
+
+  "fixed_dates": {
+    "01-01": [
+      {
+        "name": "New Year's Day",
+        "type": "international",
+        "religion": null,
+        "mumbai_relevance": "high",
+        "visual_hint": "Marine Drive sea-facing promenade packed with revelers at midnight, Gateway of India lit up, confetti over the Queen's Necklace skyline",
+        "mood": "celebratory"
+      }
+    ],
+    "01-12": [
+      {
+        "name": "National Youth Day (Swami Vivekananda Jayanti)",
+        "type": "national",
+        "religion": null,
+        "mumbai_relevance": "medium",
+        "visual_hint": "College students rallying at Azad Maidan, Swami Vivekananda portraits garlanded at institutions across Mumbai",
+        "mood": "patriotic"
+      }
+    ],
+    "01-15": [
+      {
+        "name": "Army Day",
+        "type": "national",
+        "religion": null,
+        "mumbai_relevance": "medium",
+        "visual_hint": "Indian tricolor at military installations, soldiers saluting at Colaba military area, wreaths at war memorials",
+        "mood": "patriotic"
+      }
+    ],
+    "01-23": [
+      {
+        "name": "Netaji Subhas Chandra Bose Jayanti (Parakram Diwas)",
+        "type": "national",
+        "religion": null,
+        "mumbai_relevance": "medium",
+        "visual_hint": "Garlands on Netaji statues across Mumbai, patriotic gatherings, tricolor decorations",
+        "mood": "patriotic"
+      }
+    ],
+    "01-26": [
+      {
+        "name": "Republic Day",
+        "type": "national",
+        "religion": null,
+        "mumbai_relevance": "high",
+        "visual_hint": "Flag hoisting at Mantralaya and Shivaji Park, school children in white uniforms marching, tricolor kites over Girgaon Chowpatty",
+        "mood": "patriotic"
+      }
+    ],
+    "01-30": [
+      {
+        "name": "Martyrs' Day (Shaheed Diwas)",
+        "type": "national",
+        "religion": null,
+        "mumbai_relevance": "medium",
+        "visual_hint": "Two-minute silence observed across Mumbai, wreaths at Gandhi statues, Mani Bhavan Gandhi Museum in solemn remembrance",
+        "mood": "solemn"
+      }
+    ],
+    "02-04": [
+      {
+        "name": "World Cancer Day",
+        "type": "international",
+        "religion": null,
+        "mumbai_relevance": "medium",
+        "visual_hint": "Awareness walks at Tata Memorial Hospital Parel, lavender ribbons, health camps across Mumbai hospitals",
+        "mood": "awareness"
+      }
+    ],
+    "02-07": [
+      {
+        "name": "Rose Day",
+        "type": "cultural",
+        "religion": null,
+        "mumbai_relevance": "medium",
+        "visual_hint": "Red roses at Dadar flower market overflowing, young couples exchanging roses at Bandstand, flower vendors on trains",
+        "mood": "romantic"
+      }
+    ],
+    "02-08": [
+      {
+        "name": "Propose Day",
+        "type": "cultural",
+        "religion": null,
+        "mumbai_relevance": "medium",
+        "visual_hint": "Couples at Bandra-Worli Sea Link viewpoint, heart-shaped balloons at Carter Road promenade, proposal scenes at Marine Drive sunset",
+        "mood": "romantic"
+      }
+    ],
+    "02-09": [
+      {
+        "name": "Chocolate Day",
+        "type": "cultural",
+        "religion": null,
+        "mumbai_relevance": "medium",
+        "visual_hint": "Heart-shaped chocolate boxes at Mumbai sweet shops, truffles in Colaba Causeway boutiques, cocoa aromas in Bandra cafes",
+        "mood": "romantic"
+      }
+    ],
+    "02-10": [
+      {
+        "name": "Teddy Day",
+        "type": "cultural",
+        "religion": null,
+        "mumbai_relevance": "low",
+        "visual_hint": "Stuffed teddy bears at Crawford Market gift stalls, plush toys displayed on Marine Drive vendors' carts",
+        "mood": "romantic"
+      }
+    ],
+    "02-11": [
+      {
+        "name": "Promise Day",
+        "type": "cultural",
+        "religion": null,
+        "mumbai_relevance": "low",
+        "visual_hint": "Couples walking hand-in-hand along Juhu beach at sunset, promise rings at Zaveri Bazaar jewelry shops",
+        "mood": "romantic"
+      }
+    ],
+    "02-12": [
+      {
+        "name": "Hug Day",
+        "type": "cultural",
+        "religion": null,
+        "mumbai_relevance": "low",
+        "visual_hint": "Warm embraces on Marine Drive promenade, friends hugging at Bandstand, couples at Worli Sea Face",
+        "mood": "romantic"
+      }
+    ],
+    "02-13": [
+      {
+        "name": "Kiss Day",
+        "type": "cultural",
+        "religion": null,
+        "mumbai_relevance": "low",
+        "visual_hint": "Intimate moments at Mumbai's scenic spots, Bandstand promenade couples silhouetted against sunset",
+        "mood": "romantic"
+      }
+    ],
+    "02-14": [
+      {
+        "name": "Valentine's Day",
+        "type": "international",
+        "religion": null,
+        "mumbai_relevance": "high",
+        "visual_hint": "Red and pink decorations in Bandra cafes, heart balloons at Gateway of India, couples flooding Marine Drive at sunset, flower sellers everywhere",
+        "mood": "romantic"
+      }
+    ],
+    "02-15": [
+      {
+        "name": "Slap Day (Anti-Valentine's Week)",
+        "type": "cultural",
+        "religion": null,
+        "mumbai_relevance": "low",
+        "visual_hint": "Humorous social media culture, college groups laughing in canteens, anti-Valentine memes trending",
+        "mood": "celebratory"
+      }
+    ],
+    "02-16": [
+      {
+        "name": "Kick Day (Anti-Valentine's Week)",
+        "type": "cultural",
+        "religion": null,
+        "mumbai_relevance": "low",
+        "visual_hint": "College students in groups, playful banter scenes, moving-on energy in Mumbai's youthful spaces",
+        "mood": "celebratory"
+      }
+    ],
+    "02-17": [
+      {
+        "name": "Perfume Day (Anti-Valentine's Week)",
+        "type": "cultural",
+        "religion": null,
+        "mumbai_relevance": "low",
+        "visual_hint": "Attar shops in Mohammed Ali Road, perfume counters in malls, fragrance bottles catching light",
+        "mood": "celebratory"
+      }
+    ],
+    "02-18": [
+      {
+        "name": "Flirting Day (Anti-Valentine's Week)",
+        "type": "cultural",
+        "religion": null,
+        "mumbai_relevance": "low",
+        "visual_hint": "Playful social scenes at Mumbai cafes, winks and smiles at college campuses, lighthearted energy",
+        "mood": "celebratory"
+      }
+    ],
+    "02-19": [
+      {
+        "name": "Confession Day (Anti-Valentine's Week)",
+        "type": "cultural",
+        "religion": null,
+        "mumbai_relevance": "low",
+        "visual_hint": "Introspective moments, friends talking at tapris, honest conversations at chai stalls",
+        "mood": "solemn"
+      }
+    ],
+    "02-20": [
+      {
+        "name": "Missing Day (Anti-Valentine's Week)",
+        "type": "cultural",
+        "religion": null,
+        "mumbai_relevance": "low",
+        "visual_hint": "Solitary figure on Marine Drive looking at the sea, empty bench at Bandstand, nostalgic sunset",
+        "mood": "solemn"
+      }
+    ],
+    "02-21": [
+      {
+        "name": "Breakup Day (Anti-Valentine's Week)",
+        "type": "cultural",
+        "religion": null,
+        "mumbai_relevance": "low",
+        "visual_hint": "Fresh start energy, individuals walking forward on Mumbai streets, new chapter vibes at Juhu beach sunrise",
+        "mood": "celebratory"
+      }
+    ],
+    "02-28": [
+      {
+        "name": "National Science Day",
+        "type": "national",
+        "religion": null,
+        "mumbai_relevance": "medium",
+        "visual_hint": "Science exhibitions at Nehru Science Centre Worli, curious children with experiments, planetarium shows",
+        "mood": "awareness"
+      }
+    ],
+    "03-08": [
+      {
+        "name": "International Women's Day",
+        "type": "international",
+        "religion": null,
+        "mumbai_relevance": "high",
+        "visual_hint": "Women's marches at Azad Maidan, purple-themed events in Bandra, empowered women of Mumbai's dabbawalas to corporate offices",
+        "mood": "celebratory"
+      }
+    ],
+    "03-21": [
+      {
+        "name": "Jamshedi Navroze (Parsi New Year — Equinox)",
+        "observance_id": "jamshedi_navroze",
+        "type": "religious",
+        "religion": "parsi",
+        "mumbai_relevance": "high",
+        "visual_hint": "Parsi families in white at Dadar Parsi Colony, rangoli with chalk at doorsteps, fire temple prayers at Wadiaji Atash Behram, festive meals of dhansak and sali boti",
+        "mood": "celebratory"
+      },
+      {
+        "name": "World Poetry Day",
+        "type": "international",
+        "religion": null,
+        "mumbai_relevance": "low",
+        "visual_hint": "Poetry readings at Prithvi Theatre Juhu, mushairas at Urdu literary circles, open-mic nights in Bandra",
+        "mood": "celebratory"
+      }
+    ],
+    "03-22": [
+      {
+        "name": "World Water Day",
+        "type": "international",
+        "religion": null,
+        "mumbai_relevance": "medium",
+        "visual_hint": "Awareness campaigns at Mumbai's lakes and water bodies, Powai Lake, Vihar Lake conservation drives",
+        "mood": "awareness"
+      }
+    ],
+    "03-23": [
+      {
+        "name": "Shaheed Diwas (Bhagat Singh, Sukhdev, Rajguru)",
+        "type": "national",
+        "religion": null,
+        "mumbai_relevance": "medium",
+        "visual_hint": "Tributes at freedom fighter statues, patriotic gatherings, tricolor ribbons, solemn remembrance ceremonies",
+        "mood": "solemn"
+      }
+    ],
+    "04-01": [
+      {
+        "name": "April Fools' Day",
+        "type": "international",
+        "religion": null,
+        "mumbai_relevance": "low",
+        "visual_hint": "Playful pranks in Mumbai offices and colleges, lighthearted social media posts, laughter in the city",
+        "mood": "celebratory"
+      }
+    ],
+    "04-07": [
+      {
+        "name": "World Health Day",
+        "type": "international",
+        "religion": null,
+        "mumbai_relevance": "medium",
+        "visual_hint": "Health camps at municipal hospitals, wellness drives at Shivaji Park, doctors in white coats at KEM and Sion hospitals",
+        "mood": "awareness"
+      }
+    ],
+    "04-14": [
+      {
+        "name": "Ambedkar Jayanti",
+        "type": "national",
+        "religion": null,
+        "mumbai_relevance": "high",
+        "visual_hint": "Millions gathering at Chaityabhoomi Dadar, blue flags and Ambedkar portraits everywhere, processions through Dadar streets, flower offerings at the memorial",
+        "mood": "solemn"
+      },
+      {
+        "name": "Baisakhi",
+        "type": "religious",
+        "religion": "sikh",
+        "mumbai_relevance": "medium",
+        "visual_hint": "Bhangra celebrations at Gurudwaras in Matunga and Dadar, langar seva, colorful turbans and festive spirit",
+        "mood": "celebratory"
+      }
+    ],
+    "04-22": [
+      {
+        "name": "Earth Day",
+        "type": "international",
+        "religion": null,
+        "mumbai_relevance": "medium",
+        "visual_hint": "Beach cleanups at Versova and Juhu, tree planting drives at Aarey Colony, green awareness banners across the city",
+        "mood": "awareness"
+      }
+    ],
+    "04-23": [
+      {
+        "name": "World Book Day",
+        "type": "international",
+        "religion": null,
+        "mumbai_relevance": "medium",
+        "visual_hint": "Book stalls at Flora Fountain, readers at Strand Book Stall Fort, second-hand book vendors at Churchgate",
+        "mood": "awareness"
+      }
+    ],
+    "05-01": [
+      {
+        "name": "Maharashtra Day",
+        "type": "national",
+        "religion": null,
+        "mumbai_relevance": "high",
+        "visual_hint": "Maharashtra state flag hoisted at Mantralaya and Shivaji Park, cultural programs showcasing Marathi heritage, processions with dhol-tasha, saffron and green decorations, pride of Mumbai's founding",
+        "mood": "patriotic"
+      },
+      {
+        "name": "International Workers' Day (May Day)",
+        "type": "international",
+        "religion": null,
+        "mumbai_relevance": "high",
+        "visual_hint": "Labor rallies at Azad Maidan, red flags and banners of trade unions, Mumbai's mill workers' legacy in Girangaon",
+        "mood": "awareness"
+      }
+    ],
+    "05-11": [
+      {
+        "name": "National Technology Day",
+        "type": "national",
+        "religion": null,
+        "mumbai_relevance": "medium",
+        "visual_hint": "Tech events at IIT Bombay Powai, innovation showcases, Pokhran commemoration themes",
+        "mood": "patriotic"
+      }
+    ],
+    "05-31": [
+      {
+        "name": "World No Tobacco Day",
+        "type": "international",
+        "religion": null,
+        "mumbai_relevance": "medium",
+        "visual_hint": "Anti-smoking campaigns at Tata Memorial Hospital, awareness drives at railway stations, no-smoking signs across the city",
+        "mood": "awareness"
+      }
+    ],
+    "06-05": [
+      {
+        "name": "World Environment Day",
+        "type": "international",
+        "religion": null,
+        "mumbai_relevance": "high",
+        "visual_hint": "Mangrove plantation drives at Thane Creek, tree planting at Sanjay Gandhi National Park, cleanup at Mithi River, green Mumbai initiatives",
+        "mood": "awareness"
+      }
+    ],
+    "06-08": [
+      {
+        "name": "World Oceans Day",
+        "type": "international",
+        "religion": null,
+        "mumbai_relevance": "high",
+        "visual_hint": "Arabian Sea coastline awareness, marine conservation at Haji Ali, underwater cleanup drives off Mumbai coast, fishing community celebrations at Sassoon Docks",
+        "mood": "awareness"
+      }
+    ],
+    "06-21": [
+      {
+        "name": "International Yoga Day",
+        "type": "international",
+        "religion": null,
+        "mumbai_relevance": "high",
+        "visual_hint": "Mass yoga sessions at Shivaji Park and Marine Drive at sunrise, thousands in white doing surya namaskar facing the Arabian Sea",
+        "mood": "devotional"
+      }
+    ],
+    "07-01": [
+      {
+        "name": "National Doctors' Day",
+        "type": "national",
+        "religion": null,
+        "mumbai_relevance": "medium",
+        "visual_hint": "Tributes at KEM, Sion, and JJ hospitals, stethoscopes and white coats, gratitude towards Mumbai's medical community",
+        "mood": "awareness"
+      }
+    ],
+    "07-26": [
+      {
+        "name": "Kargil Vijay Diwas",
+        "type": "national",
+        "religion": null,
+        "mumbai_relevance": "medium",
+        "visual_hint": "Wreath-laying at war memorials, Indian flags at military installations, patriotic fervor, remembrance of soldiers",
+        "mood": "patriotic"
+      }
+    ],
+    "08-15": [
+      {
+        "name": "Independence Day",
+        "type": "national",
+        "religion": null,
+        "mumbai_relevance": "high",
+        "visual_hint": "Tricolor hoisted at Red Fort on TV screens, flag ceremonies at Mantralaya and schools, kite-flying at Chowpatty, patriotic songs echoing from every lane",
+        "mood": "patriotic"
+      }
+    ],
+    "08-19": [
+      {
+        "name": "World Photography Day",
+        "type": "international",
+        "religion": null,
+        "mumbai_relevance": "medium",
+        "visual_hint": "Photographers capturing Mumbai's iconic skyline, photo walks from Colaba to Churchgate, golden hour at Marine Drive",
+        "mood": "celebratory"
+      }
+    ],
+    "08-29": [
+      {
+        "name": "National Sports Day (Major Dhyan Chand Jayanti)",
+        "type": "national",
+        "religion": null,
+        "mumbai_relevance": "medium",
+        "visual_hint": "Sports events at Wankhede Stadium, hockey matches, athletic meets at Shivaji Park, tributes to Indian sports legends",
+        "mood": "celebratory"
+      }
+    ],
+    "09-05": [
+      {
+        "name": "Teachers' Day (Dr. Radhakrishnan Jayanti)",
+        "type": "national",
+        "religion": null,
+        "mumbai_relevance": "medium",
+        "visual_hint": "Students gifting flowers to teachers, school celebrations across Mumbai, grateful tributes in classrooms",
+        "mood": "celebratory"
+      }
+    ],
+    "09-08": [
+      {
+        "name": "Nativity of Mary",
+        "observance_id": "nativity_of_mary",
+        "type": "religious",
+        "religion": "christian",
+        "mumbai_relevance": "high",
+        "visual_hint": "Pilgrims carrying candles and small wax offerings climb Mount Mary Road in Bandra, with the pale basilica visible above the trees in soft September light",
+        "mood": "devotional"
+      }
+    ],
+    "09-14": [
+      {
+        "name": "Hindi Diwas",
+        "type": "national",
+        "religion": null,
+        "mumbai_relevance": "medium",
+        "visual_hint": "Hindi literary events, Devanagari script displays, cultural programs at schools and Sahitya Akademi events",
+        "mood": "awareness"
+      }
+    ],
+    "09-15": [
+      {
+        "name": "Engineers' Day (Sir M. Visvesvaraya Jayanti)",
+        "type": "national",
+        "religion": null,
+        "mumbai_relevance": "medium",
+        "visual_hint": "Engineering marvels of Mumbai — Bandra-Worli Sea Link, Mumbai Metro, CSMT heritage station, tributes to builders of the city",
+        "mood": "celebratory"
+      }
+    ],
+    "09-27": [
+      {
+        "name": "World Tourism Day",
+        "type": "international",
+        "religion": null,
+        "mumbai_relevance": "high",
+        "visual_hint": "Gateway of India, Elephanta Caves ferry rides, heritage walks in Fort precinct, tourists at CSMT, Taj Mahal Palace Hotel",
+        "mood": "celebratory"
+      }
+    ],
+    "10-02": [
+      {
+        "name": "Gandhi Jayanti",
+        "type": "national",
+        "religion": null,
+        "mumbai_relevance": "high",
+        "visual_hint": "Mani Bhavan Gandhi Museum in Gamdevi, prayer meetings, charkha spinning events, Gandhi's spectacles iconography, Dandi March remembrance",
+        "mood": "solemn"
+      }
+    ],
+    "10-04": [
+      {
+        "name": "World Animal Day",
+        "type": "international",
+        "religion": null,
+        "mumbai_relevance": "medium",
+        "visual_hint": "Animal welfare drives, stray dog feeding events, Sanjay Gandhi National Park wildlife, Byculla Zoo activities",
+        "mood": "awareness"
+      }
+    ],
+    "10-10": [
+      {
+        "name": "World Mental Health Day",
+        "type": "international",
+        "religion": null,
+        "mumbai_relevance": "medium",
+        "visual_hint": "Awareness campaigns at Mumbai hospitals, green ribbon symbols, mindfulness sessions at corporate offices, support group gatherings",
+        "mood": "awareness"
+      }
+    ],
+    "10-15": [
+      {
+        "name": "World Students' Day (APJ Abdul Kalam Jayanti)",
+        "type": "national",
+        "religion": null,
+        "mumbai_relevance": "medium",
+        "visual_hint": "Student gatherings at IIT Bombay, science exhibitions, Kalam portraits garlanded, dreams-and-wings imagery",
+        "mood": "celebratory"
+      }
+    ],
+    "10-31": [
+      {
+        "name": "Halloween",
+        "type": "international",
+        "religion": null,
+        "mumbai_relevance": "medium",
+        "visual_hint": "Costume parties at Bandra and Colaba pubs, spooky decorations in Juhu restaurants, carved pumpkins at expat hangouts, themed nights at Lower Parel clubs",
+        "mood": "celebratory"
+      },
+      {
+        "name": "National Unity Day (Sardar Patel Jayanti)",
+        "type": "national",
+        "religion": null,
+        "mumbai_relevance": "medium",
+        "visual_hint": "Run for Unity events, Sardar Patel statues garlanded, unity pledges at schools, tricolor unity themes",
+        "mood": "patriotic"
+      }
+    ],
+    "11-14": [
+      {
+        "name": "Children's Day (Jawaharlal Nehru Jayanti)",
+        "type": "national",
+        "religion": null,
+        "mumbai_relevance": "high",
+        "visual_hint": "School fests across Mumbai, children in colorful costumes, cultural programs, teachers performing for students, joy at EsselWorld and Imagicaa trips",
+        "mood": "celebratory"
+      }
+    ],
+    "11-19": [
+      {
+        "name": "International Men's Day",
+        "type": "international",
+        "religion": null,
+        "mumbai_relevance": "low",
+        "visual_hint": "Awareness events, men's health campaigns, blue-themed workplace events across Mumbai offices",
+        "mood": "awareness"
+      }
+    ],
+    "11-26": [
+      {
+        "name": "Constitution Day (Samvidhan Divas)",
+        "type": "national",
+        "religion": null,
+        "mumbai_relevance": "medium",
+        "visual_hint": "Preamble readings at schools, constitutional awareness events, Ambedkar-related tributes",
+        "mood": "patriotic"
+      },
+      {
+        "name": "26/11 Mumbai Attack Anniversary",
+        "type": "national",
+        "religion": null,
+        "mumbai_relevance": "high",
+        "visual_hint": "Solemn vigil at Taj Mahal Palace Hotel and Leopold Cafe, candles and wreaths at police memorials, remembrance at CSMT, tributes to martyred policemen and NSG commandos, the spirit of Mumbai's resilience",
+        "mood": "solemn"
+      }
+    ],
+    "12-01": [
+      {
+        "name": "World AIDS Day",
+        "type": "international",
+        "religion": null,
+        "mumbai_relevance": "medium",
+        "visual_hint": "Red ribbon campaigns, awareness drives at Mumbai hospitals, candlelight vigils, health education events",
+        "mood": "awareness"
+      }
+    ],
+    "12-02": [
+      {
+        "name": "National Pollution Control Day",
+        "type": "national",
+        "religion": null,
+        "mumbai_relevance": "medium",
+        "visual_hint": "Air quality awareness campaigns, industrial safety remembrance (Bhopal), pollution monitoring displays, clean air drives",
+        "mood": "awareness"
+      }
+    ],
+    "12-04": [
+      {
+        "name": "Indian Navy Day",
+        "type": "national",
+        "religion": null,
+        "mumbai_relevance": "high",
+        "visual_hint": "Naval fleet review at Mumbai harbour, warships visible from Gateway of India, INS Vikrant, naval officers at Lion Gate",
+        "mood": "patriotic"
+      }
+    ],
+    "12-06": [
+      {
+        "name": "Mahaparinirvan Diwas",
+        "observance_id": "mahaparinirvan_diwas",
+        "type": "national",
+        "religion": "buddhist",
+        "mumbai_relevance": "high",
+        "visual_hint": "Millions converging at Chaityabhoomi in Dadar from across India, blue and white sea of people, Dr. Ambedkar's memorial stupa illuminated, entire Dadar area transformed, local trains packed, floral tributes overflowing",
+        "mood": "solemn"
+      }
+    ],
+    "12-07": [
+      {
+        "name": "Armed Forces Flag Day",
+        "type": "national",
+        "religion": null,
+        "mumbai_relevance": "medium",
+        "visual_hint": "Small tricolor pin flags distributed, collections for armed forces welfare, military appreciation events",
+        "mood": "patriotic"
+      }
+    ],
+    "12-10": [
+      {
+        "name": "Human Rights Day",
+        "type": "international",
+        "religion": null,
+        "mumbai_relevance": "medium",
+        "visual_hint": "Awareness events at Mumbai University, human rights organization gatherings, candlelight marches",
+        "mood": "awareness"
+      }
+    ],
+    "12-22": [
+      {
+        "name": "National Mathematics Day (Ramanujan Jayanti)",
+        "type": "national",
+        "religion": null,
+        "mumbai_relevance": "low",
+        "visual_hint": "Math olympiad events, Ramanujan-themed displays at schools and TIFR, number theory wonder",
+        "mood": "awareness"
+      }
+    ],
+    "12-25": [
+      {
+        "name": "Christmas",
+        "sequence": "christmas_week",
+        "type": "religious",
+        "religion": "christian",
+        "mumbai_relevance": "high",
+        "visual_hint": "Hill Road Bandra glowing with Christmas lights and stars, Mount Mary church midnight mass, decorated trees in Colaba, cake and wine shops bustling, Bandra's East Indian homes with cribs and stars, carol singing at churches across the city",
+        "mood": "celebratory"
+      }
+    ],
+    "12-31": [
+      {
+        "name": "New Year's Eve",
+        "type": "international",
+        "religion": null,
+        "mumbai_relevance": "high",
+        "visual_hint": "Massive crowds at Marine Drive for countdown, Gateway of India lit up, fireworks over the Arabian Sea, rooftop parties in Lower Parel and Worli, Juhu beach bonfires",
+        "mood": "celebratory"
+      }
+    ]
+  },
+
+  "relative_dates": {
+    "mothers_day": {
+      "name": "Mother's Day",
+      "rule": "nth_weekday_of",
+      "n": 2,
+      "weekday": "sunday",
+      "month": 5,
+      "type": "international",
+      "religion": null,
+      "mumbai_relevance": "medium",
+      "visual_hint": "Families at Juhu beach, mothers being feted at restaurants in Bandra and BKC, flower bouquets and greeting cards, warm family gatherings",
+      "mood": "celebratory"
+    },
+    "fathers_day": {
+      "name": "Father's Day",
+      "rule": "nth_weekday_of",
+      "n": 3,
+      "weekday": "sunday",
+      "month": 6,
+      "type": "international",
+      "religion": null,
+      "mumbai_relevance": "medium",
+      "visual_hint": "Father-child outings at EsselWorld, gifting at malls, family brunches in South Mumbai, cricket at maidans",
+      "mood": "celebratory"
+    },
+    "friendship_day": {
+      "name": "Friendship Day",
+      "rule": "nth_weekday_of",
+      "n": 1,
+      "weekday": "sunday",
+      "month": 8,
+      "type": "international",
+      "religion": null,
+      "mumbai_relevance": "high",
+      "visual_hint": "Colorful friendship bands at Linking Road stalls, friends at Marine Drive sharing cutting chai, college groups at Carter Road, band-tying rituals across Mumbai",
+      "mood": "celebratory"
+    },
+    "thanksgiving": {
+      "name": "Thanksgiving",
+      "rule": "nth_weekday_of",
+      "n": 4,
+      "weekday": "thursday",
+      "month": 11,
+      "type": "international",
+      "religion": null,
+      "mumbai_relevance": "low",
+      "visual_hint": "Thanksgiving-themed brunches at five-star hotels, expat community gatherings in South Mumbai and BKC",
+      "mood": "celebratory"
+    }
+  },
+
+  "year_specific_dates": {
+    "2027-01-05": [
+      {
+        "name": "Shab-e-Meraj",
+        "type": "religious",
+        "religion": "islamic",
+        "mumbai_relevance": "medium",
+        "visual_hint": "Night prayers at Haji Ali Dargah, illuminated mosques in Mohammed Ali Road, devotees in white offering special namaz, spiritual contemplation",
+        "mood": "devotional"
+      }
+    ],
+    "2027-01-15": [
+      {
+        "name": "Guru Gobind Singh Jayanti",
+        "type": "religious",
+        "religion": "sikh",
+        "mumbai_relevance": "medium",
+        "visual_hint": "Gurudwara celebrations in Matunga, Dadar, and Andheri, langar seva, Sikh devotees in festive turbans, nagar kirtan processions, holy book akhand path",
+        "mood": "devotional"
+      }
+    ],
+    "2027-01-24": [
+      {
+        "name": "Shab-e-Barat",
+        "type": "religious",
+        "religion": "islamic",
+        "mumbai_relevance": "high",
+        "visual_hint": "Night of forgiveness — illuminated mosques in Bhendi Bazaar, families visiting graves at Marine Lines cemetery, special halwa and sweets distributed, prayers through the night at Mahim Dargah",
+        "mood": "devotional"
+      }
+    ],
+    "2027-02-09": [
+      {
+        "name": "Ramadan Begins",
+        "sequence": "ramadan",
+        "type": "religious",
+        "religion": "islamic",
+        "mumbai_relevance": "high",
+        "visual_hint": "First sehri in Mohammed Ali Road homes, crescent moon sighting, mosques announcing the holy month, Minara Masjid preparations, fasting spirit across Muslim neighborhoods of Mumbai",
+        "mood": "devotional"
+      }
+    ],
+    "2027-02-10": [
+      {
+        "name": "Ash Wednesday",
+        "sequence": "lent",
+        "type": "religious",
+        "religion": "christian",
+        "mumbai_relevance": "medium",
+        "visual_hint": "Ash cross marked on foreheads at Bandra, Mahim, and Colaba churches, beginning of Lenten fast, solemn services at St. Michael's Church Mahim, Mount Mary Basilica",
+        "mood": "solemn"
+      }
+    ],
+    "2027-03-10": [
+      {
+        "name": "Eid ul-Fitr (Ramadan Eid)",
+        "observance_id": "eid_fitr",
+        "type": "religious",
+        "religion": "islamic",
+        "mumbai_relevance": "high",
+        "visual_hint": "Joyous Eid celebrations at Jama Masjid, families in new clothes, sheer khurma and biryani feasts, Eid namaz at grounds across Mumbai, children receiving Eidi, Mohammed Ali Road and Bhendi Bazaar bustling with festivity",
+        "mood": "celebratory"
+      }
+    ],
+    "2027-03-21": [
+      {
+        "name": "Palm Sunday",
+        "sequence": "lent",
+        "type": "religious",
+        "religion": "christian",
+        "mumbai_relevance": "medium",
+        "visual_hint": "Palm frond processions at Bandra churches, faithful carrying palm crosses, church services at Our Lady of Perpetual Succour Chembur",
+        "mood": "devotional"
+      }
+    ],
+    "2027-03-25": [
+      {
+        "name": "Maundy Thursday",
+        "sequence": "lent",
+        "type": "religious",
+        "religion": "christian",
+        "mumbai_relevance": "medium",
+        "visual_hint": "Foot-washing ceremonies at Bandra churches, Last Supper commemoration, evening mass at Holy Name Cathedral Colaba",
+        "mood": "solemn"
+      }
+    ],
+    "2027-03-26": [
+      {
+        "name": "Good Friday",
+        "sequence": "lent",
+        "type": "religious",
+        "religion": "christian",
+        "mumbai_relevance": "high",
+        "visual_hint": "Solemn processions through Bandra streets carrying the cross, Way of the Cross at Mount Mary, churches draped in purple, fish markets busy in Mahim and Bandra, Colaba church bells tolling",
+        "mood": "solemn"
+      }
+    ],
+    "2027-03-28": [
+      {
+        "name": "Easter Sunday",
+        "sequence": "lent",
+        "type": "religious",
+        "religion": "christian",
+        "mumbai_relevance": "high",
+        "visual_hint": "Joyous sunrise services, churches decorated with Easter lilies, children with Easter eggs in Bandra gardens, festive brunches, Afghan Church Colaba packed with worshippers, resurrection celebrations",
+        "mood": "celebratory"
+      }
+    ],
+    "2027-04-18": [
+      {
+        "name": "Mahavir Jayanti",
+        "observance_id": "mahavir_jayanti",
+        "type": "religious",
+        "religion": "jain",
+        "mumbai_relevance": "high",
+        "visual_hint": "Grand abhishek of Mahavir idols at Jain temples in Walkeshwar, Ghatkopar, and Malabar Hill, processions with raths, white-clad devotees, offerings of sugarcane and sweets",
+        "mood": "devotional"
+      }
+    ],
+    "2027-05-17": [
+      {
+        "name": "Eid ul-Adha (Bakrid)",
+        "observance_id": "eid_adha",
+        "type": "religious",
+        "religion": "islamic",
+        "mumbai_relevance": "high",
+        "visual_hint": "Eid prayers at open grounds, families sharing qurbani meat with neighbors and poor, biryani and kebab feasts, festive atmosphere in Dongri and Bhendi Bazaar, spirit of sacrifice and sharing",
+        "mood": "devotional"
+      }
+    ],
+    "2027-05-20": [
+      {
+        "name": "Buddha Purnima (Vesak)",
+        "observance_id": "buddha_purnima",
+        "type": "religious",
+        "religion": "buddhist",
+        "mumbai_relevance": "medium",
+        "visual_hint": "Buddhist temples and viharas lit with candles, prayers at Global Vipassana Pagoda Gorai, devotees in white, chanting at Siddharth Vihar Dadar, Bodhi tree offerings",
+        "mood": "devotional"
+      }
+    ],
+    "2027-06-16": [
+      {
+        "name": "Muharram (Ashura)",
+        "observance_id": "ashura",
+        "type": "religious",
+        "religion": "islamic",
+        "mumbai_relevance": "high",
+        "visual_hint": "Solemn tazia processions through Dongri and Mohammed Ali Road, black-clad mourners, matam gatherings, Imam Hussain remembrance, candlelit vigils at Shia mosques, rhythmic chest-beating processions through Bhendi Bazaar",
+        "mood": "solemn"
+      }
+    ],
+    "2027-08-05": [
+      {
+        "name": "Muktad Begins (Parsi Ancestor Remembrance)",
+        "sequence": "muktad_parsi",
+        "type": "religious",
+        "religion": "parsi",
+        "mumbai_relevance": "high",
+        "visual_hint": "Fresh flowers and sandalwood at Parsi fire temples, families placing flower vases for departed souls, prayers at Banaji Atash Behram, Dadar Parsi Colony homes with malido and ses",
+        "mood": "solemn"
+      }
+    ],
+    "2027-08-14": [
+      {
+        "name": "Pateti (Parsi Day of Repentance)",
+        "observance_id": "pateti",
+        "type": "religious",
+        "religion": "parsi",
+        "mumbai_relevance": "high",
+        "visual_hint": "Introspection and prayer at fire temples, Parsi families in Dadar Parsi Colony and Colaba preparing for new year, homes being cleaned, special prayers at agiaries",
+        "mood": "solemn"
+      }
+    ],
+    "2027-08-15": [
+      {
+        "name": "Parsi New Year (Navroze Shahenshahi)",
+        "observance_id": "navroze",
+        "type": "religious",
+        "religion": "parsi",
+        "mumbai_relevance": "high",
+        "visual_hint": "Parsi families in white garas and daglis at fire temples, Dadar Parsi Colony festive with rangoli and torans, Godrej Baug celebrations, lavish feasts of lagan nu bhonu, laughter at Ripon Club and CCI, chalk designs at doorsteps — coincides with Independence Day festivities",
+        "mood": "celebratory"
+      },
+      {
+        "name": "Eid-e-Milad-un-Nabi (Prophet Muhammad's Birthday)",
+        "type": "religious",
+        "religion": "islamic",
+        "mumbai_relevance": "high",
+        "visual_hint": "Green-lit mosques, processions through Mohammed Ali Road and Dongri, melodious naats and qawwalis, free food distribution, Haji Ali Dargah illuminated, festive gatherings at Mahim Dargah — triple celebration day with Independence Day and Parsi New Year",
+        "mood": "devotional"
+      }
+    ],
+    "2027-08-20": [
+      {
+        "name": "Khordad Sal (Zarathustra's Birthday)",
+        "observance_id": "khordad_sal",
+        "type": "religious",
+        "religion": "parsi",
+        "mumbai_relevance": "medium",
+        "visual_hint": "Prayers at fire temples, Parsi community gatherings, jashan ceremonies at Wadiaji Atash Behram, spiritual reverence for Zarathustra",
+        "mood": "devotional"
+      }
+    ],
+    "2027-08-28": [
+      {
+        "name": "Paryushana Begins (Shvetambar Jain)",
+        "sequence": "paryushana_jain",
+        "type": "religious",
+        "religion": "jain",
+        "mumbai_relevance": "high",
+        "visual_hint": "Jain temples in Walkeshwar, Ghatkopar, and Mulund adorned for the holy week, white-clad devotees in intense prayer, fasting begins, pravachans at Jain upashrayas across Mumbai",
+        "mood": "devotional"
+      }
+    ],
+    "2027-09-04": [
+      {
+        "name": "Samvatsari (Paryushana Conclusion — Universal Forgiveness Day)",
+        "sequence": "paryushana_jain",
+        "type": "religious",
+        "religion": "jain",
+        "mumbai_relevance": "high",
+        "visual_hint": "Outside a Ghatkopar derasar, Jain families in white cotton bow with folded hands and exchange Micchami Dukkadam greetings after the evening pratikraman",
+        "mood": "devotional"
+      }
+    ],
+    "2027-09-05": [
+      {
+        "name": "Das Lakshana Begins (Digambar Jain)",
+        "sequence": "das_lakshana_jain",
+        "type": "religious",
+        "religion": "jain",
+        "mumbai_relevance": "medium",
+        "visual_hint": "Digambar Jain temples beginning 10-day virtue observance, scripture readings, austere devotion, Jain families in white at temples in Ghatkopar and Mulund",
+        "mood": "devotional"
+      }
+    ],
+    "2027-11-28": [
+      {
+        "name": "First Sunday of Advent",
+        "sequence": "advent",
+        "type": "religious",
+        "religion": "christian",
+        "mumbai_relevance": "medium",
+        "visual_hint": "Advent wreath with first candle lit at Bandra and Colaba churches, purple vestments, preparation for Christmas begins, church altars decorated",
+        "mood": "devotional"
+      }
+    ]
+  },
+
+  "multi_day_sequences": {
+    "valentine_week": {
+      "name": "Valentine's Week",
+      "type": "cultural",
+      "religion": null,
+      "anchor_type": "fixed",
+      "anchor_date": "02-07",
+      "anchor_panchang_event": null,
+      "mumbai_relevance": "medium",
+      "days": [
+        {
+          "offset": 0,
+          "name": "Rose Day",
+          "theme": "romance_beginning",
+          "visual_hint": "Red roses overflowing at Dadar flower market, young couples exchanging single red roses at Bandstand promenade, flower vendors on local trains",
+          "mood": "romantic"
+        },
+        {
+          "offset": 1,
+          "name": "Propose Day",
+          "theme": "confession",
+          "visual_hint": "Couple at Marine Drive sunset, one knee on the sea-facing promenade, heart balloons at Carter Road, rings at Zaveri Bazaar",
+          "mood": "romantic"
+        },
+        {
+          "offset": 2,
+          "name": "Chocolate Day",
+          "theme": "sweetness",
+          "visual_hint": "Heart-shaped chocolate boxes in Colaba Causeway boutiques, cocoa aromas at Bandra patisseries, sharing truffles at Juhu beach",
+          "mood": "romantic"
+        },
+        {
+          "offset": 3,
+          "name": "Teddy Day",
+          "theme": "comfort",
+          "visual_hint": "Giant teddy bears at Crawford Market stalls, plush toys displayed at Linking Road vendors, cuddly gifts in gift-wrap",
+          "mood": "romantic"
+        },
+        {
+          "offset": 4,
+          "name": "Promise Day",
+          "theme": "commitment",
+          "visual_hint": "Couples walking hand-in-hand at Worli Sea Face, promise rings glinting in sunset light, heartfelt vows at Priyadarshini Park",
+          "mood": "romantic"
+        },
+        {
+          "offset": 5,
+          "name": "Hug Day",
+          "theme": "warmth",
+          "visual_hint": "Warm embraces at Bandstand silhouetted against Arabian Sea, friends hugging at Marine Drive, comfort in closeness",
+          "mood": "romantic"
+        },
+        {
+          "offset": 6,
+          "name": "Kiss Day",
+          "theme": "intimacy",
+          "visual_hint": "Intimate silhouettes at Bandra-Worli Sea Link viewpoint, couples at Lovers Point Bandstand, golden hour romance",
+          "mood": "romantic"
+        },
+        {
+          "offset": 7,
+          "name": "Valentine's Day",
+          "theme": "love",
+          "visual_hint": "Marine Drive glowing with couples, red and pink everywhere in Bandra, heart balloons at Gateway of India, flower sellers on every corner, cafes overflowing with love",
+          "mood": "romantic"
+        }
+      ]
+    },
+
+    "anti_valentine_week": {
+      "name": "Anti-Valentine's Week",
+      "type": "cultural",
+      "religion": null,
+      "anchor_type": "fixed",
+      "anchor_date": "02-15",
+      "anchor_panchang_event": null,
+      "mumbai_relevance": "low",
+      "days": [
+        {
+          "offset": 0,
+          "name": "Slap Day",
+          "theme": "rejection",
+          "visual_hint": "Humorous college canteen scenes, friends laughing over breakup stories, meme-worthy moments in Mumbai cafes",
+          "mood": "celebratory"
+        },
+        {
+          "offset": 1,
+          "name": "Kick Day",
+          "theme": "moving_on",
+          "visual_hint": "College groups playing sports at maidans, kicking bad memories away, energetic scenes at playgrounds",
+          "mood": "celebratory"
+        },
+        {
+          "offset": 2,
+          "name": "Perfume Day",
+          "theme": "self_care",
+          "visual_hint": "Attar shops in Mohammed Ali Road, perfume spritz at mall counters, fresh fragrance of self-love and new beginnings",
+          "mood": "celebratory"
+        },
+        {
+          "offset": 3,
+          "name": "Flirting Day",
+          "theme": "playfulness",
+          "visual_hint": "Lighthearted conversations at Prithvi Cafe Juhu, winks at college canteens, playful energy at Marine Drive evening",
+          "mood": "celebratory"
+        },
+        {
+          "offset": 4,
+          "name": "Confession Day",
+          "theme": "honesty",
+          "visual_hint": "Deep conversations over cutting chai at Irani cafes, honest words shared at tapris, clearing the air",
+          "mood": "solemn"
+        },
+        {
+          "offset": 5,
+          "name": "Missing Day",
+          "theme": "nostalgia",
+          "visual_hint": "Solitary figure on Marine Drive tetrapods gazing at the Arabian Sea, empty bench at Bandstand, bittersweet sunset reflections",
+          "mood": "solemn"
+        },
+        {
+          "offset": 6,
+          "name": "Breakup Day",
+          "theme": "fresh_start",
+          "visual_hint": "Walking forward on Mumbai streets with renewed purpose, sunrise at Juhu symbolizing new chapters, liberation energy",
+          "mood": "celebratory"
+        }
+      ]
+    },
+
+    "diwali": {
+      "name": "Diwali (Five-Day Festival of Lights)",
+      "anchor_dates": {"2027": "2027-10-29"},
+      "type": "religious",
+      "religion": "hindu",
+      "anchor_type": "dynamic_panchang",
+      "anchor_date": null,
+      "anchor_panchang_event": "diwali_lakshmi_puja",
+      "mumbai_relevance": "high",
+      "days": [
+        {
+          "offset": -2,
+          "name": "Dhanteras (Dhantrayodashi)",
+          "theme": "prosperity",
+          "deity": "Lakshmi, Dhanvantari",
+          "visual_hint": "Dadar flower market ablaze with marigolds, Zaveri Bazaar packed for gold and silver purchases, brass utensil stalls overflowing, doorstep diyas being purchased at every lane in Mumbai",
+          "mood": "celebratory"
+        },
+        {
+          "offset": -1,
+          "name": "Narak Chaturdashi (Chhoti Diwali)",
+          "theme": "victory_over_evil",
+          "deity": "Krishna",
+          "visual_hint": "Early morning oil baths, small firecrackers at dawn in Mumbai chawls, rangoli at doorsteps, homes lit with first diyas, Kali Puja in Bengali neighborhoods of Dadar",
+          "mood": "celebratory"
+        },
+        {
+          "offset": 0,
+          "name": "Diwali — Lakshmi Puja",
+          "theme": "divine_light",
+          "deity": "Lakshmi, Ganesha",
+          "visual_hint": "Mumbai skyline ablaze with diyas and lights, Marine Drive transformed into a river of lamps, firecrackers lighting up the Arabian Sea sky, Lakshmi puja in every home, Worli and Dadar glowing, children with sparklers",
+          "mood": "celebratory"
+        },
+        {
+          "offset": 1,
+          "name": "Govardhan Puja (Annakut)",
+          "theme": "gratitude_abundance",
+          "deity": "Krishna",
+          "visual_hint": "Mountain-shaped food offerings at ISKCON Juhu, 56 varieties of bhog arranged at temples, families visiting Girgaon temples, festive leftovers feasts",
+          "mood": "devotional"
+        },
+        {
+          "offset": 2,
+          "name": "Bhai Dooj (Yama Dwitiya)",
+          "theme": "sibling_bond",
+          "deity": "Yama, Yamuna",
+          "visual_hint": "Sisters applying tilak on brothers' foreheads, family gatherings with sweets, sibling love celebrated across Mumbai homes, festive family meals",
+          "mood": "celebratory"
+        }
+      ]
+    },
+
+    "ganpati_festival": {
+      "name": "Ganesh Chaturthi Festival (Ganeshotsav)",
+      "period": "ganeshotsav",
+      "total_days": 11,
+      "anchor_dates": {"2026": "2026-09-14", "2027": "2027-09-04"},
+      "end_dates": {"2026": "2026-09-25"},
+      "visual_hint": "At a Lalbaug mandap, families wait with modaks and red hibiscus for darshan of a seated Ganapati beneath brass lamps and rows of marigold garlands.",
+      "type": "religious",
+      "religion": "hindu",
+      "anchor_type": "dynamic_panchang",
+      "anchor_date": null,
+      "anchor_panchang_event": "ganesh_chaturthi",
+      "mumbai_relevance": "high",
+      "days": [
+        {
+          "offset": 0,
+          "name": "Ganesh Sthapana (Installation Day)",
+          "theme": "arrival",
+          "visual_hint": "Pandals springing up across every lane in Mumbai, Lalbaugcha Raja's first darshan queue stretching kilometers, drumbeats and dhol-tasha welcoming Bappa, homes installing clay Ganesh murtis, marigold and modak everywhere",
+          "mood": "celebratory"
+        },
+        {
+          "offset": 1,
+          "name": "Day 1.5 Visarjan (Household)",
+          "theme": "first_farewell",
+          "visual_hint": "Small household Ganesh murtis carried to Girgaon Chowpatty and Juhu beach, families chanting 'Ganpati Bappa Morya, Pudhchya Varshi Lavkar Ya', first wave of immersions",
+          "mood": "devotional"
+        },
+        {
+          "offset": 2,
+          "name": "Day 3 Visarjan",
+          "theme": "second_wave",
+          "visual_hint": "More households bidding farewell, processions through narrow Mumbai lanes, artificial ponds set up by BMC, music and dancing en route to the sea",
+          "mood": "devotional"
+        },
+        {
+          "offset": 4,
+          "name": "Day 5 Visarjan (Mid-Festival)",
+          "theme": "mid_celebration",
+          "visual_hint": "Major mid-festival visarjan, pandals still buzzing, aartis and cultural programs, Chinchpokli's Chintamani and GSB Seva Mandal in full glory",
+          "mood": "celebratory"
+        },
+        {
+          "offset": 6,
+          "name": "Day 7 Visarjan",
+          "theme": "penultimate_wave",
+          "visual_hint": "Large sarvajanik mandal visarjans begin, impressive processions on Tilak Bridge Dadar, decorated trucks carrying massive idols, dancing crowds",
+          "mood": "celebratory"
+        },
+        {
+          "offset": 9,
+          "name": "Day 10 — Anant Chaturdashi (Grand Visarjan)",
+          "theme": "grand_farewell",
+          "visual_hint": "MASSIVE visarjan processions from Lalbaug to Girgaon Chowpatty stretching over 24 hours, Lalbaugcha Raja's final journey, entire Mumbai on streets, dancing and drumming from Parel through Girgaon, immersion at Chowpatty under floodlights, Juhu beach packed, emotional farewells, 'Ganpati Bappa Morya' chants echoing across the city till dawn",
+          "mood": "celebratory"
+        }
+      ]
+    },
+
+    "paryushana_jain": {
+      "name": "Paryushana Parva (Shvetambar Jain)",
+      "type": "religious",
+      "religion": "jain",
+      "anchor_type": "year_specific",
+      "anchor_date": "2027-08-28",
+      "anchor_panchang_event": null,
+      "mumbai_relevance": "high",
+      "days": [
+        {
+          "offset": 0,
+          "name": "Day 1 — Beginning",
+          "theme": "austerity_begins",
+          "visual_hint": "Jain temples in Walkeshwar and Ghatkopar begin special rituals, white-clad devotees starting fasts, pravachan sessions begin",
+          "mood": "devotional"
+        },
+        {
+          "offset": 1,
+          "name": "Day 2 — Deepening Practice",
+          "theme": "scriptural_study",
+          "visual_hint": "Jain upashrayas filled with devotees studying Kalpa Sutra, monks delivering discourses, increasing austerity",
+          "mood": "devotional"
+        },
+        {
+          "offset": 2,
+          "name": "Day 3 — Kalpa Sutra Recitation",
+          "theme": "sacred_text",
+          "visual_hint": "Special recitation of Lord Mahavir's biography, golden covers of sacred texts, devoted listeners in white",
+          "mood": "devotional"
+        },
+        {
+          "offset": 3,
+          "name": "Day 4 — Kalpa Sutra Reading",
+          "theme": "sacred_text",
+          "visual_hint": "Readers open a gilt-edged Kalpa Sutra on a cloth-covered stand as families sit on white cotton mats in a Walkeshwar derasar",
+          "mood": "devotional"
+        },
+        {
+          "offset": 4,
+          "name": "Day 5 — Mahavir Janma Vanchan",
+          "theme": "divine_birth",
+          "visual_hint": "Families in white listen to Mahavira’s birth story from the Kalpa Sutra beside a flower-draped cradle at a Jain temple in Mulund",
+          "mood": "celebratory"
+        },
+        {
+          "offset": 5,
+          "name": "Day 6 — Spiritual Heights",
+          "theme": "deep_contemplation",
+          "visual_hint": "Devotees in deep meditation at Jain sthanaks, some completing multi-day fasts, spiritual intensity building",
+          "mood": "devotional"
+        },
+        {
+          "offset": 6,
+          "name": "Day 7 — Penultimate Day",
+          "theme": "preparation_for_forgiveness",
+          "visual_hint": "Final preparations for Samvatsari, hearts preparing for universal forgiveness, visiting elders and seeking blessings",
+          "mood": "devotional"
+        },
+        {
+          "offset": 7,
+          "name": "Day 8 — Samvatsari (Universal Forgiveness Day)",
+          "theme": "forgiveness",
+          "visual_hint": "Jain families in Ghatkopar, Mulund, and Walkeshwar exchanging 'Micchami Dukkadam', seeking and granting forgiveness, grand puja, emotional bowing to all beings, feast-breaking celebrations, SMS and WhatsApp messages flooding with forgiveness wishes",
+          "mood": "devotional"
+        }
+      ]
+    },
+
+    "das_lakshana_jain": {
+      "name": "Das Lakshana Parva (Digambar Jain — Ten Virtues Festival)",
+      "type": "religious",
+      "religion": "jain",
+      "anchor_type": "year_specific",
+      "anchor_date": "2027-09-05",
+      "anchor_panchang_event": null,
+      "mumbai_relevance": "medium",
+      "days": [
+        {
+          "offset": 0,
+          "name": "Uttam Kshama (Supreme Forgiveness)",
+          "theme": "forgiveness",
+          "visual_hint": "Digambar Jain temples beginning virtue observance, scripture readings on forgiveness, devotees in white at temples in Ghatkopar",
+          "mood": "devotional"
+        },
+        {
+          "offset": 1,
+          "name": "Uttam Mardav (Supreme Humility)",
+          "theme": "humility",
+          "visual_hint": "Teachings on ego dissolution, humble service, devotees bowing at Jain temples, simple living emphasis",
+          "mood": "devotional"
+        },
+        {
+          "offset": 2,
+          "name": "Uttam Arjav (Supreme Straightforwardness)",
+          "theme": "honesty",
+          "visual_hint": "Discourse on sincerity and transparency, devotees reflecting on truthful living, temple gatherings",
+          "mood": "devotional"
+        },
+        {
+          "offset": 3,
+          "name": "Uttam Shauch (Supreme Purity)",
+          "theme": "purity",
+          "visual_hint": "Inner cleansing rituals, meditation on purity of thought and deed, clean white surroundings at temples",
+          "mood": "devotional"
+        },
+        {
+          "offset": 4,
+          "name": "Uttam Satya (Supreme Truth)",
+          "theme": "truth",
+          "visual_hint": "Teachings on absolute truth, Jain philosophy of anekantavada (many-sidedness), scholarly discussions at upashrayas",
+          "mood": "devotional"
+        },
+        {
+          "offset": 5,
+          "name": "Uttam Sanyam (Supreme Self-restraint)",
+          "theme": "self_restraint",
+          "visual_hint": "Fasting devotees, meditation on controlling senses, disciplined practice at Jain temples in Mulund",
+          "mood": "devotional"
+        },
+        {
+          "offset": 6,
+          "name": "Uttam Tap (Supreme Penance)",
+          "theme": "penance",
+          "visual_hint": "Intense fasting and austerities, devotees enduring physical discipline, spiritual fire of tapasya",
+          "mood": "devotional"
+        },
+        {
+          "offset": 7,
+          "name": "Uttam Tyag (Supreme Renunciation)",
+          "theme": "renunciation",
+          "visual_hint": "Teachings on letting go of material attachments, charity and dana at temples, distribution to the needy",
+          "mood": "devotional"
+        },
+        {
+          "offset": 8,
+          "name": "Uttam Akinchanya (Supreme Non-attachment)",
+          "theme": "non_attachment",
+          "visual_hint": "Meditation on possessionlessness, monks exemplifying aparigraha, serene temple atmosphere",
+          "mood": "devotional"
+        },
+        {
+          "offset": 9,
+          "name": "Uttam Brahmacharya (Supreme Celibacy)",
+          "theme": "celibacy",
+          "visual_hint": "Final virtue celebrated, grand concluding puja, community feast, spiritual culmination at Digambar Jain temples across Mumbai",
+          "mood": "devotional"
+        }
+      ]
+    },
+
+    "ramadan": {
+      "name": "Ramadan (Holy Month of Fasting)",
+      "total_days": 30,
+      "date_status": "provisional",
+      "type": "religious",
+      "religion": "islamic",
+      "anchor_type": "year_specific",
+      "anchor_date": "2027-02-09",
+      "anchor_panchang_event": null,
+      "mumbai_relevance": "high",
+      "daily_pattern": {
+        "sehri": true,
+        "iftar": true,
+        "taraweeh_prayer": true
+      },
+      "days": [
+        {
+          "offset": 0,
+          "name": "First Day of Ramadan",
+          "theme": "beginning",
+          "visual_hint": "Pre-dawn sehri preparations in Mohammed Ali Road kitchens, first fast begins, mosques announcing Ramadan, Minara Masjid lit up, spiritual discipline commences across Mumbai's Muslim neighborhoods",
+          "mood": "devotional"
+        },
+        {
+          "offset": 19,
+          "name": "Last 10 Nights Begin (I'tikaf)",
+          "theme": "intensified_worship",
+          "visual_hint": "Devotees entering i'tikaf seclusion in mosques, intensified prayers through the night, Quran recitation at Haji Ali and Mahim Dargah, spiritual peak approaching",
+          "mood": "devotional"
+        },
+        {
+          "offset": 26,
+          "name": "Laylat al-Qadr (Night of Power — 27th Night)",
+          "theme": "night_of_power",
+          "visual_hint": "Most sacred night — mosques packed through dawn, tears and supplication at Jama Masjid, Haji Ali Dargah glowing, entire night spent in prayer, believed to be worth a thousand months",
+          "mood": "devotional"
+        },
+        {
+          "offset": 28,
+          "name": "Last Day of Ramadan / Chand Raat",
+          "theme": "farewell_celebration",
+          "visual_hint": "Moon sighting for Eid announced, Mohammed Ali Road erupts in celebration, mehndi artists on every corner, last-minute Eid shopping frenzy in Bhendi Bazaar, excitement for tomorrow's Eid",
+          "mood": "celebratory"
+        }
+      ]
+    },
+
+    "lent": {
+      "name": "Lent (Christian 40-Day Fast)",
+      "total_days": 47,
+      "type": "religious",
+      "religion": "christian",
+      "anchor_type": "year_specific",
+      "anchor_date": "2027-02-10",
+      "anchor_panchang_event": null,
+      "mumbai_relevance": "medium",
+      "days": [
+        {
+          "offset": 0,
+          "name": "Ash Wednesday",
+          "theme": "repentance",
+          "visual_hint": "Ash cross on foreheads of faithful at Bandra and Mahim churches, beginning of 40-day fast, solemn services at St. Michael's Church Mahim",
+          "mood": "solemn"
+        },
+        {
+          "offset": 39,
+          "name": "Palm Sunday",
+          "theme": "triumphal_entry",
+          "visual_hint": "Palm frond processions at Our Lady of Mount Carmel Bandra, faithful waving palms, church services commemorating Jesus's entry into Jerusalem",
+          "mood": "devotional"
+        },
+        {
+          "offset": 43,
+          "name": "Maundy Thursday",
+          "theme": "last_supper",
+          "visual_hint": "Foot-washing ceremonies at Holy Name Cathedral Colaba, Last Supper commemoration, evening mass, altar of repose",
+          "mood": "solemn"
+        },
+        {
+          "offset": 44,
+          "name": "Good Friday",
+          "theme": "crucifixion",
+          "visual_hint": "Solemn Way of the Cross processions through Bandra streets, churches draped in black and purple, three-hour services, fish markets in Mahim and Bandra busy as meat is avoided",
+          "mood": "solemn"
+        },
+        {
+          "offset": 46,
+          "name": "Easter Sunday",
+          "theme": "resurrection",
+          "visual_hint": "Joyous sunrise services, churches bursting with Easter lilies, children's egg hunts in Bandra gardens, festive brunches at five-stars, Afghan Church Colaba packed, resurrection hymns echoing",
+          "mood": "celebratory"
+        }
+      ],
+      "weekly_pattern": {
+        "fridays": {
+          "note": "Every Friday during Lent — fish markets busy in Bandra, Mahim, Sassoon Docks as Christians abstain from meat",
+          "offsets": [2, 9, 16, 23, 30, 37, 44]
+        }
+      }
+    },
+
+    "mount_mary_novena": {
+      "name": "Mount Mary Novena & Bandra Fair",
+      "date_status": "projected_from_second_sunday_rule",
+      "calendar_source": "https://crmapp.mcgm.gov.in/irj/go/km/docs/documents/HomePage%20Data/Whats%20New/Draft%20Policy%202025.pdf",
+      "type": "religious",
+      "religion": "christian",
+      "anchor_type": "computed",
+      "anchor_date": null,
+      "anchor_panchang_event": null,
+      "mumbai_relevance": "high",
+      "days": [
+        {
+          "offset": 0,
+          "name": "Novena Day 1",
+          "theme": "prayer_begins",
+          "visual_hint": "First novena mass at Basilica of Our Lady of the Mount Bandra, candles lit by devotees, flower offerings to Mother Mary",
+          "mood": "devotional"
+        },
+        {
+          "offset": 1,
+          "name": "Novena Day 2",
+          "theme": "faith",
+          "visual_hint": "Growing crowds at Mount Mary, wax figure offerings — limbs, houses, babies — placed at the altar seeking blessings",
+          "mood": "devotional"
+        },
+        {
+          "offset": 2,
+          "name": "Novena Day 3",
+          "theme": "hope",
+          "visual_hint": "Candlelit processions in the evening around the basilica, hymns in Konkani and English, devotees from all faiths",
+          "mood": "devotional"
+        },
+        {
+          "offset": 3,
+          "name": "Novena Day 4",
+          "theme": "healing",
+          "visual_hint": "Special prayers for the sick, hospital patients sending proxy offerings, healing intentions filling the basilica",
+          "mood": "devotional"
+        },
+        {
+          "offset": 4,
+          "name": "Novena Day 5",
+          "theme": "gratitude",
+          "visual_hint": "Thanksgiving masses for answered prayers, grateful families returning with offerings, community spirit building",
+          "mood": "devotional"
+        },
+        {
+          "offset": 5,
+          "name": "Novena Day 6",
+          "theme": "devotion",
+          "visual_hint": "Increasing crowds as weekend approaches, Mount Mary Road beginning to see fair stall setups, anticipation building",
+          "mood": "devotional"
+        },
+        {
+          "offset": 6,
+          "name": "Novena Day 7",
+          "theme": "community",
+          "visual_hint": "East Indian Catholic community in full festive mode, Bandra households preparing for the feast, stalls going up along the road",
+          "mood": "devotional"
+        },
+        {
+          "offset": 7,
+          "name": "Novena Day 8",
+          "theme": "preparation",
+          "visual_hint": "Eve-of-feast excitement, Bandra Fair stalls fully erected, street food vendors setting up, entire area transforming into a carnival",
+          "mood": "celebratory"
+        },
+        {
+          "offset": 8,
+          "name": "Novena Day 9 (Final)",
+          "theme": "culmination",
+          "visual_hint": "Final novena mass, basilica overflowing, Bandra Fair in full swing — street food stalls for miles, sugarcane juice, pani puri, toys, clothes, massive crowds from all over Mumbai",
+          "mood": "devotional"
+        },
+        {
+          "offset": 9,
+          "name": "Feast of Our Lady of the Mount (Bandra Fair)",
+          "theme": "feast_celebration",
+          "visual_hint": "Mount Mary Feast Day — Basilica packed to capacity, special high mass, Bandra Fair stalls outside the basilica with lakhs of visitors, street food carnival, ferris wheels and games, candles and flowers everywhere, one of Mumbai's most beloved multi-faith gatherings",
+          "mood": "celebratory"
+        }
+      ]
+    },
+
+    "pitru_paksha": {
+      "name": "Pitru Paksha (Fortnight of Ancestors)",
+      "total_days": 16,
+      "anchor_dates": {"2027": "2027-09-15"},
+      "type": "religious",
+      "religion": "hindu",
+      "anchor_type": "dynamic_panchang",
+      "anchor_date": null,
+      "anchor_panchang_event": "pitru_paksha_start",
+      "mumbai_relevance": "medium",
+      "overall_mood": "solemn",
+      "note": "16 days — no celebrations, no new beginnings, no auspicious activities. Focus on ancestor remembrance and tarpan rituals.",
+      "days": [
+        {
+          "offset": 0,
+          "name": "Pitru Paksha Begins (Purnima Shraddha)",
+          "theme": "ancestor_remembrance",
+          "visual_hint": "Banganga Tank in Walkeshwar becomes center of tarpan rituals, Brahmins performing pind daan, families offering food to ancestors, somber atmosphere across Hindu households",
+          "mood": "solemn"
+        },
+        {
+          "offset": 9,
+          "date_2027": "2027-09-24",
+          "name": "Avidhava Navami (Wives' Shraddha)",
+          "theme": "departed_wives",
+          "visual_hint": "Special prayers for departed married women, families at Banganga Tank, offerings of sindoor and bangles",
+          "mood": "solemn"
+        },
+        {
+          "offset": 15,
+          "name": "Sarva Pitru Amavasya (Universal Ancestor Day)",
+          "theme": "universal_remembrance",
+          "visual_hint": "Most important day — tarpan for ALL ancestors regardless of their tithi of death, Banganga Tank in Mumbai packed with families, crows being fed as symbols of ancestors, final grand offerings",
+          "mood": "solemn"
+        }
+      ]
+    },
+
+    "navratri_sharad": {
+      "name": "Sharad Navratri (Nine Nights of the Goddess)",
+      "period": "navratri",
+      "anchor_dates": {"2027": "2027-09-30"},
+      "type": "religious",
+      "religion": "hindu",
+      "anchor_type": "dynamic_panchang",
+      "anchor_date": null,
+      "anchor_panchang_event": "sharad_navratri_start",
+      "mumbai_relevance": "high",
+      "colors_year": 2027,
+      "note": "Mumbai civil-day colors for 2027 follow the nine-day sequence published by Drik Panchang.",
+      "days": [
+        {
+          "offset": 0,
+          "name": "Day 1 — Shailaputri",
+          "theme": "divine_feminine_power",
+          "devi": "Shailaputri",
+          "color": "Yellow",
+          "visual_hint": "Women in turmeric-yellow saris press barley seeds into damp soil beside a copper kalash, a coconut and mango leaves on a low Dadar windowsill.",
+          "mood": "devotional"
+        },
+        {
+          "offset": 1,
+          "name": "Day 2 — Brahmacharini",
+          "theme": "penance_devotion",
+          "devi": "Brahmacharini",
+          "color": "Green",
+          "visual_hint": "A woman in a leaf-green kurta counts her mala beside a white-robed Brahmacharini print, pausing to straighten the wick of the small brass lamp.",
+          "mood": "devotional"
+        },
+        {
+          "offset": 2,
+          "name": "Day 3 — Chandraghanta",
+          "theme": "courage_grace",
+          "devi": "Chandraghanta",
+          "color": "Grey",
+          "visual_hint": "Two sisters in grey silk raise a thali of kheer toward Chandraghanta, the crescent above the tiger framed by garlands in a Girgaon pandal.",
+          "mood": "celebratory"
+        },
+        {
+          "offset": 3,
+          "name": "Day 4 — Kushmanda",
+          "theme": "cosmic_creation",
+          "devi": "Kushmanda",
+          "color": "Orange",
+          "visual_hint": "A woman in an orange Paithani carries malpua into a Borivali courtyard, her orange pleats picking up the gold reflections from Kushmanda’s lamps.",
+          "mood": "devotional"
+        },
+        {
+          "offset": 4,
+          "name": "Day 5 — Skandamata",
+          "theme": "motherly_love",
+          "devi": "Skandamata",
+          "color": "White",
+          "visual_hint": "White cotton sleeves and jasmine braid garlands frame the hands of a Chembur family offering bananas before an image of Skandamata with infant Skanda.",
+          "mood": "celebratory"
+        },
+        {
+          "offset": 5,
+          "name": "Day 6 — Katyayani",
+          "theme": "warrior_goddess",
+          "devi": "Katyayani",
+          "color": "Red",
+          "visual_hint": "Women in red chaniya cholis pause before garba to offer rose petals at Katyayani’s shrine, their mirrored borders catching flashes from a circling lamp.",
+          "mood": "celebratory"
+        },
+        {
+          "offset": 6,
+          "name": "Day 7 — Kalaratri",
+          "theme": "destruction_of_evil",
+          "devi": "Kalaratri",
+          "color": "Royal Blue",
+          "visual_hint": "A devotee in royal blue sets a piece of jaggery beside Kalaratri’s lamp, the donkey mount visible in silhouette beyond the brass dish.",
+          "mood": "devotional"
+        },
+        {
+          "offset": 7,
+          "name": "Day 8 — Mahagauri (Maha Ashtami / Durga Ashtami)",
+          "theme": "purity_serenity",
+          "devi": "Mahagauri",
+          "color": "Pink",
+          "visual_hint": "A woman in a pink sari serves warm puris to girls seated on floor mats, with Mahagauri’s white bull visible on the household altar.",
+          "mood": "devotional"
+        },
+        {
+          "offset": 8,
+          "name": "Day 9 — Siddhidatri (Maha Navami)",
+          "theme": "divine_completeness",
+          "devi": "Siddhidatri",
+          "color": "Purple",
+          "visual_hint": "Women wearing purple gather around a small Navami havan in a Mumbai courtyard, passing a ghee spoon as firelight catches the folds of their saris.",
+          "mood": "celebratory"
+        }
+      ]
+    },
+
+    "onam": {
+      "name": "Onam (Kerala Harvest Festival in Mumbai)",
+      "type": "cultural",
+      "religion": "hindu",
+      "anchor_type": "year_specific",
+      "anchor_date": "2027-09-03",
+      "anchor_panchang_event": null,
+      "mumbai_relevance": "medium",
+      "note": "Celebrated by Mumbai's large Malayali community centered in Matunga. Thiruvonam falls on Sep 12, 2027.",
+      "days": [
+        {
+          "offset": 0,
+          "name": "Atham",
+          "theme": "beginning",
+          "visual_hint": "Pookalam (flower rangoli) designs appear at Malayali homes in Matunga, home cleaning, festive preparations begin in South Indian neighborhoods",
+          "mood": "celebratory"
+        },
+        {
+          "offset": 1,
+          "name": "Chithira",
+          "theme": "expanding_design",
+          "visual_hint": "Pookalam patterns grow more elaborate, fresh flowers added daily, Matunga flower shops busy with Malayali customers",
+          "mood": "celebratory"
+        },
+        {
+          "offset": 2,
+          "name": "Chodhi",
+          "theme": "shopping",
+          "visual_hint": "Onakkodi (new clothes) shopping, Matunga and Chembur Malayali shops bustling, festive purchases",
+          "mood": "celebratory"
+        },
+        {
+          "offset": 3,
+          "name": "Vishakam",
+          "theme": "feast_preparation",
+          "visual_hint": "Onam Sadhya preparations begin, banana leaves purchased, traditional ingredients gathered in Matunga markets",
+          "mood": "celebratory"
+        },
+        {
+          "offset": 4,
+          "name": "Anizham",
+          "theme": "cultural_events",
+          "visual_hint": "Boat race (Vallam Kali) screenings, cultural programs at Malayali associations in Mumbai, Kathakali rehearsals",
+          "mood": "celebratory"
+        },
+        {
+          "offset": 5,
+          "name": "Thriketa",
+          "theme": "temple_visits",
+          "visual_hint": "Visits to Mahalakshmi and Guruvayurappan temples, floral offerings, group prayers among Malayali community",
+          "mood": "devotional"
+        },
+        {
+          "offset": 6,
+          "name": "Moolam",
+          "theme": "cultural_performances",
+          "visual_hint": "Thiruvathirakali dance performances, Pulikali tiger parades at Matunga associations, cultural events",
+          "mood": "celebratory"
+        },
+        {
+          "offset": 7,
+          "name": "Pooradam",
+          "theme": "clay_statues",
+          "visual_hint": "Onathappan clay pyramid statues placed at pookalam centers, anticipation building for the main feast days",
+          "mood": "celebratory"
+        },
+        {
+          "offset": 8,
+          "name": "Uthradom (First Onam)",
+          "theme": "first_feast",
+          "visual_hint": "First Onam celebrations, early Sadhya feast on banana leaves, Malayali families in kasavu mundu and sari, Matunga alive with Kerala spirit",
+          "mood": "celebratory"
+        },
+        {
+          "offset": 9,
+          "name": "Thiruvonam (Main Onam Day)",
+          "theme": "grand_feast",
+          "visual_hint": "Grand Onam Sadhya — 26-course vegetarian feast on banana leaves, families gathered in Matunga, traditional games, Thumbi Thullal dance, pookalam competitions, King Mahabali's mythic return celebrated, golden kasavu sarees, community joy",
+          "mood": "celebratory"
+        }
+      ]
+    },
+
+    "advent": {
+      "name": "Advent (Christian Preparation for Christmas)",
+      "total_days": 27,
+      "type": "religious",
+      "religion": "christian",
+      "anchor_type": "year_specific",
+      "anchor_date": "2027-11-28",
+      "anchor_panchang_event": null,
+      "mumbai_relevance": "medium",
+      "days": [
+        {
+          "offset": 0,
+          "name": "First Sunday of Advent — Hope",
+          "theme": "hope",
+          "visual_hint": "First purple candle lit on Advent wreaths at Bandra and Colaba churches, Christmas preparations beginning, hymns of anticipation",
+          "mood": "devotional"
+        },
+        {
+          "offset": 7,
+          "name": "Second Sunday of Advent — Peace",
+          "theme": "peace",
+          "visual_hint": "Two purple candles glowing, peace prayers at Afghan Church Colaba, early Christmas decorations appearing in Bandra's Hill Road shops",
+          "mood": "devotional"
+        },
+        {
+          "offset": 14,
+          "name": "Third Sunday of Advent — Joy (Gaudete Sunday)",
+          "theme": "joy",
+          "visual_hint": "Rose/pink candle lit alongside two purple ones, Gaudete Sunday joy, carol practice groups in Bandra parishes, Christmas cheer building",
+          "mood": "celebratory"
+        },
+        {
+          "offset": 21,
+          "name": "Fourth Sunday of Advent — Love",
+          "theme": "love",
+          "visual_hint": "All four candles blazing, final Sunday before Christmas, Bandra churches fully decorated, midnight mass preparations, Hill Road lit up with star lanterns and fairy lights",
+          "mood": "devotional"
+        }
+      ]
+    },
+
+    "muktad_parsi": {
+      "name": "Muktad / Fravardigan (Parsi Ancestor Remembrance)",
+      "total_days": 10,
+      "overall_mood": "solemn",
+      "type": "religious",
+      "religion": "parsi",
+      "anchor_type": "year_specific",
+      "anchor_date": "2027-08-05",
+      "anchor_panchang_event": null,
+      "mumbai_relevance": "high",
+      "note": "10 days before Parsi New Year. Not individually themed but overall ancestor remembrance.",
+      "days": [
+        {
+          "offset": 0,
+          "name": "Muktad Day 1 — Ancestor Remembrance Begins",
+          "theme": "ancestor_prayers",
+          "visual_hint": "Fresh flowers placed on ancestor prayer tables (ses) at Parsi homes in Dadar Parsi Colony, fire temple prayers begin, sandalwood and frankincense fragrance",
+          "mood": "solemn"
+        },
+        {
+          "offset": 4,
+          "name": "Muktad Mid-Period",
+          "theme": "continuous_remembrance",
+          "visual_hint": "Daily flower vases refreshed with tuberoses and marigolds, families visiting fire temples — Banaji Atash Behram, Wadiaji Atash Behram — prayers for departed Fravashis",
+          "mood": "solemn"
+        },
+        {
+          "offset": 9,
+          "name": "Muktad Final Day / Pateti",
+          "theme": "farewell_to_ancestors",
+          "visual_hint": "Final prayers for departed souls, homes in Dadar Parsi Colony and Godrej Baug cleaned and prepared for new year, transition from remembrance to renewal",
+          "mood": "solemn"
+        }
+      ]
+    },
+
+    "christmas_week": {
+      "name": "Christmas Season in Mumbai",
+      "type": "religious",
+      "religion": "christian",
+      "anchor_type": "fixed",
+      "anchor_date": "12-24",
+      "anchor_panchang_event": null,
+      "mumbai_relevance": "high",
+      "days": [
+        {
+          "offset": 0,
+          "name": "Christmas Eve",
+          "theme": "anticipation",
+          "visual_hint": "Midnight mass queues at Mount Mary Basilica and Holy Name Cathedral, Hill Road Bandra glittering with star lanterns, carol singers going house to house, plum cake and wine shopping frenzy",
+          "mood": "celebratory"
+        },
+        {
+          "offset": 1,
+          "name": "Christmas Day",
+          "theme": "celebration",
+          "visual_hint": "Bandra's lanes lit with Christmas stars, church bells ringing, families exchanging gifts, East Indian Catholic homes with cribs and trees, Christmas lunch with roast and vindaloo, Colaba restaurants festive",
+          "mood": "celebratory"
+        }
+      ]
+    },
+
+    "chhath_puja": {
+      "name": "Chhath Puja (Sun Worship Festival)",
+      "anchor_dates": {"2027": "2027-11-04"},
+      "calendar_source": "https://surveyofindia.gov.in/UserFiles/files/List%20of%20Holidays-2027.pdf",
+      "type": "religious",
+      "religion": "hindu",
+      "anchor_type": "dynamic_panchang",
+      "anchor_date": null,
+      "anchor_panchang_event": "chhath_puja_sandhya_arghya",
+      "mumbai_relevance": "high",
+      "note": "Huge in Mumbai due to large Bihari/UP migrant community. Major ghats at Juhu, Girgaon Chowpatty, Powai Lake.",
+      "days": [
+        {
+          "offset": -1,
+          "name": "Kharna (Day of Fasting)",
+          "theme": "preparation_fast",
+          "visual_hint": "Devotees beginning 36-hour waterless fast, prasad of kheer and roti prepared, Bihari families in Mumbai preparing for the sun worship",
+          "mood": "devotional"
+        },
+        {
+          "offset": 0,
+          "name": "Sandhya Arghya (Evening Offering to Setting Sun)",
+          "theme": "sunset_offering",
+          "visual_hint": "Juhu Beach and Girgaon Chowpatty transformed — thousands of devotees standing waist-deep in the Arabian Sea offering arghya to the setting sun, diyas floating on water, sugarcane and fruit thekua offerings, colorful saris of women in the golden sunset, one of Mumbai's most visually spectacular festivals",
+          "mood": "devotional"
+        },
+        {
+          "offset": 1,
+          "name": "Usha Arghya (Dawn Offering to Rising Sun)",
+          "theme": "sunrise_offering",
+          "visual_hint": "Pre-dawn gathering at Juhu and Chowpatty, devotees offering arghya to the rising sun, breaking the 36-hour fast, emotional completion, sun's first rays illuminating devotees in the sea",
+          "mood": "devotional"
+        }
+      ]
+    },
+
+    "durga_puja_bengali": {
+      "name": "Durga Puja (Bengali Community in Mumbai)",
+      "anchor_dates": {"2027": "2027-09-30"},
+      "calendar_source": "https://www.drikpanchang.com/navratri/durga-puja/durga-puja-calendar.html?geoname-id=1275248",
+      "additional_milestones": {
+        "2027-10-08": {
+          "name": "Sandhi Puja",
+          "visual_hint": "At a Powai pandal, devotees in white and red set a row of oil lamps before Durga as a priest lifts a lotus from a brass tray.",
+          "mood": "devotional"
+        }
+      },
+      "type": "religious",
+      "religion": "hindu",
+      "anchor_type": "dynamic_panchang",
+      "anchor_date": null,
+      "anchor_panchang_event": "sharad_navratri_start",
+      "mumbai_relevance": "medium",
+      "note": "Overlaps with Navratri. Bengali community celebrates at pandals in Powai, Lokhandwala, Shivaji Park.",
+      "days": [
+        {
+          "offset": 5,
+          "name": "Maha Shashti (Durga Puja Begins)",
+          "theme": "goddess_arrival",
+          "visual_hint": "Bengali pandals unveiled at Powai and Lokhandwala, elaborate Durga idols with ten arms, dhunuchi dance, dhak drums echoing, community gathering in sarees and kurtas",
+          "mood": "celebratory"
+        },
+        {
+          "offset": 6,
+          "name": "Maha Saptami",
+          "theme": "divine_worship",
+          "visual_hint": "Pushpanjali flower offerings at pandals, nabapatrika (banana plant bride) bathed, Bengali food stalls with luchi-alur dom, cultural performances",
+          "mood": "devotional"
+        },
+        {
+          "offset": 7,
+          "name": "Maha Ashtami",
+          "theme": "peak_worship",
+          "visual_hint": "Sandhi Puja at the junction of Ashtami and Navami, 108 lamps lit, kumari puja (worship of young girl as goddess), pandal-hopping across Mumbai's Bengali neighborhoods",
+          "mood": "devotional"
+        },
+        {
+          "offset": 8,
+          "name": "Maha Navami",
+          "date_2027": "2027-10-09",
+          "theme": "farewell_preparation",
+          "visual_hint": "Families bring bowls of bhog to a Lokhandwala pandal, where a priest tends the Navami havan and thin smoke catches the light beside the Durga idol",
+          "mood": "devotional"
+        },
+        {
+          "offset": 9,
+          "name": "Vijayadashami — Durga Visarjan",
+          "date_2027": "2027-10-10",
+          "theme": "grand_farewell",
+          "visual_hint": "Emotional immersion processions from Powai and Lokhandwala pandals, women applying sindoor to the goddess, 'Asche Bochor Abar Hobe' (see you next year), dhak drums playing farewell beats",
+          "mood": "solemn"
+        }
+      ]
+    },
+
+    "navaratri_chaitra": {
+      "name": "Chaitra Navratri (Spring Navratri — Gudi Padwa Season)",
+      "total_days": 9,
+      "anchor_dates": {"2027": "2027-04-07"},
+      "calendar_source": "https://www.drikpanchang.com/navratri/chaitra-vasant-navratri-dates.html?geoname-id=1275339",
+      "visual_hint": "At a Girgaon home shrine, a family cups brass lamps before a Durga print and a copper kalash, with fresh mango leaves lit by spring sunlight.",
+      "type": "religious",
+      "religion": "hindu",
+      "anchor_type": "dynamic_panchang",
+      "anchor_date": null,
+      "anchor_panchang_event": "chaitra_navratri_start",
+      "mumbai_relevance": "high",
+      "note": "Coincides with Marathi New Year (Gudi Padwa). Very significant in Mumbai/Maharashtra.",
+      "days": [
+        {
+          "offset": 0,
+          "name": "Day 1 — Ghatasthapana / Gudi Padwa",
+          "theme": "new_beginnings",
+          "visual_hint": "Gudi (decorated stick with cloth and pot) raised on every Marathi household's window in Mumbai, Girgaon and Dadar lanes festive, families in traditional Marathi attire, puran poli feasts, neem-jaggery-tamarind eaten for balance",
+          "mood": "celebratory"
+        },
+        {
+          "offset": 8,
+          "name": "Rama Navami (Day 9 of Chaitra Navratri)",
+          "theme": "divine_birth",
+          "visual_hint": "Ram temples across Mumbai celebrating Lord Rama's birthday, special aarti at Wadala Ram Mandir, fasting and feasting, devotional bhajans",
+          "mood": "devotional"
+        }
+      ]
+    }
+  }
+}

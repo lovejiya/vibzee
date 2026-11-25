@@ -12,8 +12,10 @@ Design note (graceful degradation):
   Install the models (see README) to enable the full Hindi NLP path.
 """
 import json
+import logging
 import re
 import time
+from datetime import datetime
 from pathlib import Path
 
 import requests
@@ -209,6 +211,10 @@ def select_landmark(location: dict, theme: str, emotion: str, time_of_day: str,
         "state": state,
         "city": city,
         "top_3": [{"name": lm["name"], "score": s, "type": lm.get("type", "")} for s, lm in top_3],
+        "top_5": [
+            {"name": lm["name"], "score": s, "type": lm.get("type", ""), "selected": lm is chosen_lm}
+            for s, lm in scored[:5]
+        ],
     }
 
 
@@ -284,21 +290,7 @@ def enrich_context(
     """
     weather = get_weather(location["lat"], location["lon"])
     panchang_data = get_full_panchang(date, location=location, regional_profile=regional_profile, language=language)
-    festival = None
-    if panchang_data:
-        fest_name = panchang_data.get("festival_intelligence", {}).get("active_festival")
-        t_dict = panchang_data.get("astronomical_panchang", {}).get("tithi", {})
-        udaya_t = t_dict.get("udaya_tithi")
-        p_name = t_dict.get("paksha")
-        t_str = f"{udaya_t} ({p_name} Paksha)" if udaya_t and p_name else (udaya_t or "")
-        if fest_name and t_str:
-            festival = f"{fest_name} [{t_str}]"
-        elif fest_name:
-            festival = fest_name
-        elif t_str:
-            festival = t_str
-    else:
-        festival = get_festival(date, location=location, regional_profile=regional_profile, language=language)
+    festival = festival_context(panchang_data) if panchang_data else _preserved_festival(date)
 
     if custom_keywords:
         # Override subsequent NLP extraction & translation functions directly
@@ -379,20 +371,34 @@ def get_full_panchang(target_date, location=None, regional_profile=None, languag
     try:
         from panchange_engine import get_coordinator
         coord = get_coordinator()
-        d = target_date.date() if hasattr(target_date, "date") else target_date
+        is_datetime = isinstance(target_date, datetime)
         lat = location.get("lat", 19.0760) if location else 19.0760
         lon = location.get("lon", 72.8777) if location else 72.8777
         loc_name = location.get("name") if location else None
         return coord.calculate_panchang(
-            target_date=d,
+            target_date=target_date.date() if is_datetime else target_date,
             lat=lat,
             lon=lon,
             location_name=loc_name,
             regional_profile_id=regional_profile,
             language=language,
+            eval_time=target_date.time() if is_datetime else None,
         )
     except Exception:
+        logging.getLogger(__name__).warning("Panchang calculation failed for %s", target_date, exc_info=True)
         return None
+
+
+def festival_context(panchang_data: dict) -> str | None:
+    intelligence = panchang_data.get("festival_intelligence") or {}
+    observance = intelligence.get("resolved_observance") or {}
+    festival = observance.get("name") or intelligence.get("active_festival")
+    astro = panchang_data.get("astronomical_panchang") or {}
+    tithi = astro.get("tithi") or {}
+    sunrise = tithi.get("udaya_tithi")
+    paksha = tithi.get("paksha")
+    description = f"{sunrise} ({paksha} Paksha)" if sunrise and paksha else sunrise
+    return f"{festival} [{description}]" if festival and description else festival or description
 
 
 def get_festival(date, location=None, regional_profile=None, language="English") -> str | None:
@@ -401,26 +407,11 @@ def get_festival(date, location=None, regional_profile=None, language="English")
     Executes the dual-engine coordinator while preserving exact fallback compatibility
     with panchang_2026.json.
     """
-    try:
-        from panchange_engine import get_coordinator
-        coord = get_coordinator()
-        d = date.date() if hasattr(date, "date") else date
-        lat = location.get("lat", 19.0760) if location else 19.0760
-        lon = location.get("lon", 72.8777) if location else 72.8777
-        loc_name = location.get("name") if location else None
-        res_str = coord.get_festival_string(
-            target_date=d,
-            lat=lat,
-            lon=lon,
-            location_name=loc_name,
-            regional_profile_id=regional_profile,
-            language=language,
-        )
-        if res_str:
-            return res_str
-    except Exception:
-        pass
+    panchang = get_full_panchang(date, location=location, regional_profile=regional_profile, language=language)
+    return festival_context(panchang) if panchang else _preserved_festival(date)
 
+
+def _preserved_festival(date) -> str | None:
     # Direct fallback to preserved panchang_2026.json in memory
     global _PANCHANG_DATA
     if _PANCHANG_DATA is None:

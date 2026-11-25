@@ -33,10 +33,11 @@ DATA_DIR = ROOT / "data"
 CACHE_DIR = DATA_DIR / "cache"
 
 # The panchang calendar already present in the project (reused as-is).
-PANCHANG_PATH = ROOT / "panchang_2026.json"
+PANCHANG_PATH = DATA_DIR / "panchang_2026.json"
 CULTURAL_METAPHORS_PATH = DATA_DIR / "cultural_metaphors.json"
 RECENT_RUNS_PATH = DATA_DIR / "recent_runs.json"
-LANDMARK_DB_PATH = ROOT / "landmark_db.json"
+LANDMARK_DB_PATH = DATA_DIR / "landmark_db.json"
+STATIC_CALENDAR_PATH = DATA_DIR / "static_calendar.json"
 
 
 # MODELS

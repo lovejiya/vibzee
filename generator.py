@@ -23,16 +23,11 @@ class PromptGenerationError(RuntimeError):
 
 
 def generate(candidates, context, location_details, photo_ratio, location) -> MasterPrompt:
-    """
-    Main generation function. Called by app.py Step 2.
+    return dict(generation_stages(candidates, context, location_details, photo_ratio, location))["final"]
 
-    1. Compute deterministic layout geometry
-    2. Build menu of pre-written pieces (with layout context)
-    3. Call Gemini to select + restructure
-    4. Detect sacred regions from Gemini output, validate & repair
-    5. Save to recency
-    6. Return MasterPrompt
-    """
+
+def generation_stages(candidates, context, location_details, photo_ratio, location):
+    """Expose the Gemini response, checked layout, and finished prompt in order."""
     recent = load_recent()
 
     layout_id = select_layout(context, recent)
@@ -45,6 +40,7 @@ def generate(candidates, context, location_details, photo_ratio, location) -> Ma
         full_prompt = selections.get("full_prompt") if isinstance(selections, dict) else None
         if not isinstance(full_prompt, str) or not full_prompt.strip():
             raise PromptGenerationError("Gemini returned an empty or invalid prompt.")
+        yield "gemini", selections
 
         sacred = detect_sacred_regions(selections)
         layout_plan.protected_regions = sacred
@@ -53,6 +49,7 @@ def generate(candidates, context, location_details, photo_ratio, location) -> Ma
             layout_plan = repair_layout(layout_plan)
         else:
             layout_plan.validation_passed = True
+        yield "layout", layout_plan
 
         prompt = build_master_prompt(selections, candidates, location_details, photo_ratio, layout_plan)
     except PromptGenerationError:
@@ -61,7 +58,7 @@ def generate(candidates, context, location_details, photo_ratio, location) -> Ma
         raise PromptGenerationError("Gemini couldn’t generate a usable prompt.") from exc
 
     save_recent(prompt)
-    return prompt
+    yield "final", prompt
 
 
 def build_menu(candidates, context, location_details, photo_ratio, location, recent, layout_plan=None) -> str:
@@ -95,6 +92,27 @@ def build_menu(candidates, context, location_details, photo_ratio, location, rec
 {lm_context}
   Recent choices (prefer variety when options fit equally well): {recent_avoid}
 """
+    panchang = context.panchang_details or {}
+    astro = panchang.get("astronomical_panchang") or {}
+    running_tithi = (astro.get("tithi") or {}).get("running_tithi")
+    if astro.get("evaluated_at") and running_tithi:
+        menu += f"  Tithi at {astro['evaluated_at']} IST: {running_tithi}\n"
+
+    devotion = panchang.get("devotion") or {}
+    if devotion.get("primary"):
+        options = [devotion["primary"], *devotion.get("secondary", [])]
+        menu += "\n=== MUMBAI DEVOTIONAL SCENES ===\nUse these when they fit the quote.\n"
+        for option in options:
+            scene = option.get("devotee_visual") or option.get("deity_visual")
+            if not scene:
+                continue
+            menu += f"- {option['theme']}: {scene}\n"
+            deity_scene = option.get("deity_visual")
+            if deity_scene and deity_scene != scene:
+                menu += f"  Alternative shrine or deity scene: {deity_scene}\n"
+            for label, daily_scene in option.get("daily_scenes", {}).items():
+                if daily_scene not in (scene, deity_scene):
+                    menu += f"  {label.title()}: {daily_scene}\n"
     if layout_plan:
         menu += "\n=== LAYOUT GEOMETRY (pre-computed, do NOT change) ===\n"
         menu += build_layout_context_for_gemini(layout_plan) + "\n"

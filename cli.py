@@ -7,7 +7,7 @@ import sys
 
 from specs import LOCATIONS, QUOTES
 from panchange_engine import REGIONAL_PROFILES
-from app import run_pipeline, classify_time
+from app import INDIA_TIMEZONE, run_pipeline, classify_time
 from generator import PromptGenerationError
 from logs.logger import build_run_log
 import sources
@@ -77,7 +77,7 @@ def main():
 
     # Resolve target date and time
     print("\nDate and Time:")
-    now = datetime.now()
+    now = datetime.now(INDIA_TIMEZONE)
     d_input = input(f"Enter Date (YYYY-MM-DD) [default: {now.strftime('%Y-%m-%d')}]: ").strip() or now.strftime("%Y-%m-%d")
     t_input = input(f"Enter Time (HH:MM 24-hr) [default: {now.strftime('%H:%M')}]: ").strip() or now.strftime("%H:%M")
     try:
