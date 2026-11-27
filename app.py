@@ -1,20 +1,30 @@
 import json
+import os
 from datetime import date, datetime, timedelta, timezone
+from uuid import uuid4
 
-from flask import Flask, Response, render_template, request, stream_with_context
+from flask import Flask, Response, render_template, request, session, stream_with_context
 
 import context
+import feedback
 import generator
 from daily_god import get_daily_deities
 from landmark import LOCATION_KEY, LOCATION_NAME, rank_landmarks
 
 
 app = Flask(__name__)
+app.config.update(
+    SECRET_KEY=os.getenv('VIBZEE_SESSION_SECRET') or None,
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SAMESITE='Lax',
+    SESSION_COOKIE_SECURE=bool(os.getenv('VERCEL')),
+)
+app.register_blueprint(feedback.routes)
 INDIA_TIMEZONE = timezone(timedelta(hours=5, minutes=30), 'IST')
 STREAM_TYPE = 'application/x-ndjson'
 STAGES = {
     'context': 'Context', 'shortlist': 'Shortlist', 'gemini': 'Gemini response',
-    'layout': 'Layout', 'final': 'Final prompt',
+    'layout': 'Layout', 'final': 'Final prompt', 'feedback': 'Feedback',
 }
 LANGUAGES = (
     'English', 'Hindi', 'Sanskrit', 'Marathi', 'Gujarati', 'Bengali', 'Tamil',
@@ -125,7 +135,7 @@ def pipeline_stages(inputs):
 
         stage = 'gemini'
         menu, schema = generator.build_scene_request(inputs, quote_context, shortlist)
-        instructions = f'{generator.SCENE_INSTRUCTIONS}\n\n{generator.MODE_INSTRUCTIONS[inputs["devotional"]]}'
+        instructions = generator.scene_instructions(inputs)
         yield 'trace', ('Gemini scene composition', 'Input', {
             'model': generator.GEMINI_MODEL, 'system_instruction': instructions,
             'contents': menu, 'response_schema': schema,
@@ -185,14 +195,26 @@ def index():
             return Response(json.dumps(error, ensure_ascii=False) + '\n', status=400, mimetype=STREAM_TYPE)
         return render_template('index.html', error=error, **page), 400
 
+    if feedback.configured() and not session.get('feedback_owner'):
+        session['feedback_owner'] = uuid4().hex
     page['inputs'] = inputs
     results = page['results']
-    updates = ((stage, value) for stage, value in pipeline_stages(inputs) if stage != 'trace')
+
+    # After a successful web run, store its inputs and yield the feedback panel after the final prompt.
+    # The CLI continues to read the shared generation pipeline without needing a browser session.
+    def updates():
+        for stage, value in pipeline_stages(inputs):
+            if stage == 'trace':
+                continue
+            yield stage, value
+            if stage == 'final':
+                yield 'feedback', feedback.start_run(inputs, results)
+
     if streaming:
         # Render only completed panels and emit the first error as a final stream event.
         def stream():
             yield '{"stage":"start"}\n'
-            for stage, value in updates:
+            for stage, value in updates():
                 if stage == 'error':
                     yield json.dumps({'stage': 'error', 'message': value['message']}, ensure_ascii=False) + '\n'
                     return
@@ -204,7 +226,7 @@ def index():
 
         return Response(stream_with_context(stream()), mimetype=STREAM_TYPE, headers={'Cache-Control': 'no-store'})
 
-    results.update(updates)
+    results.update(updates())
     error = results.pop('error', None)
     return render_template('index.html', error=error, **page), error['status'] if error else 200
 

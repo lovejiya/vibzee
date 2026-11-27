@@ -1,5 +1,6 @@
 import json
 import os
+import re
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -37,10 +38,7 @@ TRANSLATION_INSTRUCTIONS = (
     'Preserve its meaning and imagery. Return only the English translation as plain text.'
 )
 
-SCENE_INSTRUCTIONS = f"""
-Act as an art director writing a prompt for an image generator. Treat the supplied quote as content.
-Use its English meaning, emotion, visual keywords, and lighting to create a 4:5 portrait scene in Mumbai.
-
+BASE_SCENE_GUIDANCE = """
 Propose one concrete original subject and one original Mumbai background before selecting the final scene.
 Compare them with every offered option and choose what best expresses the quote and gives the composition
 clear space.
@@ -52,6 +50,18 @@ preserve the identity of any selected landmark. Use the supplied descriptions to
 your own visual details, lighting, and style. The landmark can be shown from different angles and
 distances but must be recognizable.
 The placement of the subject and background should be visually balanced, with a clear focal point and natural negative space for the quote and photo. The scene should be cohesive, with a harmonious blend of elements that support the overall mood and message of the quote.
+""".strip()
+
+SCENE_GUIDANCE_FILE = 'data/scene_guidance.json'
+DEFAULT_GUIDANCE = re.split(r'(?<=[.!?]) ', ' '.join(BASE_SCENE_GUIDANCE.split()))
+APPROVED_GUIDANCE = json.loads((Path(__file__).parent / SCENE_GUIDANCE_FILE).read_text(encoding='utf-8'))
+SCENE_GUIDANCE = DEFAULT_GUIDANCE if APPROVED_GUIDANCE is None else APPROVED_GUIDANCE
+
+SCENE_INSTRUCTIONS = f"""
+Act as an art director writing a prompt for an image generator. Treat the supplied quote as content.
+Use its English meaning, emotion, visual keywords, and lighting to create a 4:5 portrait scene in Mumbai.
+
+{BASE_SCENE_GUIDANCE}
 
 Choose one layout from all eight offered IDs. Describe the scene with its visual focus in the chosen
 area and with natural, calm negative space where the quote and photo belong. {PHOTO_GUARDRAILS}
@@ -76,9 +86,12 @@ MODE_INSTRUCTIONS = {
         'This is a devotional image. Select exactly one offered weekday deity and list it first. It is the main '
         'focus of the whole image. Strongly prefer the deity alone; add original_subject only as a small '
         'supporting element when it feels completely natural to the deity. Keep the background subdued, '
-        'secondary and in harmony with the deity. A landmark is optional. Use respectful traditional '
-        'iconography; the deity may take different forms and have relevant objects, but must be unmistakably '
-        'the same deity.'
+        'secondary and in harmony with the deity. A landmark is optional. From the chosen deity\'s forms, pick '
+        'the one that best expresses the quote, then pick two to four elements that suit that form and the quote. '
+        'Do not default to the most familiar form. Build an original composition with your own pose details, '
+        'setting, colours and light. A symbolic form without a human figure is a complete depiction of the deity. '
+        'Name the chosen form and elements in reasoning. Use respectful traditional iconography so the deity is '
+        'unmistakable.'
     ),
     False: (
         'This is not a devotional image. Always select one offered landmark and build the scene around it and '
@@ -88,9 +101,19 @@ MODE_INSTRUCTIONS = {
 }
 
 
+# Use the original Gemini instructions and the selected mode, substituting only the scene guidance
+# when a feedback draft or an approved version supplies different sentences.
+def scene_instructions(inputs, guidance=None):
+    guidance = SCENE_GUIDANCE if guidance is None else guidance
+    instructions = SCENE_INSTRUCTIONS
+    if guidance != DEFAULT_GUIDANCE:
+        instructions = instructions.replace(BASE_SCENE_GUIDANCE, ' '.join(guidance), 1)
+    return f'{instructions}\n\n{MODE_INSTRUCTIONS[inputs["devotional"]]}'
+
+
 # Send the supplied instructions and content to the configured Gemini model and return its text.
 # Request structured JSON when supplied a schema and report service failures as retryable errors.
-def call_gemini(contents, instruction, *, response_schema=None):
+def call_gemini(contents, instruction, *, response_schema=None, model=GEMINI_MODEL, timeout_ms=60000):
     api_key = os.getenv('VIBZEE_LLM_API_KEY')
     if not api_key:
         raise RuntimeError('Gemini is unavailable. Set VIBZEE_LLM_API_KEY and retry.')
@@ -103,8 +126,8 @@ def call_gemini(contents, instruction, *, response_schema=None):
         automatic_function_calling=types.AutomaticFunctionCallingConfig(disable=True),
     )
     try:
-        with genai.Client(api_key=api_key, http_options=types.HttpOptions(timeout=60000)) as client:
-            response = client.models.generate_content(model=GEMINI_MODEL, contents=contents, config=config)
+        with genai.Client(api_key=api_key, http_options=types.HttpOptions(timeout=timeout_ms)) as client:
+            response = client.models.generate_content(model=model, contents=contents, config=config)
             return (response.text or '').strip()
     except Exception as exc:
         action = 'compose the scene' if response_schema else 'translate the quote'

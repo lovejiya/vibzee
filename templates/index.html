@@ -119,6 +119,44 @@
     <pre id="output-prompt" tabindex="0">{{ prompt }}</pre>
     <div class="prompt-actions"><small>{{ prompt.split()|length }} words</small><button type="button" id="copy-btn">Copy prompt</button></div>
     <p id="copy-feedback" class="muted" role="status"></p>
+  {% elif stage == 'feedback' %}
+    {% if results.feedback.error %}
+      <p class="muted">{{ results.feedback.error }}</p>
+    {% else %}
+      <form class="feedback-form" method="post" data-run="{{ results.feedback.id }}" data-revision="0">
+        <div class="shortlist-grid">
+          {% for field, question in [('removals', 'What should be removed or avoided in the image?'),
+                                     ('additions', 'What should be added to the image?')] %}
+            <div>
+              <label for="feedback-{{ field }}">{{ question }}</label>
+              <textarea id="feedback-{{ field }}" name="{{ field }}" maxlength="1000" rows="3"></textarea>
+              <button type="button" data-record="{{ field }}" aria-label="Record {{ field }}">Record</button>
+            </div>
+          {% endfor %}
+        </div>
+        <p class="muted">Vibzee keeps draft inputs and results for up to 24 hours. Groq transcribes recordings.</p>
+        <div data-preview hidden>
+          <div class="shortlist-grid">
+            <div><h3>Original prompt</h3><pre>{{ results.final }}</pre></div>
+            <div><h3>Revised prompt</h3><pre data-revised></pre></div>
+          </div>
+          <button type="button" data-action="copy">Copy revised prompt</button>
+          <details data-changes open hidden>
+            <summary>Review all instruction changes</summary>
+            <pre data-diff></pre>
+          </details>
+        </div>
+        <div class="prompt-actions">
+          <button type="submit" data-revise>Retry</button>
+          {% if results.feedback.can_publish %}
+            <button type="button" data-action="approve" hidden>Approve</button>
+          {% endif %}
+          <button type="button" data-action="status" hidden>Check deployment</button>
+        </div>
+        <p role="status" data-feedback-status></p>
+        <a data-commit hidden>View GitHub commit</a>
+      </form>
+    {% endif %}
   {% endif %}
 {% endmacro -%}
 
@@ -225,6 +263,10 @@
     pre { white-space: pre-wrap; overflow-wrap: anywhere; }
     #output-prompt { font: inherit; }
     .prompt-actions { margin-top: .65rem; }
+    .feedback-form { display: grid; gap: var(--gap); padding: 0; }
+    .feedback-form textarea { margin: .35rem 0; }
+    .feedback-form .prompt-actions { justify-content: flex-start; }
+    .feedback-form a { color: var(--accent); }
     @media (max-width: 40rem) {
       .quote-grid { grid-template-columns: minmax(0, 1fr); }
       h1 span { font-size: 1.05rem; }
@@ -243,6 +285,7 @@
       const generate = document.querySelector('#generate');
       const retry = document.querySelector('#retry');
       const streamType = 'application/x-ndjson';
+      let recording;
 
       form.elements.preset_quote.addEventListener('change', (event) => {
         form.elements.custom_quote.value = event.target.value;
@@ -266,6 +309,148 @@
         }
       });
 
+      async function feedbackRequest(panel, action, data = {}) {
+        const options = data instanceof FormData ? {body: data} : {
+          headers: {'Content-Type': 'application/json'}, body: JSON.stringify(data)
+        };
+        const response = await fetch(`/api/feedback/${panel.dataset.run}/${action}`, {method: 'POST', ...options});
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(result.error || 'Feedback could not be completed. Please retry.');
+        return result;
+      }
+
+      async function checkPublication(panel, result, checks = 36) {
+        const message = panel.querySelector('[data-feedback-status]');
+        const check = panel.querySelector('[data-action="status"]');
+        if (result.url) {
+          const link = panel.querySelector('[data-commit]');
+          link.href = result.url;
+          link.hidden = false;
+          panel.querySelector('[data-action="approve"]').hidden = true;
+          panel.querySelector('[data-revise]').hidden = true;
+        }
+        message.textContent = result.state === 'live' ? 'Live' : 'Awaiting deployment';
+        check.hidden = result.state === 'live';
+        if (result.state !== 'deploying' || !checks) return;
+        await new Promise(resolve => setTimeout(resolve, 5000));
+        if (!panel.isConnected) return;
+        try {
+          await checkPublication(panel, await feedbackRequest(panel, 'status'), checks - 1);
+        } catch (error) {
+          message.textContent = error.message;
+        }
+      }
+
+      timeline.addEventListener('submit', async event => {
+        const panel = event.target.closest('.feedback-form');
+        if (!panel) return;
+        event.preventDefault();
+        const button = panel.querySelector('[data-revise]');
+        if (button.disabled || button.hidden) return;
+        const controls = [...panel.querySelectorAll('button, textarea')];
+        const message = panel.querySelector('[data-feedback-status]');
+        const fields = Object.fromEntries(new FormData(panel));
+        controls.forEach(control => control.disabled = true);
+        message.textContent = 'Revising prompt…';
+        try {
+          const result = await feedbackRequest(panel, 'retry', {...fields, revision: Number(panel.dataset.revision)});
+          panel.dataset.revision = result.revision;
+          panel.querySelector('[data-revised]').textContent = result.prompt;
+          panel.querySelector('[data-diff]').textContent = result.diff;
+          panel.querySelector('[data-preview]').hidden = false;
+          panel.querySelector('[data-changes]').hidden = !result.diff;
+          const approve = panel.querySelector('[data-action="approve"]');
+          if (approve) approve.hidden = !result.diff;
+          panel.reset();
+          message.textContent = 'Revised prompt ready.';
+        } catch (error) {
+          message.textContent = error.message;
+        } finally {
+          controls.forEach(control => control.disabled = false);
+        }
+      });
+
+      timeline.addEventListener('click', async event => {
+        const button = event.target.closest('[data-action], [data-record]');
+        const panel = button?.closest('.feedback-form');
+        if (!panel) return;
+        const message = panel.querySelector('[data-feedback-status]');
+        const action = button.dataset.action;
+        if (action === 'copy') {
+          try {
+            await navigator.clipboard.writeText(panel.querySelector('[data-revised]').textContent);
+            message.textContent = 'Revised prompt copied.';
+          } catch {
+            message.textContent = 'Select the revised prompt to copy it.';
+          }
+          return;
+        }
+        if (recording?.state === 'recording' && button.dataset.record) {
+          recording.stop();
+          return;
+        }
+        if (action === 'approve') {
+          panel.querySelector('[data-changes]').open = true;
+          if (!window.confirm('Publish these instruction changes for everyone?')) return;
+        }
+        const controls = [...panel.querySelectorAll('button')];
+        controls.forEach(control => control.disabled = true);
+        try {
+          if (button.dataset.record) {
+            if (!window.MediaRecorder || !navigator.mediaDevices?.getUserMedia) {
+              throw new Error('Recording is unavailable in this browser. You can type your feedback.');
+            }
+            const mimeType = ['audio/webm', 'audio/mp4', 'audio/ogg'].find(type => MediaRecorder.isTypeSupported(type));
+            if (!mimeType) throw new Error('This browser cannot record a supported format. You can type your feedback.');
+            const stream = await navigator.mediaDevices.getUserMedia({audio: true});
+            let recorder, audio;
+            try {
+              if (!panel.isConnected) return;
+              recorder = new MediaRecorder(stream, {mimeType});
+              recording = recorder;
+              const chunks = [];
+              const captured = new Promise((resolve, reject) => {
+                recorder.addEventListener('dataavailable', entry => chunks.push(entry.data));
+                recorder.addEventListener('stop', () => resolve(new Blob(chunks, {type: mimeType})), {once: true});
+                recorder.addEventListener('error', () => reject(new Error('Recording failed. Please retry.')), {once: true});
+              });
+              recorder.start();
+              button.disabled = false;
+              button.textContent = 'Stop recording';
+              message.textContent = 'Recording…';
+              const timer = setTimeout(() => { if (recorder.state === 'recording') recorder.stop(); }, 30000);
+              try {
+                audio = await captured;
+              } finally {
+                clearTimeout(timer);
+              }
+            } finally {
+              stream.getTracks().forEach(track => track.stop());
+              if (recording === recorder) recording = null;
+              button.textContent = 'Record';
+            }
+            if (!panel.isConnected) return;
+            button.disabled = true;
+            if (!audio.size || audio.size > 2000000) throw new Error('Record a clip smaller than 2 MB.');
+            const body = new FormData();
+            body.append('audio', audio);
+            message.textContent = 'Transcribing…';
+            const result = await feedbackRequest(panel, 'transcribe', body);
+            panel.elements[button.dataset.record].value = result.text;
+            panel.elements[button.dataset.record].focus();
+            message.textContent = 'Transcript ready to edit.';
+          } else {
+            message.textContent = action === 'approve' ? 'Publishing…' : 'Checking deployment…';
+            const result = await feedbackRequest(panel, action, {revision: Number(panel.dataset.revision)});
+            void checkPublication(panel, result, action === 'approve' ? 36 : 0);
+          }
+        } catch (error) {
+          message.textContent = error.message;
+        } finally {
+          controls.forEach(control => control.disabled = false);
+        }
+      });
+
       if (!window.fetch || !window.ReadableStream || !window.TextDecoderStream) return;
       function setState(row, state) {
         row.dataset.state = state;
@@ -279,8 +464,10 @@
         if (generate.disabled) return;
         const body = new URLSearchParams(new FormData(form));
         generate.disabled = retry.disabled = true;
+        if (recording?.state === 'recording') recording.stop();
         runError.hidden = true;
         rows.forEach((row) => {
+          if (row.id === 'feedback') row.hidden = true;
           setState(row, 'waiting');
           row.querySelector('.stage-content').replaceChildren();
         });
@@ -307,6 +494,7 @@
               if (update.stage === 'error') throw new Error(update.message);
               if (update.stage !== active.id) throw new Error(interrupted);
               active.querySelector('.stage-content').innerHTML = update.html;
+              active.hidden = false;
               if (update.selected) {
                 for (const badge of timeline.querySelectorAll('[data-choice]')) {
                   const ids = update.selected[badge.dataset.choice];
@@ -363,7 +551,7 @@
     <ol class="timeline" aria-label="Generation stages">
       {% for stage, title in stages.items() %}
         {% set state = 'complete' if stage in results else 'failed' if error and stage == error.stage else 'waiting' %}
-        <li class="panel stage" id="{{ stage }}" data-state="{{ state }}">
+        <li class="panel stage" id="{{ stage }}" data-state="{{ state }}"{% if stage == 'feedback' and stage not in results %} hidden{% endif %}>
           <span class="marker" aria-hidden="true"></span>
           <div class="stage-heading"><h2>{{ title }}</h2><span class="stage-status">{{ state|capitalize }}</span></div>
           <div class="stage-content">{{ content(stage, results, inputs) if stage in results else '' }}</div>
