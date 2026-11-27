@@ -1,15 +1,11 @@
 {
-  "version": 2,
-  "builds": [
-    {
-      "src": "app.py",
-      "use": "@vercel/python"
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "flask",
+  "buildCommand": "python prepare_models.py",
+  "functions": {
+    "app.py": {
+      "includeFiles": "{data/**,models/go_emotions/**,templates/**}",
+      "excludeFiles": "{past/**,prepare_models.py}"
     }
-  ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "app.py"
-    }
-  ]
+  }
 }

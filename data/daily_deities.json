@@ -1,0 +1,130 @@
+{
+  "monday": [
+    {
+      "id": "monday-1",
+      "name": "Shiva",
+      "aspect": "Mahadeva",
+      "visual_description": "Ash-smeared Shiva with a crescent in his matted hair, rudraksha beads and a raised trident, seated beside white Nandi in blue-grey temple light."
+    },
+    {
+      "id": "monday-2",
+      "name": "Parvati",
+      "aspect": "Gauri, beside Shiva",
+      "visual_description": "Serene Gauri in a vermilion silk sari, with a lotus and a raised blessing palm, seated beside Shiva amid cream jasmine and warm gold lamps."
+    }
+  ],
+  "tuesday": [
+    {
+      "id": "tuesday-1",
+      "name": "Hanuman",
+      "aspect": "Maruti, devotee of Rama",
+      "visual_description": "Vermilion Hanuman murti with folded palms, a golden gada set beside his feet, and orange marigolds against dark stone in a Prabhadevi shrine."
+    },
+    {
+      "id": "tuesday-2",
+      "name": "Kartikeya",
+      "aspect": "Murugan, bearer of the vel",
+      "visual_description": "Youthful Murugan holding a tall silver vel, with a regal peacock beside him and red hibiscus against gold pillars in a Tamil temple alcove."
+    },
+    {
+      "id": "tuesday-3",
+      "name": "Mangala",
+      "aspect": "Mangal Graha, associated with Mars",
+      "visual_description": "A copper-toned Mangala image in red garments with a mace and ram in the carving, framed by crimson flowers and low brass lamplight."
+    }
+  ],
+  "wednesday": [
+    {
+      "id": "wednesday-1",
+      "name": "Ganesha",
+      "aspect": "Ganapati, remover of obstacles",
+      "visual_description": "Elephant-headed Ganapati seated with one broken tusk, a bowl of modaks and a small mouse below his pedestal, lit by gold and vermilion lamplight."
+    },
+    {
+      "id": "wednesday-2",
+      "name": "Krishna",
+      "aspect": "Murlidhar, the flute bearer",
+      "visual_description": "Blue Krishna in saffron-yellow silk holds a flute to his lips, peacock feather tilted above his crown, framed by white jasmine garlands and emerald textiles."
+    },
+    {
+      "id": "wednesday-3",
+      "name": "Vitthal",
+      "aspect": "Vithoba, standing on a brick",
+      "visual_description": "A dark stone Vitthal stands on a brick with hands on hips, a tall crown and tulsi garlands bright against a deep indigo backdrop."
+    }
+  ],
+  "thursday": [
+    {
+      "id": "thursday-1",
+      "name": "Vishnu",
+      "aspect": "Narayana, preserver",
+      "visual_description": "Four-armed Vishnu in yellow silk holds a conch, discus, mace and lotus, with Garuda kneeling below a carved arch in emerald and gold."
+    },
+    {
+      "id": "thursday-2",
+      "name": "Sai Baba of Shirdi",
+      "aspect": "Seated saint and spiritual teacher",
+      "visual_description": "A serene white marble Sai Baba in a headcloth and long kafni, right leg crossed over the left, with roses glowing in amber aarti light."
+    },
+    {
+      "id": "thursday-3",
+      "name": "Dattatreya",
+      "aspect": "Datta Guru",
+      "visual_description": "Three-faced Dattatreya stands beneath a broad fig tree with a rosary and water pot, a white cow and four dogs gathered in muted ochre light."
+    },
+    {
+      "id": "thursday-4",
+      "name": "Brihaspati",
+      "aspect": "Guru, teacher of the Devas",
+      "visual_description": "The sage Brihaspati wears yellow robes and holds prayer beads and a water pot, seated on a low carved pedestal in honey-coloured lamplight."
+    }
+  ],
+  "friday": [
+    {
+      "id": "friday-1",
+      "name": "Lakshmi",
+      "aspect": "Mahalakshmi, giver of prosperity",
+      "visual_description": "Four-armed Lakshmi in a crimson sari sits on a pink lotus with lotuses in her upper hands, framed by gold lamps and soft ivory garlands."
+    },
+    {
+      "id": "friday-2",
+      "name": "Santoshi Maa",
+      "aspect": "Mother of contentment",
+      "visual_description": "Santoshi Maa in a red sari sits on a lotus with a raised blessing hand, a trident and sword visible in a gold-framed devotional print."
+    }
+  ],
+  "saturday": [
+    {
+      "id": "saturday-1",
+      "name": "Shani Dev",
+      "aspect": "Shanaishchara, deity associated with Saturn",
+      "visual_description": "Dark stone Shani in indigo robes, holding a staff with a crow at the pedestal, surrounded by pinpoints of flame reflected in sesame oil."
+    },
+    {
+      "id": "saturday-2",
+      "name": "Hanuman",
+      "aspect": "Sankat Mochan, protector in adversity",
+      "visual_description": "An upright Hanuman murti with vermilion pigment and a gold gada, one hand raised in blessing as orange marigolds catch the edge of the light."
+    },
+    {
+      "id": "saturday-3",
+      "name": "Kali",
+      "aspect": "Dakshina Kali, protective mother",
+      "visual_description": "A dark blue Kali murti with flowing hair, a necklace of stylized skulls and a curved ritual sword, framed by hibiscus and deep red fabric."
+    }
+  ],
+  "sunday": [
+    {
+      "id": "sunday-1",
+      "name": "Surya Dev",
+      "aspect": "Aditya, solar deity",
+      "visual_description": "A radiant Surya with lotuses in both hands rides a chariot drawn by seven horses, rings of copper and saffron spreading across the dawn sky."
+    },
+    {
+      "id": "sunday-2",
+      "name": "Rama",
+      "aspect": "Shri Ram, prince of Ayodhya",
+      "visual_description": "Crowned Rama holds a long bow beside Sita and Lakshmana, with Hanuman kneeling at their feet and amber lamps reflected in jade and saffron fabric."
+    }
+  ]
+}

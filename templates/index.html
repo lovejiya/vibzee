@@ -1,0 +1,371 @@
+{%- macro facts(items) %}
+  <dl class="facts">
+    {% for label, value in items if value %}
+      <div><dt>{{ label }}</dt><dd>{{ value }}</dd></div>
+    {% endfor %}
+  </dl>
+{% endmacro -%}
+
+{% macro badge(kind, id, selected) %}
+  <span class="selection" data-choice="{{ kind }}" data-id="{{ id }}"{% if id not in selected %} hidden{% endif %}>Selected</span>
+{% endmacro -%}
+
+{% macro select_field(name, label, options, selected) %}
+  <label>{{ label }}
+    <select name="{{ name }}">
+      {% for option in options %}
+        {% set key, value = (option, option) if option is string else option %}
+        <option value="{{ key }}"{% if key == selected %} selected{% endif %}>{{ value }}</option>
+      {% endfor %}
+    </select>
+  </label>
+{% endmacro %}
+
+{% macro content(stage, results, inputs) %}
+  {% set scene = results.get('gemini', {}) %}
+  {% if stage == 'context' %}
+    {% set ctx = results.context %}
+    <blockquote>{{ inputs.quote }}</blockquote>
+    {{ facts([
+      ('Location', inputs.location), ('Date', inputs.date),
+      ('Time', inputs.time ~ ' IST · ' ~ (inputs.time_of_day|capitalize)),
+      ('Language', inputs.language), ('English translation', ctx.english_quote)
+    ]) }}
+    <details>
+      <summary>Keywords and emotions</summary>
+      {{ facts([('Quote keywords', ctx.direct_keywords|join(', ')),
+        ('All keywords', ctx.keywords|join(', ')), ('Expansion', ctx.graph_status)]) }}
+      <ul class="options">
+        {% for label, score in ctx.emotions.items() %}
+          <li class="option">{{ label|capitalize }} · {{ '%.1f%%'|format(score * 100) }}</li>
+        {% endfor %}
+      </ul>
+    </details>
+    {% if ctx.expansions %}
+      <details>
+        <summary>ConceptNet matches</summary>
+        <ul class="options">
+          {% for edge in ctx.expansions %}
+            <li class="option">{{ edge.start }} → {{ edge.relation }} → {{ edge.end }}<small>Quote term: {{ edge.seed }}</small></li>
+          {% endfor %}
+        </ul>
+      </details>
+    {% endif %}
+
+  {% elif stage == 'shortlist' %}
+    {% set shortlist = results.shortlist %}
+    <div class="shortlist-grid">
+      <div class="group">
+        <h3>Top three landmarks</h3>
+        <table aria-label="Ranked landmarks">
+          <thead><tr><th scope="col">Rank</th><th scope="col">Landmark</th><th scope="col">Score</th></tr></thead>
+          <tbody>
+            {% for landmark in shortlist.landmarks %}
+              <tr>
+                <td>{{ loop.index }}</td>
+                <td>{{ landmark.name }} {{ badge(1, landmark.id, scene.get('selected_background_ids', [])) }}</td>
+                <td>{{ '%.2f'|format(landmark.score) }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        <details>
+          <summary>Score breakdown and backgrounds</summary>
+          {% for landmark in shortlist.landmarks %}
+            <ul class="options">
+              <li class="option"><strong>{{ landmark.name }}</strong>
+                <small>{{ landmark.visual_description }}</small>
+                <small>Keywords {{ landmark.keyword_points }} · Emotion {{ landmark.emotion_points }} · Time {{ landmark.time_points }}</small>
+              </li>
+            </ul>
+          {% endfor %}
+        </details>
+      </div>
+      <div class="group">
+        <h3>{{ shortlist.weekday|capitalize }} deity options</h3>
+        <ul class="options">
+          {% for deity in shortlist.deities %}
+            <li class="option">
+              <strong>{{ deity.name }}</strong>{{ badge(0, deity.id, scene.get('selected_subject_ids', [])) }}
+              <small>{{ deity.aspect }}</small>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+
+  {% elif stage == 'gemini' %}
+    {{ facts([
+      ('Chosen subjects', scene.chosen_subjects|join(' · ')),
+      ('Chosen backgrounds', scene.chosen_backgrounds|join(' · '))
+    ]) }}
+    <blockquote>{{ scene.reasoning }}</blockquote>
+    <details>
+      <summary>Gemini’s original proposals</summary>
+      {{ facts([('Subject', scene.original_subject), ('Background', scene.original_background)]) }}
+    </details>
+    <details><summary>View response JSON</summary><pre>{{ scene|tojson(indent=2) }}</pre></details>
+
+  {% elif stage == 'layout' %}
+    {% set layout = results.layout %}
+    {{ facts([('Layout', layout.id), ('Quote', layout.quote|capitalize),
+      ('Photo space', (layout.photo|capitalize) ~ ' · 2.5 × 2.5 inch square'),
+      ('Main visual focus', layout.focus|capitalize)]) }}
+
+  {% elif stage == 'final' %}
+    {% set prompt = results.final %}
+    <pre id="output-prompt" tabindex="0">{{ prompt }}</pre>
+    <div class="prompt-actions"><small>{{ prompt.split()|length }} words</small><button type="button" id="copy-btn">Copy prompt</button></div>
+    <p id="copy-feedback" class="muted" role="status"></p>
+  {% endif %}
+{% endmacro -%}
+
+{%- if fragment is defined -%}
+  {{ content(fragment, results, inputs) }}
+{%- else -%}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Vibzee Prompt Generator</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --page: #141318;
+      --panel: #1d1c23;
+      --field: #17161c;
+      --line: #44404e;
+      --text: #f4f0f5;
+      --muted: #b9b1c2;
+      --accent: #d1b5f6;
+      --selected: #342943;
+      --error: #ffb9bb;
+      --gutter: clamp(.625rem, 2.6vw, 2rem);
+      --space: clamp(.625rem, 1.6vh, 1.1rem);
+      --gap: clamp(.6rem, 1.25vh, .85rem);
+      --rail: clamp(1.5rem, 2.4vw, 2rem);
+      font: 15px/1.5 system-ui, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    body { margin: 0; background: var(--page); color: var(--text); overflow-wrap: anywhere; }
+    main { width: min(100% - 2 * var(--gutter), 96rem); margin: 0 auto; padding: var(--space) 0 calc(2.5 * var(--space)); }
+    h1, h2, h3, p { margin: 0; }
+    .masthead, .stage-heading, .prompt-actions, .run-error {
+      display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .65rem;
+    }
+    .masthead { margin-bottom: var(--space); }
+    h1 { font-size: 1.5rem; font-weight: 550; line-height: 1.25; }
+    h1 strong { font-size: 1.8rem; letter-spacing: -.035em; }
+    h1 span { margin-left: .55rem; padding-left: .75rem; border-left: 1px solid var(--line); }
+    .panel { min-width: 0; border: 1px solid var(--line); border-radius: .65rem; background: var(--panel); }
+    form { padding: var(--space); }
+    .form-grid, .quote-grid, .shortlist-grid { display: grid; gap: var(--gap); }
+    .form-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 10rem), 1fr)); align-items: end; }
+    .quote-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr) auto; margin-top: var(--gap); align-items: end; }
+    label { display: grid; gap: .3rem; min-width: 0; font-weight: 600; }
+    input, select, textarea, button { font: inherit; }
+    input, select, textarea {
+      display: block; width: 100%; min-width: 0; min-height: 2.6rem; padding: .48rem .6rem;
+      border: 1px solid #615969; border-radius: .4rem; background: var(--field); color: var(--text);
+    }
+    textarea { resize: vertical; }
+    button {
+      min-height: 2.6rem; padding: .48rem .95rem; border: 1px solid transparent; border-radius: .4rem;
+      background: var(--accent); color: #201827; font-weight: 700; cursor: pointer;
+    }
+    button:hover:not(:disabled) { background: #e2cdfb; }
+    button:disabled { opacity: .65; cursor: progress; }
+    :is(button, input, select, textarea, summary, pre):focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+    details { margin-top: .7rem; }
+    summary { width: fit-content; color: var(--accent); font-weight: 600; cursor: pointer; }
+    .run-error { margin-top: .8rem; color: var(--error); }
+    #run-status, .stage-status { color: var(--muted); font-size: .86rem; }
+    .timeline { display: grid; gap: var(--gap); margin: var(--space) 0 0; padding: 0 0 0 var(--rail); list-style: none; }
+    .stage { position: relative; padding: var(--gap) clamp(.65rem, 1.55vw, 1rem); }
+    .stage:not(:last-child)::before {
+      position: absolute; top: 1rem; bottom: calc(-1rem - var(--gap)); left: calc(.625rem - var(--rail));
+      width: 1px; background: var(--line); content: '';
+    }
+    .marker {
+      position: absolute; top: .85rem; left: calc(-1 * var(--rail)); width: 1.25rem; height: 1.25rem; display: grid; place-items: center;
+      border: 1px solid var(--line); border-radius: 50%; background: var(--page); font-size: .8rem; font-weight: 750;
+    }
+    .stage[data-state="complete"] .marker { background: var(--accent); color: var(--page); border-color: var(--accent); }
+    .stage[data-state="complete"] .marker::before { content: '✓'; }
+    .stage[data-state="active"] { border-color: var(--accent); }
+    .stage[data-state="active"] :is(.marker, .stage-status) { border-color: var(--accent); color: var(--accent); }
+    .stage[data-state="active"] .marker::before { content: '•'; }
+    .stage[data-state="failed"] :is(.marker, .stage-status) { border-color: var(--error); color: var(--error); }
+    .stage[data-state="failed"] .marker::before { content: '!'; }
+    .stage h2 { font-size: 1.2rem; }
+    .stage-content:not(:empty) { margin-top: .65rem; }
+    .facts { display: flex; flex-wrap: wrap; gap: .5rem 1.2rem; margin: .6rem 0 0; }
+    .facts div { min-width: 0; }
+    dt, small, .muted { color: var(--muted); font-size: .86rem; }
+    dd { margin: 0; }
+    blockquote, pre { margin: .5rem 0 0; padding: .65rem .8rem; border-radius: .4rem; background: var(--field); }
+    .shortlist-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr)); }
+    .group { min-width: 0; padding: .7rem .8rem; border: 1px solid var(--line); border-radius: .45rem; }
+    h3 { font-size: 1rem; }
+    table { width: 100%; margin-top: .4rem; border-collapse: collapse; }
+    th, td { padding: .35rem .45rem; border-bottom: 1px solid var(--line); text-align: left; }
+    th:first-child, td:first-child, th:last-child, td:last-child { width: 1%; white-space: nowrap; }
+    th:last-child, td:last-child { text-align: right; font-variant-numeric: tabular-nums; }
+    .options { margin: .35rem 0 0; padding: 0; list-style: none; }
+    .option { padding: .35rem .45rem; border-bottom: 1px solid var(--line); }
+    .option small { display: block; }
+    .selected, .option:has(.selection:not([hidden])) { background: var(--selected); }
+    .selection { display: inline-block; margin-left: .3rem; padding: .02rem .4rem; border-radius: .3rem; color: var(--accent); font-size: .8rem; font-weight: 700; }
+    pre { white-space: pre-wrap; overflow-wrap: anywhere; }
+    #output-prompt { font: inherit; }
+    .prompt-actions { margin-top: .65rem; }
+    @media (max-width: 40rem) {
+      .quote-grid { grid-template-columns: minmax(0, 1fr); }
+      h1 span { font-size: 1.05rem; }
+    }
+    @media (pointer: coarse) {
+      input, select, textarea, button { font-size: 16px; min-height: 2.95rem; }
+    }
+  </style>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const form = document.querySelector('#prompt-form');
+      const timeline = document.querySelector('.timeline');
+      const rows = [...timeline.children];
+      const status = document.querySelector('#run-status');
+      const runError = document.querySelector('#run-error');
+      const generate = document.querySelector('#generate');
+      const retry = document.querySelector('#retry');
+      const streamType = 'application/x-ndjson';
+
+      form.elements.preset_quote.addEventListener('change', (event) => {
+        form.elements.custom_quote.value = event.target.value;
+        form.elements.language.value = 'Hindi';
+      });
+      timeline.addEventListener('click', async (event) => {
+        if (event.target.id !== 'copy-btn') return;
+        const prompt = document.querySelector('#output-prompt');
+        const feedback = document.querySelector('#copy-feedback');
+        try {
+          await navigator.clipboard.writeText(prompt.textContent);
+          feedback.textContent = 'Prompt copied.';
+        } catch {
+          prompt.focus();
+          const range = document.createRange();
+          range.selectNodeContents(prompt);
+          const selection = window.getSelection();
+          selection.removeAllRanges();
+          selection.addRange(range);
+          feedback.textContent = 'Prompt selected. Use your device’s copy shortcut.';
+        }
+      });
+
+      if (!window.fetch || !window.ReadableStream || !window.TextDecoderStream) return;
+      function setState(row, state) {
+        row.dataset.state = state;
+        row.querySelector('.stage-status').textContent = state[0].toUpperCase() + state.slice(1);
+        if (state === 'active') row.setAttribute('aria-current', 'step');
+        else row.removeAttribute('aria-current');
+      }
+
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        if (generate.disabled) return;
+        const body = new URLSearchParams(new FormData(form));
+        generate.disabled = retry.disabled = true;
+        runError.hidden = true;
+        rows.forEach((row) => {
+          setState(row, 'waiting');
+          row.querySelector('.stage-content').replaceChildren();
+        });
+        let active = rows[0];
+        setState(active, 'active');
+        status.textContent = 'Running · Context';
+
+        let reader;
+        let pending = '';
+        const interrupted = 'The run was interrupted. Please retry.';
+        try {
+          const response = await fetch(form.action, {method: form.method, headers: {Accept: streamType}, body});
+          if (!response.headers.get('content-type')?.startsWith(streamType) || !response.body) throw new Error(interrupted);
+          reader = response.body.pipeThrough(new TextDecoderStream()).getReader();
+          while (active) {
+            const {value, done} = await reader.read();
+            if (done) throw new Error(interrupted);
+            const lines = (pending + value).split('\n');
+            pending = lines.pop();
+            for (const line of lines) {
+              if (!line) continue;
+              const update = JSON.parse(line);
+              if (update.stage === 'start') continue;
+              if (update.stage === 'error') throw new Error(update.message);
+              if (update.stage !== active.id) throw new Error(interrupted);
+              active.querySelector('.stage-content').innerHTML = update.html;
+              if (update.selected) {
+                for (const badge of timeline.querySelectorAll('[data-choice]')) {
+                  const ids = update.selected[badge.dataset.choice];
+                  badge.hidden = !Array.isArray(ids) || !ids.includes(badge.dataset.id);
+                }
+              }
+              setState(active, 'complete');
+              active = active.nextElementSibling;
+              if (!active) break;
+              setState(active, 'active');
+              status.textContent = `Running · ${active.querySelector('h2').textContent}`;
+            }
+          }
+          status.textContent = 'Complete';
+        } catch (error) {
+          if (active) setState(active, 'failed');
+          status.textContent = 'Run failed';
+          runError.hidden = false;
+          document.querySelector('#error-message').textContent = error.constructor === Error ? error.message : interrupted;
+        } finally {
+          if (reader) reader.cancel().catch(() => {});
+          generate.disabled = retry.disabled = false;
+        }
+      });
+    });
+  </script>
+</head>
+<body>
+  <main>
+    <header class="masthead">
+      <h1><strong>Vibzee</strong> <span>Prompt Generator</span></h1>
+      <p id="run-status" role="status">{{ 'Run failed' if error else 'Complete' if results else 'Ready' }}</p>
+    </header>
+
+    <form id="prompt-form" class="panel" method="post" action="/">
+      <div class="form-grid">
+        {{ select_field('location_key', 'Location', [('mumbai', 'Mumbai')], form.location_key) }}
+        <label>Date <input type="date" name="date" value="{{ form.date }}"></label>
+        <label>Time <input type="time" name="time" value="{{ form.time }}"></label>
+        {{ select_field('language', 'Quote language', languages, form.language) }}
+      </div>
+      <div class="quote-grid">
+        {{ select_field('preset_quote', 'Preset quote', quotes, form.preset_quote) }}
+        <label>Custom quote <input type="text" id="custom_quote" name="custom_quote" value="{{ form.custom_quote }}"></label>
+        <button id="generate" type="submit">Generate prompt</button>
+      </div>
+      <div class="run-error" id="run-error"{% if not error %} hidden{% endif %}>
+        <span id="error-message" role="alert">{{ error.message if error else '' }}</span>
+        <button id="retry" type="submit">Retry</button>
+      </div>
+    </form>
+
+    <ol class="timeline" aria-label="Generation stages">
+      {% for stage, title in stages.items() %}
+        {% set state = 'complete' if stage in results else 'failed' if error and stage == error.stage else 'waiting' %}
+        <li class="panel stage" id="{{ stage }}" data-state="{{ state }}">
+          <span class="marker" aria-hidden="true"></span>
+          <div class="stage-heading"><h2>{{ title }}</h2><span class="stage-status">{{ state|capitalize }}</span></div>
+          <div class="stage-content">{{ content(stage, results, inputs) if stage in results else '' }}</div>
+        </li>
+      {% endfor %}
+    </ol>
+  </main>
+</body>
+</html>
+{%- endif %}

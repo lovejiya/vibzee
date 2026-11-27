@@ -7,3 +7,8 @@ logs/*.log
 .vercel/
 data/recent_runs.json
 .vercel
+past/data/cache/
+past/data/recent_runs.json
+past/logs/*.log
+models/
+.venv/
