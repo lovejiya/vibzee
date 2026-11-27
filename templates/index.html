@@ -81,17 +81,19 @@
           {% endfor %}
         </details>
       </div>
-      <div class="group">
-        <h3>{{ shortlist.weekday|capitalize }} deity options</h3>
-        <ul class="options">
-          {% for deity in shortlist.deities %}
-            <li class="option">
-              <strong>{{ deity.name }}</strong>{{ badge(0, deity.id, scene.get('selected_subject_ids', [])) }}
-              <small>{{ deity.aspect }}</small>
-            </li>
-          {% endfor %}
-        </ul>
-      </div>
+      {% if shortlist.deities %}
+        <div class="group">
+          <h3>{{ shortlist.weekday|capitalize }} deity options</h3>
+          <ul class="options">
+            {% for deity in shortlist.deities %}
+              <li class="option">
+                <strong>{{ deity.name }}</strong>{{ badge(0, deity.id, scene.get('selected_subject_ids', [])) }}
+                <small>{{ deity.aspect }}</small>
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+      {% endif %}
     </div>
 
   {% elif stage == 'gemini' %}
@@ -171,6 +173,8 @@
       border: 1px solid #615969; border-radius: .4rem; background: var(--field); color: var(--text);
     }
     textarea { resize: vertical; }
+    .check { display: flex; align-items: center; min-height: 2.6rem; }
+    .check input { width: 1.1rem; min-height: 1.1rem; accent-color: var(--accent); }
     button {
       min-height: 2.6rem; padding: .48rem .95rem; border: 1px solid transparent; border-radius: .4rem;
       background: var(--accent); color: #201827; font-weight: 700; cursor: pointer;
@@ -343,6 +347,7 @@
         <label>Date <input type="date" name="date" value="{{ form.date }}"></label>
         <label>Time <input type="time" name="time" value="{{ form.time }}"></label>
         {{ select_field('language', 'Quote language', languages, form.language) }}
+        <label class="check"><input type="checkbox" name="devotional"{% if form.devotional %} checked{% endif %}> Devotional</label>
       </div>
       <div class="quote-grid">
         {{ select_field('preset_quote', 'Preset quote', quotes, form.preset_quote) }}

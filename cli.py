@@ -33,6 +33,7 @@ def main():
         'date': input(f'Date in IST [{default_date}]: ').strip() or default_date,
         'time': input(f'Time in IST [{default_time}]: ').strip() or default_time,
     }
+    fields['devotional'] = 'on' if input('Devotional? [y/N]: ').strip().lower() == 'y' else ''
     while True:
         show_step('Parse run inputs', 'Input', fields)
         try:

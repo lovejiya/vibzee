@@ -42,24 +42,21 @@ Act as an art director writing a prompt for an image generator. Treat the suppli
 Use its English meaning, emotion, visual keywords, and lighting to create a 4:5 portrait scene in Mumbai.
 
 Propose one concrete original subject and one original Mumbai background before selecting the final scene.
-Compare the original subject with every offered weekday deity and the original background with all three
-ranked landmarks. Choose what best expresses the quote and gives the composition clear space.
+Compare them with every offered option and choose what best expresses the quote and gives the composition
+clear space.
 
-The original subject may stand alone or support one offered deity in the same scene. A named deity can
-only come from the offered weekday choices. If you blend subjects, put the main one first and give
-them distinct visual roles. Use at most one named landmark. You may blend that landmark with the
-original background if the original scenery reads as atmosphere around the identifiable landmark.
-Treat an original setting as an imagined Mumbai scene and preserve the identity of any selected landmark.
-Use diety descriptions and landmark descriptions to inform the scene, but add your own visual details, lighting, and style. Avoid photorealistic close-up human faces. It must also be a respectful depiction of the deity and landmark, with no watermarks, logos, or named copyrighted characters.
-The diety can have relevant things added and can have different forms but it must be very clear that it is the same deity. The landmark can be shown from different angles and distances but must be recognizable as the same landmark.
-It is not necessary to include a deity as the end result must look right for the quote and the scene. The landmark can be included or not, but if it is included it must be recognizable.
+If you blend subjects, put the main one first and give them distinct visual roles. Use at most one named
+landmark. You may blend that landmark with the original background if the original scenery reads as
+atmosphere around the identifiable landmark. Treat an original setting as an imagined Mumbai scene and
+preserve the identity of any selected landmark. Use the supplied descriptions to inform the scene, but add
+your own visual details, lighting, and style. The landmark can be shown from different angles and
+distances but must be recognizable.
 The placement of the subject and background should be visually balanced, with a clear focal point and natural negative space for the quote and photo. The scene should be cohesive, with a harmonious blend of elements that support the overall mood and message of the quote.
 
 Choose one layout from all eight offered IDs. Describe the scene with its visual focus in the chosen
 area and with natural, calm negative space where the quote and photo belong. {PHOTO_GUARDRAILS}
 The photo space is reserved for a no outline square photo, with a physical size of 2.5 by 2.5 inches.
-Use respectful traditional iconography for deities, avoid photorealistic close-up human faces,
-and exclude watermarks, logos, and named copyrighted characters.
+Avoid photorealistic close-up human faces, and exclude watermarks, logos, and named copyrighted characters.
 
 Return a JSON object with these fields:
     original_subject: nonempty description of your original subject
@@ -73,6 +70,22 @@ Return a JSON object with these fields:
 Write full_prompt as image-generation instructions, without analysis or the original quote text.
 The application appends the exact quote, layout placement, photo-space sentence, and portrait format.
 """.strip()
+
+MODE_INSTRUCTIONS = {
+    True: (
+        'This is a devotional image. Select exactly one offered weekday deity and list it first. It is the main '
+        'focus of the whole image. Strongly prefer the deity alone; add original_subject only as a small '
+        'supporting element when it feels completely natural to the deity. Keep the background subdued, '
+        'secondary and in harmony with the deity. A landmark is optional. Use respectful traditional '
+        'iconography; the deity may take different forms and have relevant objects, but must be unmistakably '
+        'the same deity.'
+    ),
+    False: (
+        'This is not a devotional image. Always select one offered landmark and build the scene around it and '
+        'the meaning of the quote. Your original subject is not automatically the main focus; keep it a natural '
+        'part of the scene that supports the landmark and quote. Do not add any deity or idol.'
+    ),
+}
 
 
 # Send the supplied instructions and content to the configured Gemini model and return its text.
@@ -171,11 +184,18 @@ def parse_scene(response, shortlist):
 # portrait instructions to Gemini's scene paragraph so both interfaces copy the same prompt.
 def build_final_prompt(scene, inputs):
     layout = LAYOUTS[scene['selected_layout_id']]
+    devotion = 'Make the deity the main focus of the whole image and keep the background understated. '
     return (
         f'{scene["full_prompt"].strip()} '
+        f'{devotion if inputs["devotional"] else ""}'
         f'Place the main visual focus in the {layout["focus"]}. '
         f'Render the following exact quote in {inputs["language"]} in its original script, '
         f'{layout["quote"]}, using clean, high-contrast typography: “{inputs["quote"]}” '
         f'Position the photo space {layout["photo"]}. {PHOTO_SPACE} '
+        'Preserve this as a naturally empty, uninterrupted area of the surrounding background, large enough '
+        'to accommodate a 2.5 × 2.5 inch photograph added externally after image generation. This region must '
+        'remain visually indistinguishable from the surrounding background. Do not render any visible box, '
+        'frame, border, outline, rectangular patch, placeholder graphic, or photograph. The reserved space '
+        'must exist purely through natural negative space in the scene. '
         f'{PHOTO_GUARDRAILS} 4:5 portrait aspect ratio image.'
     )

@@ -33,11 +33,11 @@ QUOTES = (
 
     'मुंबई की ऊँची इमारतों की तरह अपने सपनों को भी नई ऊँचाइयों तक पहुँचने दीजिए।',
 
-    'सुबह की पहली किरण जब समंदर को छूती है, तो हर अधूरा सपना फिर से जाग उठता है।'
+    'सुबह की पहली किरण जब समंदर को छूती है, तो हर अधूरा सपना फिर से जाग उठता है।',
 
-    'मुंबई की बारिश हो या ज़िंदगी की मुश्किलें, मुस्कुराकर आगे बढ़ने का अपना ही आनंद है। सुप्रभात!'
+    'मुंबई की बारिश हो या ज़िंदगी की मुश्किलें, मुस्कुराकर आगे बढ़ने का अपना ही आनंद है। सुप्रभात!',
 
-    'सिद्धिविनायक के आशीर्वाद से आपके जीवन की हर सुबह सुख, शांति और समृद्धि लेकर आए।'
+    'सिद्धिविनायक के आशीर्वाद से आपके जीवन की हर सुबह सुख, शांति और समृद्धि लेकर आए।',
 
     'सपनों के इस शहर में हर नई सुबह एक खाली पन्ना है, जिस पर आप अपनी सफलता की कहानी लिख सकते हैं।'
 )
@@ -66,6 +66,7 @@ def parse_inputs(fields):
     return {
         'quote': quote, 'language': language, 'location_key': LOCATION_KEY, 'location': LOCATION_NAME,
         'date': selected.date().isoformat(), 'time': selected.strftime('%H:%M'),
+        'devotional': fields.get('devotional') == 'on',
         'time_of_day': next(label for cutoff, label in LIGHTING_PERIODS if selected.hour < cutoff),
     }
 
@@ -104,7 +105,7 @@ def pipeline_stages(inputs):
 
         stage = 'shortlist'
         ranking_inputs = {
-            'location_key': inputs['location_key'], 'time_of_day': inputs['time_of_day'],
+            'time_of_day': inputs['time_of_day'],
             'keywords': direct_keywords, 'expansions': expansions, 'emotions': emotions,
         }
         yield 'trace', ('Mumbai landmark ranking', 'Input', ranking_inputs)
@@ -115,18 +116,21 @@ def pipeline_stages(inputs):
         })
 
         yield 'trace', ('Weekday deities', 'Input', inputs['date'])
-        weekday, deities = get_daily_deities(date.fromisoformat(inputs['date']))
+        weekday, deities = (
+            get_daily_deities(date.fromisoformat(inputs['date'])) if inputs['devotional'] else (None, [])
+        )
         shortlist.update(weekday=weekday, deities=deities)
         yield 'trace', ('Weekday deities', 'Output', {'weekday': weekday, 'deities': deities})
         yield 'shortlist', shortlist
 
         stage = 'gemini'
         menu, schema = generator.build_scene_request(inputs, quote_context, shortlist)
+        instructions = f'{generator.SCENE_INSTRUCTIONS}\n\n{generator.MODE_INSTRUCTIONS[inputs["devotional"]]}'
         yield 'trace', ('Gemini scene composition', 'Input', {
-            'model': generator.GEMINI_MODEL, 'system_instruction': generator.SCENE_INSTRUCTIONS,
+            'model': generator.GEMINI_MODEL, 'system_instruction': instructions,
             'contents': menu, 'response_schema': schema,
         })
-        response = generator.call_gemini(menu, generator.SCENE_INSTRUCTIONS, response_schema=schema)
+        response = generator.call_gemini(menu, instructions, response_schema=schema)
         yield 'trace', ('Gemini scene composition', 'Output', response)
         scene = generator.parse_scene(response, shortlist)
         subject_names = {item['id']: item['name'] for item in deities}
@@ -164,7 +168,7 @@ def index():
     now = datetime.now(INDIA_TIMEZONE)
     form = {
         'location_key': LOCATION_KEY, 'preset_quote': QUOTES[0], 'custom_quote': QUOTES[0],
-        'language': 'Hindi', 'date': now.date().isoformat(), 'time': now.strftime('%H:%M'),
+        'language': 'Hindi', 'date': now.date().isoformat(), 'time': now.strftime('%H:%M'), 'devotional': '',
     }
     page = {'form': form, 'quotes': QUOTES, 'languages': LANGUAGES, 'stages': STAGES, 'results': {}}
     if request.method == 'GET':
