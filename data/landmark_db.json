@@ -1,682 +1,663 @@
 {
-  "mumbai": [
+  "meta": {
+    "version": "2.0",
+    "city": "mumbai",
+    "total": 25,
+    "format": "goemotions_sparse",
+    "note": "Emotions use GoEmotions 27+neutral labels. Only non-zero scores listed. time_of_day scores 0.0-1.0 indicate suitability."
+  },
+  "landmarks": [
     {
-      "id": "gateway-of-india",
+      "id": "gateway_of_india",
       "name": "Gateway of India",
-      "visual_description": "Honey-colored basalt arch with intricate lattice work, boats bobbing in the harbour behind, pigeons circling, tourists and vendors on the wide plaza",
-      "keywords": [
-        "waterfront",
-        "harbour",
-        "arch",
-        "colonial",
-        "crowd",
-        "boats",
-        "plaza"
-      ],
-      "time_scores": {
-        "pre-dawn": 1,
-        "dawn": 0.5,
-        "morning": 0,
-        "late-morning": 0,
+      "type": "monument",
+      "location": "Apollo Bunder, Colaba, South Mumbai",
+      "visual_description": "Honey-colored basalt arch with intricate Indo-Saracenic lattice work towering over a wide stone plaza, fishing boats and ferries bobbing in the harbour behind, pigeons circling the dome, balloon sellers and kulfi vendors dotting the crowded waterfront, Taj Hotel gleaming white across the plaza, golden hour light warming the stone",
+      "time_of_day": {
+        "morning": 0.6,
         "afternoon": 0.5,
-        "evening": 1,
-        "dusk": 1,
-        "night": 1
+        "evening": 0.95,
+        "night": 0.8
       },
-      "emotion_scores": {
-        "amusement": 0.9,
-        "caring": 0.5,
-        "excitement": 0.9,
-        "gratitude": 0.6,
-        "joy": 0.9,
-        "love": 0.5,
-        "optimism": 0.8,
-        "relief": 0.1
-      }
-    },
-    {
-      "id": "marine-drive",
-      "name": "Marine Drive",
-      "visual_description": "Sweeping concrete promenade along Arabian Sea, Art Deco buildings lining the curve, streetlamps forming a necklace of light at dusk, couples on the sea wall, waves crashing on tetrapods",
-      "keywords": [
-        "seafront",
-        "promenade",
-        "waves",
-        "art_deco",
-        "evening",
-        "couples",
-        "city_lights"
-      ],
-      "time_scores": {
-        "pre-dawn": 1,
-        "dawn": 0.5,
-        "morning": 0,
-        "late-morning": 0,
-        "afternoon": 0.5,
-        "evening": 1,
-        "dusk": 1,
-        "night": 1
-      },
-      "emotion_scores": {
-        "amusement": 0.4,
-        "caring": 0.9,
-        "excitement": 0.4,
-        "gratitude": 0.6,
-        "joy": 0.4,
-        "love": 0.9,
-        "optimism": 0.4,
-        "relief": 0.7
-      }
-    },
-    {
-      "id": "taj-mahal-palace-hotel",
-      "name": "Taj Mahal Palace Hotel",
-      "visual_description": "Red-domed palatial hotel with Gothic arches and Moorish flourishes, doormen in white, luxury cars at the entrance, harbour glinting behind",
-      "keywords": [
-        "heritage",
-        "luxury",
-        "dome",
-        "harbour",
-        "colonial",
-        "grandeur"
-      ],
-      "time_scores": {
-        "pre-dawn": 1,
-        "dawn": 0.5,
-        "morning": 1,
-        "late-morning": 0.5,
-        "afternoon": 0.5,
-        "evening": 1,
-        "dusk": 0.5,
-        "night": 1
-      },
-      "emotion_scores": {
-        "amusement": 0.8,
-        "caring": 0.7,
-        "excitement": 0.8,
-        "gratitude": 0.6,
-        "joy": 0.8,
-        "love": 0.7,
-        "optimism": 0.6,
-        "relief": 0.2
-      }
-    },
-    {
-      "id": "chhatrapati-shivaji-maharaj-terminus",
-      "name": "Chhatrapati Shivaji Maharaj Terminus",
-      "visual_description": "Ornate Gothic stone facade with pointed arches, stained glass windows, turrets and gargoyles, rush-hour commuters streaming through grand arched entrances",
-      "keywords": [
-        "station",
-        "gothic",
-        "colonial",
-        "rush_hour",
-        "commuters",
-        "heritage"
-      ],
-      "time_scores": {
-        "pre-dawn": 0,
-        "dawn": 0.5,
-        "morning": 1,
-        "late-morning": 0.5,
-        "afternoon": 0.5,
-        "evening": 1,
-        "dusk": 0.5,
-        "night": 0
-      },
-      "emotion_scores": {
-        "amusement": 0.5,
-        "caring": 0.3,
-        "excitement": 0.5,
-        "gratitude": 0.4,
-        "joy": 0.5,
-        "love": 0.3,
-        "optimism": 0.8,
-        "relief": 0.1
-      }
-    },
-    {
-      "id": "elephanta-caves",
-      "name": "Elephanta Caves",
-      "visual_description": "Dark basalt cave interiors with massive Trimurti Shiva sculpture, columns carved from living rock, dappled sunlight at cave mouth, ferry ride across harbour to reach",
-      "keywords": [
-        "caves",
-        "island",
-        "ancient",
-        "sculpture",
-        "rock_cut",
-        "harbour",
-        "ferry"
-      ],
-      "time_scores": {
-        "pre-dawn": 0,
-        "dawn": 0.5,
-        "morning": 1,
-        "late-morning": 1,
-        "afternoon": 0.5,
-        "evening": 0,
-        "dusk": 0,
-        "night": 0
-      },
-      "emotion_scores": {
-        "amusement": 0.2,
-        "caring": 0.3,
-        "excitement": 0.2,
-        "gratitude": 0.5,
-        "joy": 0.2,
-        "love": 0.3,
-        "optimism": 0.3,
-        "relief": 0.7
-      }
-    },
-    {
-      "id": "siddhivinayak-temple",
-      "name": "Siddhivinayak Temple",
-      "visual_description": "Gold-plated dome and shikhara rising above crowded Prabhadevi streets, long queues of devotees, marigold garlands, incense smoke, warm interior glow",
-      "keywords": [
-        "temple",
-        "devotion",
-        "gold",
-        "queue",
-        "marigold",
-        "incense",
-        "prayer"
-      ],
-      "time_scores": {
-        "pre-dawn": 0.5,
-        "dawn": 1,
-        "morning": 1,
-        "late-morning": 0.5,
-        "afternoon": 0,
-        "evening": 0,
-        "dusk": 0,
-        "night": 0.5
-      },
-      "emotion_scores": {
-        "amusement": 0.5,
-        "caring": 0.4,
-        "excitement": 0.5,
-        "gratitude": 0.8,
-        "joy": 0.5,
-        "love": 0.4,
-        "optimism": 0.5,
-        "relief": 0.2
-      }
-    },
-    {
-      "id": "haji-ali-dargah",
-      "name": "Haji Ali Dargah",
-      "visual_description": "White Indo-Islamic dargah rising from the sea, narrow causeway submerged at high tide, devotees walking single file, Arabian Sea stretching on all sides",
-      "keywords": [
-        "sea",
-        "causeway",
-        "mosque",
-        "tidal",
-        "devotion",
-        "white",
-        "island"
-      ],
-      "time_scores": {
-        "pre-dawn": 0,
-        "dawn": 0,
-        "morning": 0,
-        "late-morning": 0.5,
-        "afternoon": 1,
-        "evening": 1,
-        "dusk": 1,
-        "night": 0
-      },
-      "emotion_scores": {
-        "amusement": 0.2,
-        "caring": 0.5,
-        "excitement": 0.2,
-        "gratitude": 0.6,
-        "joy": 0.2,
-        "love": 0.5,
-        "optimism": 0.3,
-        "relief": 0.7
-      }
-    },
-    {
-      "id": "chowpatty-beach",
-      "name": "Chowpatty Beach",
-      "visual_description": "Sandy beach with colorful food stalls and balloon sellers, families on the sand, city skyline behind, Ganesh idols during Chaturthi, sunset crowds",
-      "keywords": [
-        "beach",
-        "street_food",
-        "families",
-        "sand",
-        "skyline",
-        "festival",
-        "evening"
-      ],
-      "time_scores": {
-        "pre-dawn": 1,
-        "dawn": 0.5,
-        "morning": 0,
-        "late-morning": 0,
-        "afternoon": 0.5,
-        "evening": 1,
-        "dusk": 1,
-        "night": 1
-      },
-      "emotion_scores": {
-        "amusement": 0.9,
-        "caring": 0.6,
-        "excitement": 0.9,
-        "gratitude": 0.5,
-        "joy": 0.9,
-        "love": 0.6,
-        "optimism": 0.4,
-        "relief": 0.1
-      }
-    },
-    {
-      "id": "bandra-worli-sea-link",
-      "name": "Bandra-Worli Sea Link",
-      "visual_description": "Sleek cable-stayed bridge stretching across the bay, cables fanning from tall pylons, car headlights streaming, city lights reflected in dark water below",
-      "keywords": [
-        "bridge",
-        "modern",
-        "cables",
-        "bay",
-        "night_lights",
-        "engineering",
-        "speed"
-      ],
-      "time_scores": {
-        "pre-dawn": 1,
-        "dawn": 0.5,
-        "morning": 0,
-        "late-morning": 0,
-        "afternoon": 0,
-        "evening": 0.5,
-        "dusk": 1,
-        "night": 1
-      },
-      "emotion_scores": {
-        "amusement": 0.5,
-        "caring": 0.5,
-        "excitement": 0.5,
-        "gratitude": 0.3,
-        "joy": 0.5,
-        "love": 0.5,
-        "optimism": 0.8,
-        "relief": 0.3
-      }
-    },
-    {
-      "id": "crawford-market",
-      "name": "Crawford Market",
-      "visual_description": "Ornate stone market building with Gothic arches, piled fruit and flower stalls inside, shafts of light through high windows, bustling traders and shoppers",
-      "keywords": [
-        "market",
-        "colonial",
-        "fruit",
-        "flowers",
-        "bustling",
-        "heritage",
-        "bazaar"
-      ],
-      "time_scores": {
-        "pre-dawn": 0,
-        "dawn": 0.5,
-        "morning": 1,
-        "late-morning": 1,
-        "afternoon": 0.5,
-        "evening": 0,
-        "dusk": 0,
-        "night": 0
-      },
-      "emotion_scores": {
-        "amusement": 0.7,
-        "caring": 0.3,
-        "excitement": 0.7,
-        "gratitude": 0.5,
+      "emotions": {
+        "admiration": 0.9,
+        "pride": 0.8,
         "joy": 0.7,
-        "love": 0.3,
-        "optimism": 0.4,
-        "relief": 0.1
-      }
-    },
-    {
-      "id": "banganga-tank",
-      "name": "Banganga Tank",
-      "visual_description": "Rectangular stone tank surrounded by old temples and crumbling steps, still water reflecting sky, tucked between modern high-rises, an ancient pocket in the city",
-      "keywords": [
-        "tank",
-        "ancient",
-        "quiet",
-        "temples",
-        "water",
-        "reflection",
-        "heritage"
-      ],
-      "time_scores": {
-        "pre-dawn": 0.5,
-        "dawn": 1,
-        "morning": 1,
-        "late-morning": 0.5,
-        "afternoon": 0.5,
-        "evening": 1,
-        "dusk": 0.5,
-        "night": 0.5
-      },
-      "emotion_scores": {
-        "amusement": 0.1,
-        "caring": 0.4,
-        "excitement": 0.1,
-        "gratitude": 0.5,
-        "joy": 0.1,
-        "love": 0.4,
-        "optimism": 0.2,
-        "relief": 0.9
-      }
-    },
-    {
-      "id": "wankhede-stadium",
-      "name": "Wankhede Stadium",
-      "visual_description": "Open-air cricket stadium with tiered stands, emerald green pitch, floodlight towers, roaring crowd, Mumbai skyline visible beyond the stands",
-      "keywords": [
-        "cricket",
-        "stadium",
-        "crowd",
-        "sport",
-        "floodlights",
-        "energy",
-        "cheering"
-      ],
-      "time_scores": {
-        "pre-dawn": 1,
-        "dawn": 0.5,
-        "morning": 0,
-        "late-morning": 0.5,
-        "afternoon": 1,
-        "evening": 0.5,
-        "dusk": 0,
-        "night": 1
-      },
-      "emotion_scores": {
-        "amusement": 0.9,
-        "caring": 0.3,
-        "excitement": 0.9,
-        "gratitude": 0.4,
-        "joy": 0.9,
-        "love": 0.3,
-        "optimism": 0.8,
-        "relief": 0.05
-      }
-    },
-    {
-      "id": "hanging-gardens",
-      "name": "Hanging Gardens",
-      "visual_description": "Manicured terraced garden with whimsical animal-shaped hedges, curved pathways, benches overlooking the Arabian Sea, families with children, old trees",
-      "keywords": [
-        "garden",
-        "topiary",
-        "hilltop",
-        "sea_view",
-        "families",
-        "green",
-        "peaceful"
-      ],
-      "time_scores": {
-        "pre-dawn": 0,
-        "dawn": 0.5,
-        "morning": 1,
-        "late-morning": 0.5,
-        "afternoon": 0.5,
-        "evening": 1,
-        "dusk": 0.5,
-        "night": 0
-      },
-      "emotion_scores": {
-        "amusement": 0.3,
-        "caring": 0.6,
-        "excitement": 0.3,
-        "gratitude": 0.5,
-        "joy": 0.3,
-        "love": 0.6,
-        "optimism": 0.3,
-        "relief": 0.5
-      }
-    },
-    {
-      "id": "sanjay-gandhi-national-park",
-      "name": "Sanjay Gandhi National Park",
-      "visual_description": "Dense tropical forest within city limits, spotted deer on trails, ancient Buddhist cave entrances, dappled sunlight through canopy, leopards at twilight",
-      "keywords": [
-        "forest",
-        "caves",
-        "wildlife",
-        "trails",
-        "canopy",
-        "urban_wild",
-        "nature"
-      ],
-      "time_scores": {
-        "pre-dawn": 0.5,
-        "dawn": 1,
-        "morning": 1,
-        "late-morning": 0.5,
-        "afternoon": 0,
-        "evening": 0,
-        "dusk": 0,
-        "night": 0.5
-      },
-      "emotion_scores": {
-        "amusement": 0.1,
-        "caring": 0.3,
-        "excitement": 0.1,
-        "gratitude": 0.5,
-        "joy": 0.1,
-        "love": 0.3,
-        "optimism": 0.3,
-        "relief": 0.8
-      }
-    },
-    {
-      "id": "dhobi-ghat",
-      "name": "Dhobi Ghat",
-      "visual_description": "Rows of concrete wash pens stretching to the horizon, colorful clothes drying on lines, workers beating fabric, Mumbai skyline towering behind, raw human industry",
-      "keywords": [
-        "laundry",
-        "workers",
-        "colorful",
-        "urban",
-        "industry",
-        "raw",
-        "clothes_lines"
-      ],
-      "time_scores": {
-        "pre-dawn": 0,
-        "dawn": 0.5,
-        "morning": 1,
-        "late-morning": 1,
-        "afternoon": 0.5,
-        "evening": 0,
-        "dusk": 0,
-        "night": 0
-      },
-      "emotion_scores": {
-        "amusement": 0.3,
-        "caring": 0.3,
-        "excitement": 0.3,
-        "gratitude": 0.6,
-        "joy": 0.3,
-        "love": 0.3,
-        "optimism": 0.7,
-        "relief": 0.2
-      }
-    },
-    {
-      "id": "colaba-causeway",
-      "name": "Colaba Causeway",
-      "visual_description": "Narrow street lined with colonial buildings, pavement stalls selling jewelry and scarves, backpackers and locals mingling, cafes with checked tablecloths, old bookshops",
-      "keywords": [
-        "shopping",
-        "colonial",
-        "street_stalls",
-        "cafes",
-        "tourists",
-        "vibrant",
-        "heritage"
-      ],
-      "time_scores": {
-        "pre-dawn": 0,
-        "dawn": 0,
-        "morning": 0,
-        "late-morning": 0.5,
-        "afternoon": 1,
-        "evening": 1,
-        "dusk": 0.5,
-        "night": 0
-      },
-      "emotion_scores": {
-        "amusement": 0.6,
-        "caring": 0.5,
         "excitement": 0.6,
-        "gratitude": 0.4,
-        "joy": 0.6,
+        "gratitude": 0.5,
         "love": 0.5,
-        "optimism": 0.4,
-        "relief": 0.1
-      }
-    },
-    {
-      "id": "worli-fort",
-      "name": "Worli Fort",
-      "visual_description": "Crumbling stone bastion on a rocky promontory, waves crashing against walls, sea link visible in background, wild grass growing through ruins, solitary and windswept",
-      "keywords": [
-        "fort",
-        "ruins",
-        "sea",
-        "rocky",
-        "windswept",
-        "solitary",
-        "portuguese"
-      ],
-      "time_scores": {
-        "pre-dawn": 0,
-        "dawn": 0.5,
-        "morning": 1,
-        "late-morning": 0.5,
-        "afternoon": 0.5,
-        "evening": 1,
-        "dusk": 1,
-        "night": 0
-      },
-      "emotion_scores": {
-        "amusement": 0.1,
-        "caring": 0.5,
-        "excitement": 0.1,
-        "gratitude": 0.4,
-        "joy": 0.1,
-        "love": 0.5,
-        "optimism": 0.4,
-        "relief": 0.9
-      }
-    },
-    {
-      "id": "mount-mary-basilica",
-      "name": "Mount Mary Basilica",
-      "visual_description": "Neo-Gothic stone church with pointed spire on a Bandra hilltop, stained glass, sea visible through arched windows, annual fair with lights and stalls",
-      "keywords": [
-        "church",
-        "gothic",
-        "hilltop",
-        "sea_view",
-        "faith",
-        "fair",
-        "bandra"
-      ],
-      "time_scores": {
-        "pre-dawn": 0,
-        "dawn": 0.5,
-        "morning": 1,
-        "late-morning": 0.5,
-        "afternoon": 0.5,
-        "evening": 1,
-        "dusk": 0.5,
-        "night": 0
-      },
-      "emotion_scores": {
-        "amusement": 0.4,
-        "caring": 0.6,
-        "excitement": 0.4,
-        "gratitude": 0.7,
-        "joy": 0.4,
-        "love": 0.6,
-        "optimism": 0.3,
-        "relief": 0.5
-      }
-    },
-    {
-      "id": "nehru-science-centre",
-      "name": "Nehru Science Centre",
-      "visual_description": "Modern concrete and glass building with a giant dome planetarium, colorful exhibits visible through windows, school groups on the lawn, futuristic sculptures",
-      "keywords": [
-        "museum",
-        "modern",
-        "science",
-        "dome",
-        "education",
-        "futuristic",
-        "interactive"
-      ],
-      "time_scores": {
-        "pre-dawn": 0,
-        "dawn": 0.5,
-        "morning": 1,
-        "late-morning": 0.5,
-        "afternoon": 1,
-        "evening": 0.5,
-        "dusk": 0,
-        "night": 0
-      },
-      "emotion_scores": {
-        "amusement": 0.3,
-        "caring": 0.2,
-        "excitement": 0.3,
-        "gratitude": 0.3,
-        "joy": 0.3,
-        "love": 0.2,
         "optimism": 0.6,
-        "relief": 0.2
-      }
+        "amusement": 0.4,
+        "curiosity": 0.5,
+        "surprise": 0.3,
+        "approval": 0.4
+      },
+      "keywords": ["waterfront", "harbour", "colonial", "iconic", "tourist", "pigeons", "boats", "plaza", "heritage", "crowd"]
     },
     {
-      "id": "kala-ghoda-art-district",
-      "name": "Kala Ghoda Art District",
-      "visual_description": "Tree-lined streets with colonial facades, pop-up art installations, gallery windows showing contemporary art, creative crowds, painted murals on old walls",
-      "keywords": [
-        "art",
-        "galleries",
-        "colonial",
-        "street_art",
-        "creative",
-        "festival",
-        "heritage"
-      ],
-      "time_scores": {
-        "pre-dawn": 0,
-        "dawn": 0,
-        "morning": 0,
-        "late-morning": 0.5,
-        "afternoon": 1,
-        "evening": 1,
-        "dusk": 0.5,
-        "night": 0
+      "id": "marine_drive",
+      "name": "Marine Drive",
+      "type": "promenade",
+      "location": "Netaji Subhash Chandra Bose Road, Churchgate to Nariman Point",
+      "visual_description": "Sweeping arc of Art Deco buildings lining a crescent-shaped seafront promenade, black basalt tetrapods along the shore, couples sitting on the concrete parapet watching waves crash, necklace of amber streetlights curving into the distance at dusk, joggers and families on the wide pavement, Arabian Sea stretching to the horizon",
+      "time_of_day": {
+        "morning": 0.8,
+        "afternoon": 0.4,
+        "evening": 0.95,
+        "night": 0.9
       },
-      "emotion_scores": {
-        "amusement": 0.6,
-        "caring": 0.6,
-        "excitement": 0.6,
-        "gratitude": 0.5,
-        "joy": 0.6,
-        "love": 0.6,
+      "emotions": {
+        "love": 0.8,
+        "joy": 0.7,
+        "admiration": 0.7,
+        "optimism": 0.7,
+        "gratitude": 0.6,
+        "relief": 0.6,
+        "excitement": 0.4,
+        "pride": 0.5,
+        "caring": 0.5,
+        "curiosity": 0.3,
+        "sadness": 0.3,
+        "desire": 0.4
+      },
+      "keywords": ["seafront", "queens_necklace", "art_deco", "promenade", "couples", "sunset", "waves", "joggers", "evening_walk", "solitude_friendly"]
+    },
+    {
+      "id": "taj_mahal_palace",
+      "name": "Taj Mahal Palace Hotel",
+      "type": "heritage_building",
+      "location": "Apollo Bunder, Colaba, opposite Gateway of India",
+      "visual_description": "Grand white Florentine Gothic palace with red dome and ornate arched windows, liveried doormen at brass-fitted entrance, luxury cars in the portico, manicured lawn and fountain in front, the building glowing warmly at night against dark sky, boats visible beyond in the harbour",
+      "time_of_day": {
+        "morning": 0.5,
+        "afternoon": 0.5,
+        "evening": 0.8,
+        "night": 0.9
+      },
+      "emotions": {
+        "admiration": 0.95,
+        "pride": 0.7,
+        "desire": 0.6,
+        "approval": 0.6,
+        "joy": 0.5,
+        "love": 0.4,
+        "gratitude": 0.4,
         "optimism": 0.5,
-        "relief": 0.3
-      }
+        "curiosity": 0.4,
+        "surprise": 0.3
+      },
+      "keywords": ["luxury", "heritage", "colonial", "grandeur", "iconic", "five_star", "waterfront", "resilience", "history", "opulence"]
+    },
+    {
+      "id": "cst_terminus",
+      "name": "Chhatrapati Shivaji Maharaj Terminus",
+      "type": "transit",
+      "location": "Fort, South Mumbai",
+      "visual_description": "Victorian Gothic cathedral-like railway station with stone gargoyles, stained glass windows, ornamental turrets and a central dome, thousands of commuters streaming through massive arched entrances during rush hour, red BEST buses passing in front, the building dramatically lit at night revealing carved stone animals and floral motifs",
+      "time_of_day": {
+        "morning": 0.9,
+        "afternoon": 0.6,
+        "evening": 0.9,
+        "night": 0.7
+      },
+      "emotions": {
+        "admiration": 0.9,
+        "excitement": 0.6,
+        "pride": 0.7,
+        "curiosity": 0.5,
+        "joy": 0.4,
+        "surprise": 0.5,
+        "approval": 0.5,
+        "optimism": 0.4,
+        "nervousness": 0.3
+      },
+      "keywords": ["victoria_terminus", "gothic", "UNESCO", "railway", "rush_hour", "commuters", "heritage", "crowd", "daily_grind", "architecture"]
+    },
+    {
+      "id": "elephanta_caves",
+      "name": "Elephanta Caves",
+      "type": "cave",
+      "location": "Elephanta Island, Mumbai Harbour (ferry from Gateway of India)",
+      "visual_description": "Ancient rock-cut cave temple with massive Trimurti Shiva sculpture carved from living basalt, pillared mandapa hall with shafts of light falling through stone doorways, monkeys playing on steps leading up from the ferry dock, lush green island hill surrounded by harbour waters, toy train running up the jetty path",
+      "time_of_day": {
+        "morning": 0.9,
+        "afternoon": 0.7,
+        "evening": 0.3,
+        "night": 0.0
+      },
+      "emotions": {
+        "admiration": 0.9,
+        "curiosity": 0.8,
+        "realization": 0.6,
+        "surprise": 0.5,
+        "gratitude": 0.5,
+        "pride": 0.5,
+        "joy": 0.4,
+        "approval": 0.4,
+        "love": 0.3
+      },
+      "keywords": ["ancient", "rock_cut", "shiva", "UNESCO", "island", "ferry", "sculpture", "archaeology", "spiritual", "heritage"]
+    },
+    {
+      "id": "siddhivinayak_temple",
+      "name": "Siddhivinayak Temple",
+      "type": "temple",
+      "location": "Prabhadevi, Dadar West",
+      "visual_description": "Golden shikhara dome gleaming above a marble temple complex, long serpentine queue of devotees winding through covered walkways, the black stone Ganesha idol adorned with gold ornaments and flower garlands visible through sanctum doorway, coconut and modak offerings in devotees' hands, the sound of bells and aarti implied in the crowded courtyard",
+      "time_of_day": {
+        "morning": 0.9,
+        "afternoon": 0.6,
+        "evening": 0.8,
+        "night": 0.3
+      },
+      "emotions": {
+        "gratitude": 0.9,
+        "admiration": 0.7,
+        "joy": 0.7,
+        "love": 0.6,
+        "caring": 0.5,
+        "optimism": 0.8,
+        "relief": 0.6,
+        "pride": 0.5,
+        "desire": 0.4,
+        "approval": 0.5,
+        "excitement": 0.3,
+        "nervousness": 0.2
+      },
+      "keywords": ["ganesha", "devotion", "darshan", "queue", "wish_fulfillment", "tuesday_crowd", "golden_dome", "puja", "mumbai_faith", "vip_darshan"]
+    },
+    {
+      "id": "haji_ali_dargah",
+      "name": "Haji Ali Dargah",
+      "type": "shrine",
+      "location": "Haji Ali, Worli, on an islet in the Arabian Sea",
+      "visual_description": "White marble dargah with slender minaret sitting on a rocky islet connected to the shore by a narrow causeway, waves crashing on both sides of the walkway, devotees walking single file carrying rose petals and chadar offerings, qawwali musicians inside the shrine chamber, seagulls wheeling overhead, Mumbai skyline visible across the bay",
+      "time_of_day": {
+        "morning": 0.6,
+        "afternoon": 0.7,
+        "evening": 0.9,
+        "night": 0.4
+      },
+      "emotions": {
+        "admiration": 0.8,
+        "gratitude": 0.8,
+        "love": 0.7,
+        "caring": 0.6,
+        "joy": 0.5,
+        "relief": 0.6,
+        "optimism": 0.6,
+        "pride": 0.4,
+        "curiosity": 0.4,
+        "surprise": 0.3,
+        "sadness": 0.2,
+        "fear": 0.2
+      },
+      "keywords": ["sufi", "dargah", "causeway", "sea", "qawwali", "faith", "interfaith", "tide_dependent", "islet", "rose_petals"]
+    },
+    {
+      "id": "chowpatty_beach",
+      "name": "Girgaon Chowpatty Beach",
+      "type": "beach",
+      "location": "Girgaon Chowpatty, end of Marine Drive",
+      "visual_description": "Curved sandy beach backed by the city skyline, bhelpuri and pav bhaji vendors with lit-up stalls, families sitting on the sand at sunset, ferris wheel and balloon sellers, children getting pony rides, the beach transforming during Ganpati visarjan with massive processions carrying idols into the surf, Marine Drive necklace lights curving away in the background",
+      "time_of_day": {
+        "morning": 0.3,
+        "afternoon": 0.4,
+        "evening": 0.95,
+        "night": 0.7
+      },
+      "emotions": {
+        "joy": 0.9,
+        "amusement": 0.8,
+        "excitement": 0.7,
+        "love": 0.6,
+        "desire": 0.5,
+        "caring": 0.5,
+        "gratitude": 0.4,
+        "pride": 0.4,
+        "optimism": 0.5,
+        "admiration": 0.4,
+        "surprise": 0.3
+      },
+      "keywords": ["beach", "street_food", "bhelpuri", "ganpati_visarjan", "families", "evening_hangout", "ferris_wheel", "sand", "sunset", "casual"]
+    },
+    {
+      "id": "bandra_worli_sealink",
+      "name": "Bandra-Worli Sea Link",
+      "type": "bridge",
+      "location": "Spanning Mahim Bay, connecting Bandra to Worli",
+      "visual_description": "Cable-stayed bridge with diamond-shaped concrete pylons soaring over the dark sea, eight lanes of traffic streaming with headlight trails, the bridge curving gracefully between two coastlines, city lights reflecting in the water below, dramatic when shot from Bandra Fort or Worli seaface with the bridge sweeping across the frame",
+      "time_of_day": {
+        "morning": 0.5,
+        "afternoon": 0.4,
+        "evening": 0.8,
+        "night": 0.95
+      },
+      "emotions": {
+        "admiration": 0.8,
+        "pride": 0.7,
+        "excitement": 0.5,
+        "optimism": 0.6,
+        "joy": 0.4,
+        "surprise": 0.4,
+        "approval": 0.5,
+        "curiosity": 0.3
+      },
+      "keywords": ["engineering", "modern", "cable_stayed", "night_lights", "commute", "skyline", "speed", "infrastructure", "connecting", "dramatic"]
+    },
+    {
+      "id": "crawford_market",
+      "name": "Crawford Market (Mahatma Jyotiba Phule Mandai)",
+      "type": "market",
+      "location": "Lokmanya Tilak Road, Fort, South Mumbai",
+      "visual_description": "Victorian stone market building with Norman Gothic arches and Lockwood Kipling bas-relief friezes over the entrance, pyramids of Alphonso mangoes and custard apples stacked on wooden carts, wholesale fruit and vegetable chaos inside high-ceilinged halls, caged birds in the pet section, porters carrying heavy baskets on their heads, shafts of light through ventilator windows",
+      "time_of_day": {
+        "morning": 0.95,
+        "afternoon": 0.7,
+        "evening": 0.4,
+        "night": 0.1
+      },
+      "emotions": {
+        "excitement": 0.7,
+        "curiosity": 0.7,
+        "amusement": 0.5,
+        "joy": 0.6,
+        "desire": 0.5,
+        "surprise": 0.5,
+        "admiration": 0.4,
+        "approval": 0.3
+      },
+      "keywords": ["wholesale", "fruit", "colonial_building", "bazaar", "chaos", "mangoes", "porters", "kipling", "pet_market", "early_morning"]
+    },
+    {
+      "id": "banganga_tank",
+      "name": "Banganga Tank",
+      "type": "sacred_tank",
+      "location": "Walkeshwar, Malabar Hill",
+      "visual_description": "Ancient stone-stepped water tank surrounded by old temples and crumbling wadas, still green water reflecting temple spires, Brahmin priests performing rituals on the ghats, stray cats sleeping on warm stone steps, the tank nestled incongruously between high-rise buildings of Malabar Hill, pigeons on carved stone pillars, early morning mist rising from the water",
+      "time_of_day": {
+        "morning": 0.9,
+        "afternoon": 0.5,
+        "evening": 0.7,
+        "night": 0.3
+      },
+      "emotions": {
+        "admiration": 0.6,
+        "gratitude": 0.7,
+        "curiosity": 0.6,
+        "realization": 0.5,
+        "love": 0.4,
+        "relief": 0.5,
+        "sadness": 0.3,
+        "pride": 0.4,
+        "caring": 0.3,
+        "surprise": 0.3
+      },
+      "keywords": ["ancient", "sacred_water", "ghats", "pitru_tarpan", "walkeshwar", "hidden_gem", "priests", "old_mumbai", "spiritual", "malabar_hill"]
+    },
+    {
+      "id": "wankhede_stadium",
+      "name": "Wankhede Stadium",
+      "type": "stadium",
+      "location": "D Road, Churchgate, South Mumbai",
+      "visual_description": "Floodlit cricket stadium packed with roaring fans in blue Indian jerseys, the green pitch glowing under white lights, players in cricket whites against the emerald outfield, giant screen replaying a six, food vendors in the stands selling samosas, the sea visible beyond the east stand, ticker tape and Indian flags waving after a wicket",
+      "time_of_day": {
+        "morning": 0.3,
+        "afternoon": 0.7,
+        "evening": 0.9,
+        "night": 0.8
+      },
+      "emotions": {
+        "excitement": 0.95,
+        "joy": 0.8,
+        "pride": 0.8,
+        "amusement": 0.5,
+        "admiration": 0.6,
+        "love": 0.4,
+        "optimism": 0.5,
+        "surprise": 0.5,
+        "nervousness": 0.5,
+        "disappointment": 0.2,
+        "approval": 0.4
+      },
+      "keywords": ["cricket", "IPL", "floodlights", "india_match", "sachin", "crowd_roar", "world_cup", "sport", "blue_jersey", "night_match"]
+    },
+    {
+      "id": "hanging_gardens",
+      "name": "Hanging Gardens (Pherozeshah Mehta Gardens)",
+      "type": "garden",
+      "location": "Ridge Road, Malabar Hill",
+      "visual_description": "Terraced hilltop garden with animal-shaped hedges trimmed into elephants and giraffes, old couples walking on shaded pathways, the Arabian Sea and Marine Drive visible far below through gaps in the trees, children playing near the boot-shaped hedge, early morning yoga groups on the lawn, Parsi Tower of Silence wall visible beyond the garden boundary",
+      "time_of_day": {
+        "morning": 0.95,
+        "afternoon": 0.4,
+        "evening": 0.8,
+        "night": 0.1
+      },
+      "emotions": {
+        "joy": 0.6,
+        "relief": 0.7,
+        "gratitude": 0.5,
+        "love": 0.5,
+        "caring": 0.5,
+        "amusement": 0.4,
+        "admiration": 0.3,
+        "optimism": 0.5,
+        "approval": 0.4,
+        "curiosity": 0.3
+      },
+      "keywords": ["hilltop", "hedge_animals", "morning_walk", "elderly", "panoramic_view", "yoga", "children", "quiet", "malabar_hill", "green_refuge"]
+    },
+    {
+      "id": "sgnp",
+      "name": "Sanjay Gandhi National Park",
+      "type": "forest",
+      "location": "Borivali East, extends into Thane",
+      "visual_description": "Dense deciduous forest canopy inside a city, spotted deer grazing on a forest clearing, Kanheri Caves rock-cut Buddhist viharas carved into basalt hillside, leopard warning signs on hiking trails, tribal Warli paintings on park information boards, families picnicking near the lakes, the Borivali suburban sprawl abruptly ending at the forest boundary",
+      "time_of_day": {
+        "morning": 0.95,
+        "afternoon": 0.6,
+        "evening": 0.4,
+        "night": 0.1
+      },
+      "emotions": {
+        "admiration": 0.6,
+        "curiosity": 0.7,
+        "joy": 0.5,
+        "relief": 0.7,
+        "surprise": 0.5,
+        "gratitude": 0.5,
+        "optimism": 0.4,
+        "love": 0.3,
+        "fear": 0.3,
+        "excitement": 0.4
+      },
+      "keywords": ["forest", "leopard", "kanheri_caves", "buddhist", "trekking", "nature_in_city", "tribal", "deer", "picnic", "borivali"]
+    },
+    {
+      "id": "dhobi_ghat",
+      "name": "Dhobi Ghat",
+      "type": "open_laundry",
+      "location": "Dr. E. Moses Road, Mahalakshmi, near Mahalakshmi Railway Station",
+      "visual_description": "Vast open-air laundry with hundreds of concrete wash pens in neat rows, dhobis thrashing wet clothes against stone slabs, thousands of garments and sheets hanging on lines in every color, steam rising from boiling vats, the whole scene viewed from the Mahalakshmi bridge above, local train rattling past on elevated tracks behind",
+      "time_of_day": {
+        "morning": 0.9,
+        "afternoon": 0.7,
+        "evening": 0.4,
+        "night": 0.1
+      },
+      "emotions": {
+        "admiration": 0.6,
+        "curiosity": 0.7,
+        "surprise": 0.6,
+        "realization": 0.5,
+        "pride": 0.4,
+        "joy": 0.3,
+        "gratitude": 0.4,
+        "approval": 0.3,
+        "sadness": 0.3,
+        "caring": 0.3
+      },
+      "keywords": ["laundry", "working_class", "labor", "colorful_clothes", "unique_mumbai", "open_air", "industry", "tradition", "mahalakshmi", "resilience"]
+    },
+    {
+      "id": "colaba_causeway",
+      "name": "Colaba Causeway",
+      "type": "street",
+      "location": "Shahid Bhagat Singh Road, Colaba",
+      "visual_description": "Bustling shopping street lined with colonial-era buildings and pavement vendors selling junk jewellery, leather bags, and bootleg books, tourists bargaining at stalls, old Irani cafes with marble tables spilling onto the sidewalk, Leopold Cafe green facade, double-decker BEST bus squeezing through, fairy lights strung between lampposts at night",
+      "time_of_day": {
+        "morning": 0.4,
+        "afternoon": 0.7,
+        "evening": 0.9,
+        "night": 0.6
+      },
+      "emotions": {
+        "excitement": 0.7,
+        "amusement": 0.6,
+        "joy": 0.6,
+        "curiosity": 0.6,
+        "desire": 0.6,
+        "surprise": 0.4,
+        "approval": 0.3,
+        "admiration": 0.3
+      },
+      "keywords": ["shopping", "street_vendors", "bargaining", "leopold_cafe", "tourist", "books", "colonial", "nightlife", "pavement_stalls", "south_mumbai"]
+    },
+    {
+      "id": "worli_fort",
+      "name": "Worli Fort",
+      "type": "fort",
+      "location": "Worli Village, Worli",
+      "visual_description": "Small 17th-century Portuguese stone fort on a rocky promontory jutting into the sea, waves crashing against black basalt rocks, Koli fisherwomen drying Bombay duck on bamboo racks nearby, Bandra-Worli Sea Link soaring in the background, the fort crumbling walls covered in moss, stray dogs sleeping in the shade, wide open view of the Arabian Sea",
+      "time_of_day": {
+        "morning": 0.7,
+        "afternoon": 0.4,
+        "evening": 0.9,
+        "night": 0.3
+      },
+      "emotions": {
+        "admiration": 0.5,
+        "curiosity": 0.5,
+        "relief": 0.5,
+        "love": 0.4,
+        "gratitude": 0.4,
+        "sadness": 0.3,
+        "pride": 0.3,
+        "realization": 0.3,
+        "joy": 0.3,
+        "optimism": 0.3
+      },
+      "keywords": ["portuguese", "fort", "rocky_shore", "koli_village", "sealink_view", "quiet", "fishing", "ruins", "sunset_spot", "old_worli"]
+    },
+    {
+      "id": "mount_mary_basilica",
+      "name": "Mount Mary Basilica",
+      "type": "church",
+      "location": "Mount Mary Road, Bandra West",
+      "visual_description": "Gothic-style Catholic basilica perched on a hillock, white facade with twin spires and a blue-robed Virgin Mary statue in the niche, devotees climbing the steps holding wax limb offerings, candle-lit grotto on the hillside, Bandra Fair stalls stretching down the road during September feast, flower sellers and rosary vendors lining the path, sea visible from the hilltop",
+      "time_of_day": {
+        "morning": 0.8,
+        "afternoon": 0.5,
+        "evening": 0.7,
+        "night": 0.4
+      },
+      "emotions": {
+        "gratitude": 0.8,
+        "love": 0.7,
+        "admiration": 0.6,
+        "caring": 0.6,
+        "relief": 0.6,
+        "joy": 0.5,
+        "optimism": 0.5,
+        "pride": 0.4,
+        "sadness": 0.2,
+        "desire": 0.3
+      },
+      "keywords": ["catholic", "basilica", "bandra", "bandra_fair", "wax_offerings", "virgin_mary", "novena", "september_feast", "hilltop", "interfaith"]
+    },
+    {
+      "id": "kala_ghoda",
+      "name": "Kala Ghoda Art District",
+      "type": "cultural_district",
+      "location": "Kala Ghoda, Fort, South Mumbai",
+      "visual_description": "Tree-lined heritage precinct with art galleries in restored colonial buildings, the black horse statue at the intersection, street art installations during the annual Kala Ghoda festival, NGMA and Jehangir Art Gallery entrances, bohemian cafes with chalkboard menus, art students sketching on stone benches, David Sassoon Library Gothic windows framed by rain trees",
+      "time_of_day": {
+        "morning": 0.6,
+        "afternoon": 0.8,
+        "evening": 0.7,
+        "night": 0.3
+      },
+      "emotions": {
+        "admiration": 0.7,
+        "curiosity": 0.8,
+        "joy": 0.5,
+        "approval": 0.5,
+        "pride": 0.5,
+        "amusement": 0.4,
+        "surprise": 0.4,
+        "love": 0.3,
+        "realization": 0.4,
+        "optimism": 0.4
+      },
+      "keywords": ["art", "galleries", "heritage", "festival", "jehangir", "bohemian", "colonial", "culture", "students", "architecture"]
+    },
+    {
+      "id": "nehru_science_centre",
+      "name": "Nehru Science Centre",
+      "type": "museum",
+      "location": "Dr. E. Moses Road, Worli",
+      "visual_description": "Modernist white building with a large dome planetarium, school children in uniforms streaming through the entrance, interactive science exhibits visible through glass walls, rocket and aircraft models in the outdoor display garden, families gathered around the energy ball exhibit, the building set back from the busy Worli road behind a manicured lawn",
+      "time_of_day": {
+        "morning": 0.7,
+        "afternoon": 0.8,
+        "evening": 0.4,
+        "night": 0.1
+      },
+      "emotions": {
+        "curiosity": 0.9,
+        "amusement": 0.6,
+        "joy": 0.5,
+        "surprise": 0.5,
+        "admiration": 0.4,
+        "excitement": 0.5,
+        "realization": 0.4,
+        "approval": 0.3,
+        "optimism": 0.4
+      },
+      "keywords": ["science", "planetarium", "school_trips", "interactive", "children", "education", "rockets", "dome", "discovery", "family"]
+    },
+    {
+      "id": "babulnath_temple",
+      "name": "Babulnath Temple",
+      "type": "temple",
+      "location": "Babulnath Road, Girgaon, near Chowpatty",
+      "visual_description": "Ancient Shiva temple atop a small hill accessed by steep stone steps, the black Shivalinga draped in bilva leaves and white flowers, devotees pouring milk in continuous abhishekam, the smell of incense and ghee lamps thick in the carved stone sanctum, monkeys playing on the temple walls, the city visible below from the hilltop courtyard, massive queues on Shravan Mondays spilling down the steps",
+      "time_of_day": {
+        "morning": 0.9,
+        "afternoon": 0.5,
+        "evening": 0.8,
+        "night": 0.3
+      },
+      "emotions": {
+        "gratitude": 0.9,
+        "admiration": 0.6,
+        "love": 0.6,
+        "relief": 0.6,
+        "caring": 0.4,
+        "optimism": 0.5,
+        "joy": 0.5,
+        "pride": 0.4,
+        "curiosity": 0.3,
+        "fear": 0.2
+      },
+      "keywords": ["shiva", "shivalinga", "shravan_monday", "abhishekam", "hilltop_temple", "ancient", "bilva", "devotion", "girgaon", "monday_worship"]
+    },
+    {
+      "id": "mahalakshmi_temple",
+      "name": "Mahalakshmi Temple",
+      "type": "temple",
+      "location": "Bhulabhai Desai Road, Mahalakshmi, seafacing",
+      "visual_description": "Vibrant red and gold temple perched on a rocky headland overlooking the Arabian Sea, three deity idols of Mahalakshmi Mahakali and Mahasaraswati adorned with gold jewellery and silk, devotees offering lotus and coconut garlands, the prasad counter selling sweet peda, flower sellers with baskets of marigold and roses at the entrance steps, waves crashing on rocks below the temple platform",
+      "time_of_day": {
+        "morning": 0.8,
+        "afternoon": 0.5,
+        "evening": 0.9,
+        "night": 0.3
+      },
+      "emotions": {
+        "gratitude": 0.9,
+        "admiration": 0.7,
+        "love": 0.7,
+        "joy": 0.6,
+        "optimism": 0.7,
+        "relief": 0.5,
+        "caring": 0.5,
+        "pride": 0.5,
+        "desire": 0.4,
+        "excitement": 0.3
+      },
+      "keywords": ["lakshmi", "prosperity", "seafacing", "friday_puja", "gold_ornaments", "three_goddesses", "flower_market", "devotion", "women_devotees", "navratra"]
+    },
+    {
+      "id": "juhu_beach",
+      "name": "Juhu Beach",
+      "type": "beach",
+      "location": "Juhu Tara Road, Juhu, Western Suburbs",
+      "visual_description": "Wide sandy beach stretching north with chaat stalls lit by kerosene lamps, families wading in shallow waves at sunset, Bollywood celebrity bungalows behind the treeline, pav bhaji sizzling on flat iron tawas, horse rides and giant wheel, kite flyers on windy evenings, ISKCON temple white spires visible in the distance, groups of college students taking selfies at the water edge",
+      "time_of_day": {
+        "morning": 0.5,
+        "afternoon": 0.4,
+        "evening": 0.95,
+        "night": 0.6
+      },
+      "emotions": {
+        "joy": 0.9,
+        "amusement": 0.7,
+        "excitement": 0.6,
+        "love": 0.5,
+        "desire": 0.5,
+        "caring": 0.4,
+        "gratitude": 0.3,
+        "optimism": 0.5,
+        "relief": 0.4,
+        "pride": 0.3,
+        "curiosity": 0.3
+      },
+      "keywords": ["beach", "street_food", "bollywood", "pav_bhaji", "families", "sunset", "chaat", "kites", "selfies", "suburban_mumbai"]
+    },
+    {
+      "id": "dadar_flower_market",
+      "name": "Dadar Flower Market",
+      "type": "market",
+      "location": "Dadar West, near Dadar Railway Station",
+      "visual_description": "Explosion of color — mountains of orange marigolds, strings of white jasmine mogra, piles of red roses, loose chrysanthemum petals sold by weight, vendors sitting cross-legged on the ground surrounded by flower baskets, women threading garlands at impossible speed, the wet concrete floor carpeted with crushed petals and leaves, pre-dawn wholesale chaos under bare bulb lights, the air impossibly fragrant",
+      "time_of_day": {
+        "morning": 0.95,
+        "afternoon": 0.5,
+        "evening": 0.6,
+        "night": 0.2
+      },
+      "emotions": {
+        "joy": 0.8,
+        "admiration": 0.7,
+        "surprise": 0.6,
+        "desire": 0.5,
+        "love": 0.6,
+        "excitement": 0.5,
+        "curiosity": 0.5,
+        "gratitude": 0.4,
+        "amusement": 0.4,
+        "approval": 0.3
+      },
+      "keywords": ["flowers", "marigold", "jasmine", "wholesale", "pre_dawn", "garlands", "color_explosion", "puja_supply", "fragrant", "daily_ritual"]
+    },
+    {
+      "id": "mohammed_ali_road",
+      "name": "Mohammed Ali Road",
+      "type": "street",
+      "location": "Mohammed Ali Road, Bhendi Bazaar, South Mumbai",
+      "visual_description": "Narrow street transformed into a neon-lit food paradise during Ramadan, kebab stalls with charcoal grills sending smoke spiraling up between old buildings, malpua and jalebi frying in enormous kadais, men in white topi and kurta breaking fast together at communal tables, Minara Masjid green-lit minarets towering above the crowd, shoulder-to-shoulder foot traffic, the entire street humming with energy and the smell of nihari and seekh kebabs",
+      "time_of_day": {
+        "morning": 0.2,
+        "afternoon": 0.3,
+        "evening": 0.9,
+        "night": 0.95
+      },
+      "emotions": {
+        "excitement": 0.9,
+        "joy": 0.8,
+        "desire": 0.8,
+        "amusement": 0.6,
+        "curiosity": 0.7,
+        "admiration": 0.5,
+        "love": 0.4,
+        "surprise": 0.5,
+        "gratitude": 0.4,
+        "pride": 0.3,
+        "approval": 0.3
+      },
+      "keywords": ["ramadan", "street_food", "kebabs", "iftar", "muslim_quarter", "night_food", "neon_lights", "minarets", "nihari", "communal_eating"]
     }
   ]
 }
